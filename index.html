@@ -3,188 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MathQuill Dynamic Input</title>
+  <title>MathQuill Dynamic Infinite Canvas with Auto-Save on Blur</title>
+  
+  <!-- MathQuill CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      overflow: hidden;
-      background-color: #121212; /* Dark background */
-      color: #e0e0e0; /* Light text color */
-    }
-
-    .math-group {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .math-field-container {
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      padding: 5px;
-    }
-
-    .math-field {
-      border: 1px solid #444; /* Dark border */
-      min-height: 40px;
-      display: inline-block;
-      width: auto;
-      padding: 5px;
-      font-size: 18px;
-      white-space: nowrap;
-      overflow: hidden;
-      background: #1e1e1e; /* Darker background for fields */
-      color: #ffffff; /* White text */
-      border-radius: 5px;
-    }
-
-    /* MathQuill Styling */
-    .mq-editable-field, .mq-math-mode {
-      background: #1e1e1e !important; /* Ensure dark background */
-      color: #ffffff !important; /* Ensure light text */
-      border-color: #666 !important;
-    }
-
-    /* Cursor color in MathQuill */
-    .mq-focused {
-      border-color: #4caf50 !important; /* Green focus border */
-    }
-
-    /* White text cursor inside MathQuill fields */
-    .mq-editable-field .mq-cursor {
-      border-left: 2px solid #ffffff !important; /* White cursor */
-    }
-  </style>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- The huge canvas holds all math groups -->
+  <div id="canvas"></div>
+
+  <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
-  <script>
-    const MQ = MathQuill.getInterface(2);
-
-    document.addEventListener('dblclick', function(event) {
-      createMathGroup(event.clientX, event.clientY);
-    });
-
-    document.addEventListener('click', function(event) {
-      let target = event.target;
-      while (target && !target.classList.contains('math-field-container') && !target.classList.contains('math-group')) {
-        target = target.parentElement;
-      }
-      if (target && target.classList.contains('math-field-container')) {
-        editMathField(target);
-      }
-    });
-
-    function createMathGroup(x, y) {
-      const group = document.createElement('div');
-      group.className = 'math-group';
-      group.style.left = `${x}px`;
-      group.style.top = `${y}px`;
-      document.body.appendChild(group);
-
-      createMathField(group);
-    }
-
-    function createMathField(group) {
-    const container = document.createElement('div');
-    container.className = 'math-field-container';
-    group.appendChild(container);
-
-    const mathFieldElement = document.createElement('div');
-    mathFieldElement.className = 'math-field';
-    container.appendChild(mathFieldElement);
-
-    const mathField = MQ.MathField(mathFieldElement, {
-        spaceBehavesLikeTab: true
-    });
-
-    container.dataset.latex = '';
-
-    mathFieldElement.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            finalizeMathField(container, mathField);
-            if (event.ctrlKey) {
-                mathFieldElement.blur();
-            } else {
-                setTimeout(() => createMathField(group), 0);
-            }
-        }
-    });
-
-    // Remove empty stack if clicked away
-    mathFieldElement.addEventListener('blur', function() {
-        if (!mathField.latex().trim()) {
-            container.remove();
-            // If the entire group is empty after removal, delete the group
-            if (group.children.length === 0) {
-                group.remove();
-            }
-        }
-    });
-
-    mathField.focus();
-}
-
-
-    function finalizeMathField(container, mathField) {
-    const latex = mathField.latex().trim();
-    
-    // If empty, remove the stack
-    if (!latex) {
-        container.parentElement.remove();
-        return;
-    }
-
-    container.dataset.latex = latex;
-    container.innerHTML = '';
-    const staticMath = document.createElement('div');
-    staticMath.className = 'math-field';
-    container.appendChild(staticMath);
-    MQ.StaticMath(staticMath).latex(latex);
-}
-
-
-    function editMathField(container) {
-      const existingLatex = container.dataset.latex || '';
-
-      // Prevent re-editing if already in edit mode.
-      if (container.querySelector('.mq-editable-field')) return;
-
-      container.innerHTML = ''; // Clear contents to switch to edit mode
-
-      const mathFieldElement = document.createElement('div');
-      mathFieldElement.className = 'math-field';
-      container.appendChild(mathFieldElement);
-
-      // Initialize the editable MathQuill field.
-      const mathField = MQ.MathField(mathFieldElement, {
-        spaceBehavesLikeTab: true
-      });
-
-      mathField.latex(existingLatex);
-      mathField.focus();
-
-      // Keydown listener for Enter (handles both plain Enter and CTRL+Enter).
-      mathFieldElement.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          finalizeMathField(container, mathField);
-          if (event.ctrlKey) {
-            // CTRL+Enter: finalize and exit/deselect the stack.
-            mathFieldElement.blur();
-          } else {
-            // Normal Enter: finalize and add a new line to the math group.
-            setTimeout(() => createMathField(container.parentElement), 0);
-          }
-        }
-      });
-    }
-  </script>
+  
+  <!-- Main Script -->
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,91 @@
+/* Reset and basic styling */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: #1d1d1d;
+  }
+  
+  /* Huge canvas with dotted background extending 20,000x20,000px */
+  #canvas {
+    position: absolute;
+    top: -10000px;
+    left: -10000px;
+    width: 20000px;
+    height: 20000px;
+    background-color: #1d1d1d;
+    background-image: radial-gradient(#282828 1px, transparent 1px);
+    background-size: 20px 20px;
+    transform-origin: 0 0;
+  }
+  
+/* Math group styling with 10px padding for hover/drag detection */
+.math-group {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    cursor: grab; /* Indicates draggable area */
+  }
+  
+  /* Hover state: white outline at 50% opacity */
+  .math-group:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+  }
+  
+  /* Selected state: green outline */
+  .math-group.selected {
+    outline: 2px solid #00c59a;
+    border-radius: 5px;
+  }
+  
+  /* Dragging state: green outline with grabbing cursor */
+  .math-group.dragging {
+    outline: 2px solid #00c59a !important;
+    cursor: grabbing;
+  }
+
+  
+  
+  /* Math field container styling */
+  .math-field-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 5px;
+  }
+  
+  /* Editable math field styling */
+  .math-field {
+    border: 1px solid #444;
+    min-height: 40px;
+    display: inline-block;
+    padding: 5px;
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    background: #1e1e1e;
+    color: #ffffff;
+    border-radius: 5px;
+  }
+  
+  /* MathQuill styling overrides */
+  .mq-editable-field,
+  .mq-math-mode {
+    background: #1e1e1e !important;
+    color: #ffffff !important;
+    border-color: #666 !important;
+  }
+  
+  .mq-focused {
+    border-color: #00c59a !important;
+  }
+  
+  .mq-editable-field .mq-cursor {
+    border-left: 2px solid #ffffff !important;
+  }
+  
