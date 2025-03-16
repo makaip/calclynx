@@ -93,15 +93,22 @@ document.addEventListener('click', (event) => {
   
   let target = event.target;
   
-  // Check if we clicked a static math field container
+  // Check if we clicked a static math field container.
+  // (This is triggered when clicking a non-editing math field, causing it to become editable.)
   const mathContainer = target.closest('.math-field-container');
   if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
     event.stopPropagation();
     editMathField(mathContainer);
     return;
   }
-
-  // Handle group selection
+  
+  // If the click is inside any math field container (either static or in edit mode),
+  // do not highlight the whole math group.
+  if (target.closest('.math-field-container')) {
+    return;
+  }
+  
+  // Otherwise, handle group selection by finding the math-group container.
   while (target && !target.classList.contains('math-group')) {
     target = target.parentElement;
   }
@@ -111,6 +118,7 @@ document.addEventListener('click', (event) => {
   }
 });
 
+
 // ----- Math Group Dragging -----
 // When clicking in the 10px margin, allow dragging of math groups.
 let groupDragging = false;
@@ -119,25 +127,27 @@ let dragOffsetX = 0, dragOffsetY = 0;
 const margin = 10;
 
 document.addEventListener('mousedown', (event) => {
-  // Only proceed if left button is pressed and space is not down (so panning isn't active).
+  // Only proceed if left button is pressed and space is not down (panning not active).
   if (event.button !== 0 || spaceDown) return;
-
+  
+  // If the click is inside a math field container, do nothing.
+  if (event.target.closest('.math-field-container')) return;
+  
   let target = event.target;
   while (target && !target.classList.contains('math-group')) {
     target = target.parentElement;
   }
-
   if (target && target.classList.contains('math-group')) {
-    // Allow dragging from any point by removing the margin check.
     groupDragging = true;
     draggedGroup = target;
     dragOffsetX = event.clientX - target.offsetLeft;
     dragOffsetY = event.clientY - target.offsetTop;
     target.classList.add('dragging');
-    // Stop propagation so that other events (e.g., group selection) don't interfere.
+    // Stop further propagation to prevent other listeners from interfering.
     event.stopPropagation();
   }
 });
+
 
 
 document.addEventListener('mousemove', (event) => {
@@ -202,6 +212,10 @@ function createMathGroup(x, y) {
 function createMathField(group) {
   const container = document.createElement('div');
   container.className = 'math-field-container';
+  // Prevent mousedown events on this container from bubbling up.
+  container.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+  });
   group.appendChild(container);
 
   const mathFieldElement = document.createElement('div');

@@ -33,7 +33,7 @@ html, body {
   
   /* Hover state: white outline at 50% opacity */
   .math-group:hover {
-    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline: 2px solid rgba(255, 255, 255, 0.05);
     border-radius: 5px;
   }
   
@@ -84,6 +84,8 @@ html, body {
   .mq-focused {
     border-color: #00c59a !important;
   }
+
+
   
   .mq-editable-field .mq-cursor {
     border-left: 2px solid #ffffff !important;
