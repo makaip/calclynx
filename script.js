@@ -121,32 +121,24 @@ const margin = 10;
 document.addEventListener('mousedown', (event) => {
   // Only proceed if left button is pressed and space is not down (so panning isn't active).
   if (event.button !== 0 || spaceDown) return;
-  
+
   let target = event.target;
   while (target && !target.classList.contains('math-group')) {
     target = target.parentElement;
   }
-  
+
   if (target && target.classList.contains('math-group')) {
-    const rect = target.getBoundingClientRect();
-    // Check if the click is within the 10px margin (outline area)
-    if (
-      event.clientX < rect.left + margin ||
-      event.clientX > rect.right - margin ||
-      event.clientY < rect.top + margin ||
-      event.clientY > rect.bottom - margin
-    ) {
-      groupDragging = true;
-      draggedGroup = target;
-      dragOffsetX = event.clientX - target.offsetLeft;
-      dragOffsetY = event.clientY - target.offsetTop;
-      // Immediately apply the green outline to indicate selection for dragging.
-      target.classList.add('dragging');
-      // Stop propagation so that other click events (e.g. for selection) don't interfere.
-      event.stopPropagation();
-    }
+    // Allow dragging from any point by removing the margin check.
+    groupDragging = true;
+    draggedGroup = target;
+    dragOffsetX = event.clientX - target.offsetLeft;
+    dragOffsetY = event.clientY - target.offsetTop;
+    target.classList.add('dragging');
+    // Stop propagation so that other events (e.g., group selection) don't interfere.
+    event.stopPropagation();
   }
 });
+
 
 document.addEventListener('mousemove', (event) => {
   if (groupDragging && draggedGroup) {
@@ -162,6 +154,18 @@ document.addEventListener('mouseup', () => {
     draggedGroup = null;
   }
 });
+
+document.addEventListener('keydown', (e) => {
+  // Check if the Backspace key is pressed without any modifiers
+  if (e.key === 'Backspace' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    const selectedGroup = document.querySelector('.math-group.selected');
+    if (selectedGroup) {
+      e.preventDefault(); // Prevent default backspace behavior (like browser navigation)
+      selectedGroup.remove();
+    }
+  }
+});
+
 
 
 // Create a new math group at the given canvas coordinates.
