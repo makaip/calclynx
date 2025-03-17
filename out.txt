@@ -1,4 +1,7 @@
-=== f:\Programming\GitHub\mathboard\index.html ===
+=== /Users/makaip/Documents/GitHub/mathboard/out.txt ===
+
+
+=== /Users/makaip/Documents/GitHub/mathboard/index.html ===
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,15 +31,7 @@
 </html>
 
 
-=== f:\Programming\GitHub\mathboard\out.txt ===
-
-
-=== f:\Programming\GitHub\mathboard\script.js ===
-document.addEventListener('DOMContentLoaded', () => {
-  new MathBoard();
-});
-
-=== f:\Programming\GitHub\mathboard\styles.css ===
+=== /Users/makaip/Documents/GitHub/mathboard/styles.css ===
 /* Reset and basic styling */
 html, body {
     margin: 0;
@@ -88,6 +83,13 @@ html, body {
     cursor: grabbing;
   }
 
+  .selection-box {
+    position: absolute;
+    border: 1px dashed #00c59a;
+    background-color: rgba(0, 197, 154, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+  }
   
   
   /* Math field container styling */
@@ -131,7 +133,202 @@ html, body {
   }
   
 
-=== f:\Programming\GitHub\mathboard\scripts\mathboard.js ===
+=== /Users/makaip/Documents/GitHub/mathboard/script.js ===
+document.addEventListener('DOMContentLoaded', () => {
+  new MathBoard();
+});
+
+=== /Users/makaip/Documents/GitHub/mathboard/scripts/mathfield.js ===
+class MathField {
+    constructor(mathGroup) {
+      this.mathGroup = mathGroup;
+      this.createContainer();
+      this.createMathField();
+      this.attachEventListeners();
+      this.mathField.focus();
+    }
+  
+    createContainer() {
+      this.container = document.createElement('div');
+      this.container.className = 'math-field-container';
+      this.container.dataset.latex = '';
+      // Prevent inner mousedown events from bubbling up.
+      this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+      this.mathGroup.element.appendChild(this.container);
+    }
+  
+    createMathField() {
+      this.mathFieldElement = document.createElement('div');
+      this.mathFieldElement.className = 'math-field';
+      this.container.appendChild(this.mathFieldElement);
+      this.mathField = MQ.MathField(this.mathFieldElement, {
+        spaceBehavesLikeTab: true,
+      });
+    }
+  
+    attachEventListeners() {
+        this.mathFieldElement.addEventListener('keydown', (event) => {
+          // If Backspace is pressed (without ctrl) and the field is empty:
+          if (
+            event.key === 'Backspace' &&
+            !event.ctrlKey &&
+            !this.mathField.latex().trim()
+          ) {
+            const groupElement = this.mathGroup.element;
+            // Only perform if there is more than one field and this isn't the first one.
+            if (
+              groupElement.children.length > 1 &&
+              this.container !== groupElement.firstElementChild
+            ) {
+              event.preventDefault();
+              const previousContainer = this.container.previousElementSibling;
+              this.container.remove();
+              // Switch the previous container into edit mode.
+              MathField.edit(previousContainer);
+              return;
+            }
+          }
+      
+          // Ctrl+Backspace: delete field; Shift+Ctrl+Backspace: delete entire group.
+          if (event.key === 'Backspace' && event.ctrlKey) {
+            event.preventDefault();
+            if (event.shiftKey) {
+              this.mathGroup.remove();
+            } else {
+              this.container.remove();
+              if (!this.mathGroup.element.querySelector('.math-field-container')) {
+                this.mathGroup.remove();
+              }
+            }
+            return;
+          }
+          // Enter finalizes the field.
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            this.finalize();
+            if (event.ctrlKey) {
+              this.mathFieldElement.blur();
+            } else {
+              // Only auto-create a new field if this is the last one.
+              if (this.container === this.mathGroup.element.lastElementChild) {
+                this.mathGroup.addMathField();
+              }
+            }
+          }
+        });
+      }
+      
+  
+    finalize() {
+      const latex = this.mathField.latex().trim();
+      if (!latex) {
+        this.container.remove();
+        if (!this.mathGroup.element.querySelector('.math-field-container')) {
+          this.mathGroup.remove();
+        }
+        return;
+      }
+      this.container.dataset.latex = latex;
+      this.container.innerHTML = '';
+      const staticMath = document.createElement('div');
+      staticMath.className = 'math-field';
+      this.container.appendChild(staticMath);
+      MQ.StaticMath(staticMath).latex(latex);
+    }
+  
+    // Static method to enable editing on a static math field.
+    static edit(container) {
+        const existingLatex = container.dataset.latex || '';
+        if (container.querySelector('.mq-editable-field')) return;
+        container.innerHTML = '';
+      
+        const mathFieldElement = document.createElement('div');
+        mathFieldElement.className = 'math-field';
+        container.appendChild(mathFieldElement);
+      
+        const mathField = MQ.MathField(mathFieldElement, {
+          spaceBehavesLikeTab: true,
+        });
+        mathField.latex(existingLatex);
+        mathField.focus();
+      
+        mathFieldElement.addEventListener('keydown', function (event) {
+          // If Backspace is pressed (without ctrl) and the field is empty:
+          if (
+            event.key === 'Backspace' &&
+            !event.ctrlKey &&
+            !mathField.latex().trim()
+          ) {
+            // Check if a previous container exists.
+            if (container.previousElementSibling) {
+              event.preventDefault();
+              const previousContainer = container.previousElementSibling;
+              container.remove();
+              // Switch the previous container into edit mode.
+              MathField.edit(previousContainer);
+              return;
+            }
+          }
+      
+          // Existing shortcut: Ctrl+Backspace (and Shift+Ctrl+Backspace) deletion.
+          if (event.key === 'Backspace' && event.ctrlKey) {
+            event.preventDefault();
+            if (event.shiftKey) {
+              container.parentElement.remove();
+            } else {
+              container.remove();
+              const group = container.parentElement;
+              if (group && !group.querySelector('.math-field-container')) {
+                group.remove();
+              }
+            }
+            return;
+          }
+          
+          // Enter finalizes the field.
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            const latex = mathField.latex().trim();
+            if (!latex) {
+              container.remove();
+              const group = container.parentElement;
+              if (group && !group.querySelector('.math-field-container')) {
+                group.remove();
+              }
+              return;
+            }
+            container.dataset.latex = latex;
+            container.innerHTML = '';
+            const staticMath = document.createElement('div');
+            staticMath.className = 'math-field';
+            container.appendChild(staticMath);
+            MQ.StaticMath(staticMath).latex(latex);
+      
+            // If this container is the last element in the math group, add a new field.
+            const groupElement = container.parentElement;
+            if (groupElement && groupElement.lastElementChild === container && groupElement.mathGroup) {
+              groupElement.mathGroup.addMathField();
+            }
+          }
+        });
+      
+        mathFieldElement.addEventListener('blur', function () {
+          setTimeout(() => {
+            if (!mathField.latex().trim()) {
+              container.remove();
+              const group = container.parentElement;
+              if (group && !group.querySelector('.math-field-container')) {
+                group.remove();
+              }
+            }
+          }, 50);
+        });
+      }
+      
+    }
+    
+
+=== /Users/makaip/Documents/GitHub/mathboard/scripts/mathboard.js ===
 const MQ = MathQuill.getInterface(2);
 
 class MathBoard {
@@ -152,6 +349,11 @@ class MathBoard {
     this.dragOffsetY = 0;
     this.margin = 10;
 
+    // Box select properties
+    this.isBoxSelecting = false;
+    this.boxSelectStart = { x: 0, y: 0 };
+    this.selectionBox = null;
+
     this.initEventListeners();
   }
 
@@ -162,6 +364,7 @@ class MathBoard {
     this.initGroupDragging();
     this.initWindowResizeHandler();
     this.initDoubleClickHandler();
+    this.initBoxSelection();
   }
 
   initGlobalKeyHandlers() {
@@ -250,9 +453,13 @@ class MathBoard {
   initGroupDragging() {
     // Start dragging a math group.
     document.addEventListener('mousedown', (event) => {
+      // Only proceed for left-click and when space is not held.
       if (event.button !== 0 || this.spaceDown) return;
-      if (event.target.closest('.math-field-container')) return;
-
+      
+      // Prevent dragging if the click is inside an actively editing math field.
+      if (event.target.closest('.mq-editable-field')) return;
+  
+      // Traverse up to find the math group.
       let target = event.target;
       while (target && !target.classList.contains('math-group')) {
         target = target.parentElement;
@@ -266,14 +473,14 @@ class MathBoard {
         event.stopPropagation();
       }
     });
-
+  
     document.addEventListener('mousemove', (event) => {
       if (this.groupDragging && this.draggedGroup) {
         this.draggedGroup.style.left = event.clientX - this.dragOffsetX + 'px';
         this.draggedGroup.style.top = event.clientY - this.dragOffsetY + 'px';
       }
     });
-
+  
     document.addEventListener('mouseup', () => {
       if (this.groupDragging && this.draggedGroup) {
         this.draggedGroup.classList.remove('dragging');
@@ -282,6 +489,7 @@ class MathBoard {
       }
     });
   }
+  
 
   initWindowResizeHandler() {
     window.addEventListener('resize', () => {
@@ -312,175 +520,125 @@ class MathBoard {
     this.canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
   }
 
+  initBoxSelection() {
+    // Track the box selection state.
+    this.boxSelect = {
+      isSelecting: false,
+      startX: 0,
+      startY: 0,
+      element: null,
+    };
+  
+    // Start box selection on mousedown if clicking on the canvas background.
+    this.canvas.addEventListener('mousedown', (e) => {
+      // Only act on left-click, and if space is not held (panning takes precedence)
+      if (e.button !== 0 || this.spaceDown) return;
+      // Only start box selection if clicking directly on the canvas.
+      if (e.target !== this.canvas) return;
+  
+      this.boxSelect.isSelecting = true;
+      this.boxSelect.startX = e.clientX;
+      this.boxSelect.startY = e.clientY;
+  
+      // Create the selection rectangle element.
+      this.boxSelect.element = document.createElement('div');
+      this.boxSelect.element.className = 'box-select-rect';
+      this.boxSelect.element.style.position = 'absolute';
+      this.boxSelect.element.style.border = '1px dashed #00c59a';
+      this.boxSelect.element.style.backgroundColor = 'rgba(0, 197, 154, 0.1)';
+      this.boxSelect.element.style.pointerEvents = 'none';
+      this.boxSelect.element.style.left = `${this.boxSelect.startX}px`;
+      this.boxSelect.element.style.top = `${this.boxSelect.startY}px`;
+      this.boxSelect.element.style.width = '0px';
+      this.boxSelect.element.style.height = '0px';
+  
+      // Append to document body so its position is in viewport coordinates.
+      document.body.appendChild(this.boxSelect.element);
+    });
+  
+    // Update the selection rectangle as the mouse moves.
+    document.addEventListener('mousemove', (e) => {
+      if (!this.boxSelect.isSelecting) return;
+      const startX = this.boxSelect.startX;
+      const startY = this.boxSelect.startY;
+      const currentX = e.clientX;
+      const currentY = e.clientY;
+      // Calculate rectangle position and size.
+      const left = Math.min(startX, currentX);
+      const top = Math.min(startY, currentY);
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+  
+      this.boxSelect.element.style.left = `${left}px`;
+      this.boxSelect.element.style.top = `${top}px`;
+      this.boxSelect.element.style.width = `${width}px`;
+      this.boxSelect.element.style.height = `${height}px`;
+    });
+  
+    // On mouseup, finalize the selection.
+    document.addEventListener('mouseup', (e) => {
+      if (!this.boxSelect.isSelecting) return;
+      this.boxSelect.isSelecting = false;
+      // Get bounding rect of the selection element (in viewport coordinates).
+      const selectionRect = this.boxSelect.element.getBoundingClientRect();
+      // Remove the selection rectangle.
+      this.boxSelect.element.remove();
+      this.boxSelect.element = null;
+  
+      // Optionally, clear previous selection.
+      document.querySelectorAll('.math-group').forEach((group) => {
+        group.classList.remove('selected');
+      });
+  
+      // For each math group, check if its bounding rectangle intersects the selection rectangle.
+      document.querySelectorAll('.math-group').forEach((group) => {
+        const groupRect = group.getBoundingClientRect();
+        if (
+          selectionRect.left < groupRect.right &&
+          selectionRect.right > groupRect.left &&
+          selectionRect.top < groupRect.bottom &&
+          selectionRect.bottom > groupRect.top
+        ) {
+          group.classList.add('selected');
+        }
+      });
+    });
+  
+    // Cancel selection if the mouse leaves the canvas.
+    this.canvas.addEventListener('mouseleave', () => {
+      if (this.boxSelect.isSelecting && this.boxSelect.element) {
+        this.boxSelect.element.remove();
+        this.boxSelect.isSelecting = false;
+      }
+    });
+  }
+  
+  
+
+  // screenToCanvas remains unchanged:
   screenToCanvas(x, y) {
     return {
       x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
       y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
     };
   }
+
+  
 }
 
-=== f:\Programming\GitHub\mathboard\scripts\mathfield.js ===
-class MathField {
-    constructor(mathGroup) {
-      this.mathGroup = mathGroup;
-      this.createContainer();
-      this.createMathField();
-      this.attachEventListeners();
-      this.mathField.focus();
-    }
-  
-    createContainer() {
-      this.container = document.createElement('div');
-      this.container.className = 'math-field-container';
-      this.container.dataset.latex = '';
-      // Prevent inner mousedown events from bubbling up.
-      this.container.addEventListener('mousedown', (e) => e.stopPropagation());
-      this.mathGroup.element.appendChild(this.container);
-    }
-  
-    createMathField() {
-      this.mathFieldElement = document.createElement('div');
-      this.mathFieldElement.className = 'math-field';
-      this.container.appendChild(this.mathFieldElement);
-      this.mathField = MQ.MathField(this.mathFieldElement, {
-        spaceBehavesLikeTab: true,
-      });
-    }
-  
-    attachEventListeners() {
-      // Remove field on blur if empty.
-      this.mathFieldElement.addEventListener('blur', () => {
-        setTimeout(() => {
-          if (!this.mathField.latex().trim()) {
-            this.container.remove();
-            if (!this.mathGroup.element.querySelector('.math-field-container')) {
-              this.mathGroup.remove();
-            }
-          }
-        }, 50);
-      });
-  
-      this.mathFieldElement.addEventListener('keydown', (event) => {
-        // Ctrl+Backspace: delete field; Shift+Ctrl+Backspace: delete entire group.
-        if (event.key === 'Backspace' && event.ctrlKey) {
-          event.preventDefault();
-          if (event.shiftKey) {
-            this.mathGroup.remove();
-          } else {
-            this.container.remove();
-            if (!this.mathGroup.element.querySelector('.math-field-container')) {
-              this.mathGroup.remove();
-            }
-          }
-          return;
-        }
-        // Enter finalizes the field.
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          this.finalize();
-          if (event.ctrlKey) {
-            this.mathFieldElement.blur();
-          } else {
-            // Only auto-create a new field if this is the last one.
-            if (this.container === this.mathGroup.element.lastElementChild) {
-              this.mathGroup.addMathField();
-            }
-          }
-        }
-      });
-    }
-  
-    finalize() {
-      const latex = this.mathField.latex().trim();
-      if (!latex) {
-        this.container.remove();
-        if (!this.mathGroup.element.querySelector('.math-field-container')) {
-          this.mathGroup.remove();
-        }
-        return;
-      }
-      this.container.dataset.latex = latex;
-      this.container.innerHTML = '';
-      const staticMath = document.createElement('div');
-      staticMath.className = 'math-field';
-      this.container.appendChild(staticMath);
-      MQ.StaticMath(staticMath).latex(latex);
-    }
-  
-    // Static method to enable editing on a static math field.
-    static edit(container) {
-      const existingLatex = container.dataset.latex || '';
-      if (container.querySelector('.mq-editable-field')) return;
-      container.innerHTML = '';
-  
-      const mathFieldElement = document.createElement('div');
-      mathFieldElement.className = 'math-field';
-      container.appendChild(mathFieldElement);
-  
-      const mathField = MQ.MathField(mathFieldElement, {
-        spaceBehavesLikeTab: true,
-      });
-      mathField.latex(existingLatex);
-      mathField.focus();
-  
-      mathFieldElement.addEventListener('keydown', function (event) {
-        if (event.key === 'Backspace' && event.ctrlKey) {
-          event.preventDefault();
-          if (event.shiftKey) {
-            container.parentElement.remove();
-          } else {
-            container.remove();
-            const group = container.parentElement;
-            if (group && !group.querySelector('.math-field-container')) {
-              group.remove();
-            }
-          }
-          return;
-        }
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          const latex = mathField.latex().trim();
-          if (!latex) {
-            container.remove();
-            const group = container.parentElement;
-            if (group && !group.querySelector('.math-field-container')) {
-              group.remove();
-            }
-            return;
-          }
-          container.dataset.latex = latex;
-          container.innerHTML = '';
-          const staticMath = document.createElement('div');
-          staticMath.className = 'math-field';
-          container.appendChild(staticMath);
-          MQ.StaticMath(staticMath).latex(latex);
-        }
-      });
-  
-      mathFieldElement.addEventListener('blur', function () {
-        setTimeout(() => {
-          if (!mathField.latex().trim()) {
-            container.remove();
-            const group = container.parentElement;
-            if (group && !group.querySelector('.math-field-container')) {
-              group.remove();
-            }
-          }
-        }, 50);
-      });
-    }
-  }
-
-=== f:\Programming\GitHub\mathboard\scripts\mathgroup.js ===
+=== /Users/makaip/Documents/GitHub/mathboard/scripts/mathgroup.js ===
 class MathGroup {
     constructor(board, x, y) {
       this.board = board;
       this.element = document.createElement('div');
       this.element.className = 'math-group';
+      // Set the position for this group.
       this.element.style.left = `${x}px`;
       this.element.style.top = `${y}px`;
       this.element.tabIndex = -1; // Make focusable.
+  
+      // Attach a reference to this MathGroup instance on its DOM element.
+      this.element.mathGroup = this;
   
       board.canvas.appendChild(this.element);
       this.attachFocusOutHandler();
@@ -511,4 +669,5 @@ class MathGroup {
       this.element.remove();
     }
   }
+  
 

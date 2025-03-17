@@ -49,6 +49,13 @@ html, body {
     cursor: grabbing;
   }
 
+  .selection-box {
+    position: absolute;
+    border: 1px dashed #00c59a;
+    background-color: rgba(0, 197, 154, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+  }
   
   
   /* Math field container styling */
