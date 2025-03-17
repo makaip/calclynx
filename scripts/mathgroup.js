@@ -56,4 +56,16 @@ class MathGroup {
     this.element.remove();
     this.board.saveState();
   }
+
+  insertMathFieldAfter(referenceContainer) {
+    // Create a new math field.
+    const newField = new MathField(this);
+    // Insert the new container right after the reference container.
+    this.element.insertBefore(newField.container, referenceContainer.nextSibling);
+    // Focus on the new math field.
+    newField.mathField.focus();
+  }
+  
+  
 }
+

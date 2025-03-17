@@ -124,6 +124,7 @@ importData(jsonData) {
     this.initWindowResizeHandler();
     this.initDoubleClickHandler();
     this.initBoxSelection();
+    this.initTrackpadNavigation();
   }
 
   initGlobalKeyHandlers() {
@@ -260,6 +261,25 @@ importData(jsonData) {
         this.saveState();
       }
     });
+  }
+
+  initTrackpadNavigation() {
+    // Use {passive: false} so we can call preventDefault.
+    this.canvas.addEventListener('wheel', (e) => {
+      // Heuristic:
+      // - Trackpad events typically deliver deltas in pixel mode (deltaMode === 0).
+      // - They often provide horizontal scrolling (deltaX nonzero) or small vertical deltas.
+      if (
+        e.deltaMode === 0 &&
+        (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) < 50)
+      ) {
+        e.preventDefault();  // Prevent default scrolling behavior.
+        this.canvasOffset.x -= e.deltaX;
+        this.canvasOffset.y -= e.deltaY;
+        this.clampPan();
+        this.updateTransform();
+      }
+    }, { passive: false });
   }
 
   initWindowResizeHandler() {
