@@ -32,46 +32,42 @@ class MathBoard {
   // -------------------------
   // SAVE / LOAD STATE METHODS
   // ------------------------- 
-  saveState() {
-    const groups = [];
-    const mathGroupElements = this.canvas.querySelectorAll('.math-group');
-    mathGroupElements.forEach((group) => {
-      const left = group.style.left;
-      const top = group.style.top;
-      const fields = [];
-      group.querySelectorAll('.math-field-container').forEach((container) => {
-        if (container.dataset.latex) {
-          fields.push(container.dataset.latex);
-        }
-      });
-      groups.push({ left, top, fields });
-    });
-    const stateString = JSON.stringify(groups);
-    // Save state in a cookie valid for 7 d ays.
-    document.cookie =
-      "mathBoardState=" +
-      encodeURIComponent(stateString) +
-      "; path=/; max-age=" +
-      60 * 60 * 24 * 7;
-  }
+// In mathboard.js
 
-  loadState() {
-    const cookieEntry = document
-      .cookie.split('; ')
-      .find((row) => row.startsWith("mathBoardState="));
-    if (!cookieEntry) return;
-    const stateString = decodeURIComponent(cookieEntry.split('=')[1]);
-    let groups;
-    try {
-      groups = JSON.parse(stateString);
-    } catch (e) {
-      console.error("Failed to parse state cookie:", e);
-      return;
-    }
-    groups.forEach((groupData) => {
-      new MathGroup(this, groupData.left, groupData.top, groupData);
+saveState() {
+  const groups = [];
+  const mathGroupElements = this.canvas.querySelectorAll('.math-group');
+  mathGroupElements.forEach((group) => {
+    const left = group.style.left;
+    const top = group.style.top;
+    const fields = [];
+    group.querySelectorAll('.math-field-container').forEach((container) => {
+      if (container.dataset.latex) {
+        fields.push(container.dataset.latex);
+      }
     });
+    groups.push({ left, top, fields });
+  });
+  const stateString = JSON.stringify(groups);
+  // Save state using localStorage
+  localStorage.setItem("mathBoardState", stateString);
+}
+
+loadState() {
+  const stateString = localStorage.getItem("mathBoardState");
+  if (!stateString) return;
+  let groups;
+  try {
+    groups = JSON.parse(stateString);
+  } catch (e) {
+    console.error("Failed to parse state from localStorage:", e);
+    return;
   }
+  groups.forEach((groupData) => {
+    new MathGroup(this, groupData.left, groupData.top, groupData);
+  });
+}
+
 
   // Exports the current state as a JSON file.
 exportData() {
