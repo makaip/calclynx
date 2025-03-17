@@ -1,0 +1,514 @@
+=== f:\Programming\GitHub\mathboard\index.html ===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MathBoard</title>
+  
+  <!-- MathQuill CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- The huge canvas holds all math groups -->
+  <div id="canvas"></div>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
+  
+  <!-- Main Scripts -->
+  <script src="scripts/mathboard.js"></script>
+  <script src="scripts/mathgroup.js"></script>
+  <script src="scripts/mathfield.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+=== f:\Programming\GitHub\mathboard\out.txt ===
+
+
+=== f:\Programming\GitHub\mathboard\script.js ===
+document.addEventListener('DOMContentLoaded', () => {
+  new MathBoard();
+});
+
+=== f:\Programming\GitHub\mathboard\styles.css ===
+/* Reset and basic styling */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: #1d1d1d;
+  }
+  
+  /* Huge canvas with dotted background extending 20,000x20,000px */
+  #canvas {
+    position: absolute;
+    top: -10000px;
+    left: -10000px;
+    width: 20000px;
+    height: 20000px;
+    background-color: #1d1d1d;
+    background-image: radial-gradient(#282828 1px, transparent 1px);
+    background-size: 20px 20px;
+    transform-origin: 0 0;
+  }
+  
+/* Math group styling with 10px padding for hover/drag detection */
+.math-group {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    cursor: grab; /* Indicates draggable area */
+  }
+  
+  /* Hover state: white outline at 50% opacity */
+  .math-group:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+  }
+  
+  /* Selected state: green outline */
+  .math-group.selected {
+    outline: 2px solid #00c59a;
+    border-radius: 5px;
+  }
+  
+  /* Dragging state: green outline with grabbing cursor */
+  .math-group.dragging {
+    outline: 2px solid #00c59a !important;
+    cursor: grabbing;
+  }
+
+  
+  
+  /* Math field container styling */
+  .math-field-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 5px;
+  }
+  
+  /* Editable math field styling */
+  .math-field {
+    border: 1px solid #444;
+    min-height: 40px;
+    display: inline-block;
+    padding: 5px;
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    background: #1e1e1e;
+    color: #ffffff;
+    border-radius: 5px;
+  }
+  
+  /* MathQuill styling overrides */
+  .mq-editable-field,
+  .mq-math-mode {
+    background: #1e1e1e !important;
+    color: #ffffff !important;
+    border-color: #666 !important;
+  }
+  
+  .mq-focused {
+    border-color: #00c59a !important;
+  }
+
+
+  
+  .mq-editable-field .mq-cursor {
+    border-left: 2px solid #ffffff !important;
+  }
+  
+
+=== f:\Programming\GitHub\mathboard\scripts\mathboard.js ===
+const MQ = MathQuill.getInterface(2);
+
+class MathBoard {
+  constructor() {
+    // Canvas and panning properties.
+    this.canvas = document.getElementById('canvas');
+    this.isPanning = false;
+    this.panStart = { x: 0, y: 0 };
+    this.canvasOffset = { x: 0, y: 0 };
+    this.spaceDown = false;
+    this.scale = 1;
+    this.canvasInitialOffset = { x: -10000, y: -10000 };
+
+    // Variables for group dragging.
+    this.groupDragging = false;
+    this.draggedGroup = null;
+    this.dragOffsetX = 0;
+    this.dragOffsetY = 0;
+    this.margin = 10;
+
+    this.initEventListeners();
+  }
+
+  initEventListeners() {
+    this.initGlobalKeyHandlers();
+    this.initCanvasPanning();
+    this.initDocumentClickHandler();
+    this.initGroupDragging();
+    this.initWindowResizeHandler();
+    this.initDoubleClickHandler();
+  }
+
+  initGlobalKeyHandlers() {
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        this.spaceDown = true;
+      }
+      // Backspace deletion for selected math group.
+      if ((e.key === 'Backspace' || e.key === 'x') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const selectedGroup = document.querySelector('.math-group.selected');
+        if (selectedGroup) {
+          e.preventDefault();
+          selectedGroup.remove();
+        }
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        this.spaceDown = false;
+      }
+    });
+  }
+
+  initCanvasPanning() {
+    this.canvas.addEventListener('mousedown', (e) => {
+      // Start panning with middle mouse or left mouse when space is held.
+      if (e.button === 1 || (e.button === 0 && this.spaceDown)) {
+        this.isPanning = true;
+        this.panStart.x = e.clientX - this.canvasOffset.x;
+        this.panStart.y = e.clientY - this.canvasOffset.y;
+        e.preventDefault();
+      }
+    });
+
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (this.isPanning) {
+        this.canvasOffset.x = e.clientX - this.panStart.x;
+        this.canvasOffset.y = e.clientY - this.panStart.y;
+        this.clampPan();
+        this.updateTransform();
+      }
+    });
+
+    this.canvas.addEventListener('mouseup', (e) => {
+      if (e.button === 1 || e.button === 0) {
+        this.isPanning = false;
+      }
+    });
+
+    this.canvas.addEventListener('mouseleave', () => (this.isPanning = false));
+    this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  initDocumentClickHandler() {
+    document.addEventListener('click', (event) => {
+      // Do nothing if panning or group dragging.
+      if (this.isPanning || this.groupDragging) return;
+
+      // Deselect all groups.
+      document.querySelectorAll('.math-group').forEach((group) =>
+        group.classList.remove('selected')
+      );
+
+      let target = event.target;
+      const mathContainer = target.closest('.math-field-container');
+      // If clicking on a container that isn’t in edit mode, enable editing.
+      if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
+        event.stopPropagation();
+        MathField.edit(mathContainer);
+        return;
+      }
+      // If click is inside a math container, do nothing.
+      if (target.closest('.math-field-container')) return;
+
+      // Otherwise, select the parent math group.
+      while (target && !target.classList.contains('math-group')) {
+        target = target.parentElement;
+      }
+      if (target && target.classList.contains('math-group')) {
+        target.classList.add('selected');
+      }
+    });
+  }
+
+  initGroupDragging() {
+    // Start dragging a math group.
+    document.addEventListener('mousedown', (event) => {
+      if (event.button !== 0 || this.spaceDown) return;
+      if (event.target.closest('.math-field-container')) return;
+
+      let target = event.target;
+      while (target && !target.classList.contains('math-group')) {
+        target = target.parentElement;
+      }
+      if (target && target.classList.contains('math-group')) {
+        this.groupDragging = true;
+        this.draggedGroup = target;
+        this.dragOffsetX = event.clientX - target.offsetLeft;
+        this.dragOffsetY = event.clientY - target.offsetTop;
+        target.classList.add('dragging');
+        event.stopPropagation();
+      }
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      if (this.groupDragging && this.draggedGroup) {
+        this.draggedGroup.style.left = event.clientX - this.dragOffsetX + 'px';
+        this.draggedGroup.style.top = event.clientY - this.dragOffsetY + 'px';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (this.groupDragging && this.draggedGroup) {
+        this.draggedGroup.classList.remove('dragging');
+        this.groupDragging = false;
+        this.draggedGroup = null;
+      }
+    });
+  }
+
+  initWindowResizeHandler() {
+    window.addEventListener('resize', () => {
+      this.clampPan();
+      this.updateTransform();
+    });
+  }
+
+  initDoubleClickHandler() {
+    document.addEventListener('dblclick', (event) => {
+      if (this.isPanning) return;
+      const coords = this.screenToCanvas(event.clientX, event.clientY);
+      new MathGroup(this, coords.x, coords.y);
+    });
+  }
+
+  clampPan() {
+    const minX = window.innerWidth - 10000;
+    const maxX = 10000;
+    this.canvasOffset.x = Math.min(maxX, Math.max(minX, this.canvasOffset.x));
+
+    const minY = window.innerHeight - 10000;
+    const maxY = 10000;
+    this.canvasOffset.y = Math.min(maxY, Math.max(minY, this.canvasOffset.y));
+  }
+
+  updateTransform() {
+    this.canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
+  }
+
+  screenToCanvas(x, y) {
+    return {
+      x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
+      y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
+    };
+  }
+}
+
+=== f:\Programming\GitHub\mathboard\scripts\mathfield.js ===
+class MathField {
+    constructor(mathGroup) {
+      this.mathGroup = mathGroup;
+      this.createContainer();
+      this.createMathField();
+      this.attachEventListeners();
+      this.mathField.focus();
+    }
+  
+    createContainer() {
+      this.container = document.createElement('div');
+      this.container.className = 'math-field-container';
+      this.container.dataset.latex = '';
+      // Prevent inner mousedown events from bubbling up.
+      this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+      this.mathGroup.element.appendChild(this.container);
+    }
+  
+    createMathField() {
+      this.mathFieldElement = document.createElement('div');
+      this.mathFieldElement.className = 'math-field';
+      this.container.appendChild(this.mathFieldElement);
+      this.mathField = MQ.MathField(this.mathFieldElement, {
+        spaceBehavesLikeTab: true,
+      });
+    }
+  
+    attachEventListeners() {
+      // Remove field on blur if empty.
+      this.mathFieldElement.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!this.mathField.latex().trim()) {
+            this.container.remove();
+            if (!this.mathGroup.element.querySelector('.math-field-container')) {
+              this.mathGroup.remove();
+            }
+          }
+        }, 50);
+      });
+  
+      this.mathFieldElement.addEventListener('keydown', (event) => {
+        // Ctrl+Backspace: delete field; Shift+Ctrl+Backspace: delete entire group.
+        if (event.key === 'Backspace' && event.ctrlKey) {
+          event.preventDefault();
+          if (event.shiftKey) {
+            this.mathGroup.remove();
+          } else {
+            this.container.remove();
+            if (!this.mathGroup.element.querySelector('.math-field-container')) {
+              this.mathGroup.remove();
+            }
+          }
+          return;
+        }
+        // Enter finalizes the field.
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.finalize();
+          if (event.ctrlKey) {
+            this.mathFieldElement.blur();
+          } else {
+            // Only auto-create a new field if this is the last one.
+            if (this.container === this.mathGroup.element.lastElementChild) {
+              this.mathGroup.addMathField();
+            }
+          }
+        }
+      });
+    }
+  
+    finalize() {
+      const latex = this.mathField.latex().trim();
+      if (!latex) {
+        this.container.remove();
+        if (!this.mathGroup.element.querySelector('.math-field-container')) {
+          this.mathGroup.remove();
+        }
+        return;
+      }
+      this.container.dataset.latex = latex;
+      this.container.innerHTML = '';
+      const staticMath = document.createElement('div');
+      staticMath.className = 'math-field';
+      this.container.appendChild(staticMath);
+      MQ.StaticMath(staticMath).latex(latex);
+    }
+  
+    // Static method to enable editing on a static math field.
+    static edit(container) {
+      const existingLatex = container.dataset.latex || '';
+      if (container.querySelector('.mq-editable-field')) return;
+      container.innerHTML = '';
+  
+      const mathFieldElement = document.createElement('div');
+      mathFieldElement.className = 'math-field';
+      container.appendChild(mathFieldElement);
+  
+      const mathField = MQ.MathField(mathFieldElement, {
+        spaceBehavesLikeTab: true,
+      });
+      mathField.latex(existingLatex);
+      mathField.focus();
+  
+      mathFieldElement.addEventListener('keydown', function (event) {
+        if (event.key === 'Backspace' && event.ctrlKey) {
+          event.preventDefault();
+          if (event.shiftKey) {
+            container.parentElement.remove();
+          } else {
+            container.remove();
+            const group = container.parentElement;
+            if (group && !group.querySelector('.math-field-container')) {
+              group.remove();
+            }
+          }
+          return;
+        }
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          const latex = mathField.latex().trim();
+          if (!latex) {
+            container.remove();
+            const group = container.parentElement;
+            if (group && !group.querySelector('.math-field-container')) {
+              group.remove();
+            }
+            return;
+          }
+          container.dataset.latex = latex;
+          container.innerHTML = '';
+          const staticMath = document.createElement('div');
+          staticMath.className = 'math-field';
+          container.appendChild(staticMath);
+          MQ.StaticMath(staticMath).latex(latex);
+        }
+      });
+  
+      mathFieldElement.addEventListener('blur', function () {
+        setTimeout(() => {
+          if (!mathField.latex().trim()) {
+            container.remove();
+            const group = container.parentElement;
+            if (group && !group.querySelector('.math-field-container')) {
+              group.remove();
+            }
+          }
+        }, 50);
+      });
+    }
+  }
+
+=== f:\Programming\GitHub\mathboard\scripts\mathgroup.js ===
+class MathGroup {
+    constructor(board, x, y) {
+      this.board = board;
+      this.element = document.createElement('div');
+      this.element.className = 'math-group';
+      this.element.style.left = `${x}px`;
+      this.element.style.top = `${y}px`;
+      this.element.tabIndex = -1; // Make focusable.
+  
+      board.canvas.appendChild(this.element);
+      this.attachFocusOutHandler();
+      this.addMathField();
+    }
+  
+    attachFocusOutHandler() {
+      this.element.addEventListener('focusout', () => {
+        setTimeout(() => {
+          if (!this.element.contains(document.activeElement)) {
+            // If there is only one math field container and it’s empty…
+            if (this.element.children.length === 1) {
+              const container = this.element.children[0];
+              if (!container.dataset.latex || container.dataset.latex.trim() === '') {
+                this.remove();
+              }
+            }
+          }
+        }, 50);
+      });
+    }
+  
+    addMathField() {
+      new MathField(this);
+    }
+  
+    remove() {
+      this.element.remove();
+    }
+  }
+
