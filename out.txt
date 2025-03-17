@@ -271,11 +271,16 @@ class MathField {
         if (event.ctrlKey) {
           this.mathFieldElement.blur();
         } else {
+          // If the current container is the last child, add a new math field at the end.
+          // Otherwise, insert a new math field right after this one.
           if (this.container === this.mathGroup.element.lastElementChild) {
             this.mathGroup.addMathField();
+          } else {
+            this.mathGroup.insertMathFieldAfter(this.container);
           }
         }
       }
+      
     });
   }
       
@@ -362,12 +367,15 @@ class MathField {
         staticMath.className = 'math-field';
         container.appendChild(staticMath);
         MQ.StaticMath(staticMath).latex(latex);
-  
+      
         const groupElement = container.parentElement;
         if (groupElement && groupElement.lastElementChild === container && groupElement.mathGroup) {
           groupElement.mathGroup.addMathField();
+        } else if (groupElement && groupElement.mathGroup) {
+          groupElement.mathGroup.insertMathFieldAfter(container);
         }
       }
+      
     });
   
     mathFieldElement.addEventListener('blur', function () {
