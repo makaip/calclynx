@@ -15,8 +15,16 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  
+
   <!-- The huge canvas holds all math groups -->
   <div id="canvas"></div>
+
+    <!-- Export and Import buttons -->
+    <button id="exportBtn" style="position: fixed; top: 10px; right: 10px;">Export JSON</button>
+    <button id="importBtn" style="position: fixed; top: 10px; right: 120px;">Import JSON</button>
+    <input type="file" id="importInput" accept=".json" style="display: none;">
+  
 
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -133,200 +141,250 @@ html, body {
   }
   
 
+  button {
+    background-color: #1e1e1e; /* Green */
+    border: #666 1px solid;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    border: #00c59a 1px solid;
+  }
+  
+  button:active {
+    background: #00c59a;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+
 === /Users/makaip/Documents/GitHub/mathboard/script.js ===
 document.addEventListener('DOMContentLoaded', () => {
-  new MathBoard();
+  // Create and store MathBoard instance globally.
+  window.mathBoard = new MathBoard();
+
+  // Export data: triggers a JSON download.
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    window.mathBoard.exportData();
+  });
+
+  // Import data: click triggers file input.
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('importInput').click();
+  });
+
+  // When a file is chosen, read its contents and import the data.
+  document.getElementById('importInput').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const jsonData = e.target.result;
+          window.mathBoard.importData(jsonData);
+        } catch (err) {
+          console.error("Error reading JSON file:", err);
+        }
+      };
+      reader.readAsText(file);
+    }
+    // Reset the file input for future uploads.
+    event.target.value = '';
+  });
 });
+
 
 === /Users/makaip/Documents/GitHub/mathboard/scripts/mathfield.js ===
 class MathField {
-    constructor(mathGroup) {
-      this.mathGroup = mathGroup;
-      this.createContainer();
-      this.createMathField();
-      this.attachEventListeners();
-      this.mathField.focus();
-    }
-  
-    createContainer() {
-      this.container = document.createElement('div');
-      this.container.className = 'math-field-container';
-      this.container.dataset.latex = '';
-      // Prevent inner mousedown events from bubbling up.
-      this.container.addEventListener('mousedown', (e) => e.stopPropagation());
-      this.mathGroup.element.appendChild(this.container);
-    }
-  
-    createMathField() {
-      this.mathFieldElement = document.createElement('div');
-      this.mathFieldElement.className = 'math-field';
-      this.container.appendChild(this.mathFieldElement);
-      this.mathField = MQ.MathField(this.mathFieldElement, {
-        spaceBehavesLikeTab: true,
-      });
-    }
-  
-    attachEventListeners() {
-        this.mathFieldElement.addEventListener('keydown', (event) => {
-          // If Backspace is pressed (without ctrl) and the field is empty:
-          if (
-            event.key === 'Backspace' &&
-            !event.ctrlKey &&
-            !this.mathField.latex().trim()
-          ) {
-            const groupElement = this.mathGroup.element;
-            // Only perform if there is more than one field and this isn't the first one.
-            if (
-              groupElement.children.length > 1 &&
-              this.container !== groupElement.firstElementChild
-            ) {
-              event.preventDefault();
-              const previousContainer = this.container.previousElementSibling;
-              this.container.remove();
-              // Switch the previous container into edit mode.
-              MathField.edit(previousContainer);
-              return;
-            }
-          }
-      
-          // Ctrl+Backspace: delete field; Shift+Ctrl+Backspace: delete entire group.
-          if (event.key === 'Backspace' && event.ctrlKey) {
-            event.preventDefault();
-            if (event.shiftKey) {
-              this.mathGroup.remove();
-            } else {
-              this.container.remove();
-              if (!this.mathGroup.element.querySelector('.math-field-container')) {
-                this.mathGroup.remove();
-              }
-            }
-            return;
-          }
-          // Enter finalizes the field.
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            this.finalize();
-            if (event.ctrlKey) {
-              this.mathFieldElement.blur();
-            } else {
-              // Only auto-create a new field if this is the last one.
-              if (this.container === this.mathGroup.element.lastElementChild) {
-                this.mathGroup.addMathField();
-              }
-            }
-          }
-        });
+  constructor(mathGroup) {
+    this.mathGroup = mathGroup;
+    this.createContainer();
+    this.createMathField();
+    this.attachEventListeners();
+    this.mathField.focus();
+  }
+
+  createContainer() {
+    this.container = document.createElement('div');
+    this.container.className = 'math-field-container';
+    this.container.dataset.latex = '';
+    this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+    this.mathGroup.element.appendChild(this.container);
+  }
+
+  createMathField() {
+    this.mathFieldElement = document.createElement('div');
+    this.mathFieldElement.className = 'math-field';
+    this.container.appendChild(this.mathFieldElement);
+    this.mathField = MQ.MathField(this.mathFieldElement, {
+      spaceBehavesLikeTab: true,
+    });
+  }
+
+  attachEventListeners() {
+    this.mathFieldElement.addEventListener('keydown', (event) => {
+      if (
+        event.key === 'Backspace' &&
+        !event.ctrlKey &&
+        !this.mathField.latex().trim()
+      ) {
+        const groupElement = this.mathGroup.element;
+        if (
+          groupElement.children.length > 1 &&
+          this.container !== groupElement.firstElementChild
+        ) {
+          event.preventDefault();
+          const previousContainer = this.container.previousElementSibling;
+          this.container.remove();
+          MathField.edit(previousContainer);
+          this.mathGroup.board.saveState();
+          return;
+        }
       }
-      
   
-    finalize() {
-      const latex = this.mathField.latex().trim();
-      if (!latex) {
-        this.container.remove();
-        if (!this.mathGroup.element.querySelector('.math-field-container')) {
+      if (event.key === 'Backspace' && event.ctrlKey) {
+        event.preventDefault();
+        if (event.shiftKey) {
           this.mathGroup.remove();
+        } else {
+          this.container.remove();
+          if (!this.mathGroup.element.querySelector('.math-field-container')) {
+            this.mathGroup.remove();
+          }
+        }
+        this.mathGroup.board.saveState();
+        return;
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        this.finalize();
+        if (event.ctrlKey) {
+          this.mathFieldElement.blur();
+        } else {
+          if (this.container === this.mathGroup.element.lastElementChild) {
+            this.mathGroup.addMathField();
+          }
+        }
+      }
+    });
+  }
+      
+  finalize() {
+    const latex = this.mathField.latex().trim();
+    if (!latex) {
+      this.container.remove();
+      if (!this.mathGroup.element.querySelector('.math-field-container')) {
+        this.mathGroup.remove();
+      }
+      this.mathGroup.board.saveState();
+      return;
+    }
+    this.container.dataset.latex = latex;
+    this.container.innerHTML = '';
+    const staticMath = document.createElement('div');
+    staticMath.className = 'math-field';
+    this.container.appendChild(staticMath);
+    MQ.StaticMath(staticMath).latex(latex);
+    // Save the state after finalizing the field.
+    this.mathGroup.board.saveState();
+  }
+
+  // Static method to enable editing on a static math field.
+  static edit(container) {
+    const existingLatex = container.dataset.latex || '';
+    if (container.querySelector('.mq-editable-field')) return;
+    container.innerHTML = '';
+  
+    const mathFieldElement = document.createElement('div');
+    mathFieldElement.className = 'math-field';
+    container.appendChild(mathFieldElement);
+  
+    const mathField = MQ.MathField(mathFieldElement, {
+      spaceBehavesLikeTab: true,
+    });
+    mathField.latex(existingLatex);
+    mathField.focus();
+  
+    mathFieldElement.addEventListener('keydown', function (event) {
+      if (
+        event.key === 'Backspace' &&
+        !event.ctrlKey &&
+        !mathField.latex().trim()
+      ) {
+        if (container.previousElementSibling) {
+          event.preventDefault();
+          const previousContainer = container.previousElementSibling;
+          container.remove();
+          MathField.edit(previousContainer);
+          // Note: Assuming mathGroup instance is accessible, its board.saveState() should be called.
+          return;
+        }
+      }
+  
+      if (event.key === 'Backspace' && event.ctrlKey) {
+        event.preventDefault();
+        if (event.shiftKey) {
+          container.parentElement.remove();
+        } else {
+          container.remove();
+          const group = container.parentElement;
+          if (group && !group.querySelector('.math-field-container')) {
+            group.remove();
+          }
         }
         return;
       }
-      this.container.dataset.latex = latex;
-      this.container.innerHTML = '';
-      const staticMath = document.createElement('div');
-      staticMath.className = 'math-field';
-      this.container.appendChild(staticMath);
-      MQ.StaticMath(staticMath).latex(latex);
-    }
-  
-    // Static method to enable editing on a static math field.
-    static edit(container) {
-        const existingLatex = container.dataset.latex || '';
-        if (container.querySelector('.mq-editable-field')) return;
+      
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const latex = mathField.latex().trim();
+        if (!latex) {
+          container.remove();
+          const group = container.parentElement;
+          if (group && !group.querySelector('.math-field-container')) {
+            group.remove();
+          }
+          return;
+        }
+        container.dataset.latex = latex;
         container.innerHTML = '';
-      
-        const mathFieldElement = document.createElement('div');
-        mathFieldElement.className = 'math-field';
-        container.appendChild(mathFieldElement);
-      
-        const mathField = MQ.MathField(mathFieldElement, {
-          spaceBehavesLikeTab: true,
-        });
-        mathField.latex(existingLatex);
-        mathField.focus();
-      
-        mathFieldElement.addEventListener('keydown', function (event) {
-          // If Backspace is pressed (without ctrl) and the field is empty:
-          if (
-            event.key === 'Backspace' &&
-            !event.ctrlKey &&
-            !mathField.latex().trim()
-          ) {
-            // Check if a previous container exists.
-            if (container.previousElementSibling) {
-              event.preventDefault();
-              const previousContainer = container.previousElementSibling;
-              container.remove();
-              // Switch the previous container into edit mode.
-              MathField.edit(previousContainer);
-              return;
-            }
-          }
-      
-          // Existing shortcut: Ctrl+Backspace (and Shift+Ctrl+Backspace) deletion.
-          if (event.key === 'Backspace' && event.ctrlKey) {
-            event.preventDefault();
-            if (event.shiftKey) {
-              container.parentElement.remove();
-            } else {
-              container.remove();
-              const group = container.parentElement;
-              if (group && !group.querySelector('.math-field-container')) {
-                group.remove();
-              }
-            }
-            return;
-          }
-          
-          // Enter finalizes the field.
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            const latex = mathField.latex().trim();
-            if (!latex) {
-              container.remove();
-              const group = container.parentElement;
-              if (group && !group.querySelector('.math-field-container')) {
-                group.remove();
-              }
-              return;
-            }
-            container.dataset.latex = latex;
-            container.innerHTML = '';
-            const staticMath = document.createElement('div');
-            staticMath.className = 'math-field';
-            container.appendChild(staticMath);
-            MQ.StaticMath(staticMath).latex(latex);
-      
-            // If this container is the last element in the math group, add a new field.
-            const groupElement = container.parentElement;
-            if (groupElement && groupElement.lastElementChild === container && groupElement.mathGroup) {
-              groupElement.mathGroup.addMathField();
-            }
-          }
-        });
-      
-        mathFieldElement.addEventListener('blur', function () {
-          setTimeout(() => {
-            if (!mathField.latex().trim()) {
-              container.remove();
-              const group = container.parentElement;
-              if (group && !group.querySelector('.math-field-container')) {
-                group.remove();
-              }
-            }
-          }, 50);
-        });
+        const staticMath = document.createElement('div');
+        staticMath.className = 'math-field';
+        container.appendChild(staticMath);
+        MQ.StaticMath(staticMath).latex(latex);
+  
+        const groupElement = container.parentElement;
+        if (groupElement && groupElement.lastElementChild === container && groupElement.mathGroup) {
+          groupElement.mathGroup.addMathField();
+        }
       }
-      
-    }
-    
+    });
+  
+    mathFieldElement.addEventListener('blur', function () {
+      setTimeout(() => {
+        if (!mathField.latex().trim()) {
+          container.remove();
+          const group = container.parentElement;
+          if (group && !group.querySelector('.math-field-container')) {
+            group.remove();
+          }
+        }
+      }, 50);
+    });
+  }
+}
+
 
 === /Users/makaip/Documents/GitHub/mathboard/scripts/mathboard.js ===
 const MQ = MathQuill.getInterface(2);
@@ -355,8 +413,102 @@ class MathBoard {
     this.selectionBox = null;
 
     this.initEventListeners();
+
+    // Load saved state (if any)
+    this.loadState();
   }
 
+  // -------------------------
+  // SAVE / LOAD STATE METHODS
+  // ------------------------- 
+  saveState() {
+    const groups = [];
+    const mathGroupElements = this.canvas.querySelectorAll('.math-group');
+    mathGroupElements.forEach((group) => {
+      const left = group.style.left;
+      const top = group.style.top;
+      const fields = [];
+      group.querySelectorAll('.math-field-container').forEach((container) => {
+        if (container.dataset.latex) {
+          fields.push(container.dataset.latex);
+        }
+      });
+      groups.push({ left, top, fields });
+    });
+    const stateString = JSON.stringify(groups);
+    // Save state in a cookie valid for 7 d ays.
+    document.cookie =
+      "mathBoardState=" +
+      encodeURIComponent(stateString) +
+      "; path=/; max-age=" +
+      60 * 60 * 24 * 7;
+  }
+
+  loadState() {
+    const cookieEntry = document
+      .cookie.split('; ')
+      .find((row) => row.startsWith("mathBoardState="));
+    if (!cookieEntry) return;
+    const stateString = decodeURIComponent(cookieEntry.split('=')[1]);
+    let groups;
+    try {
+      groups = JSON.parse(stateString);
+    } catch (e) {
+      console.error("Failed to parse state cookie:", e);
+      return;
+    }
+    groups.forEach((groupData) => {
+      new MathGroup(this, groupData.left, groupData.top, groupData);
+    });
+  }
+
+  // Exports the current state as a JSON file.
+exportData() {
+  const groups = [];
+  const mathGroupElements = this.canvas.querySelectorAll('.math-group');
+  mathGroupElements.forEach((group) => {
+    const left = group.style.left;
+    const top = group.style.top;
+    const fields = [];
+    group.querySelectorAll('.math-field-container').forEach((container) => {
+      if (container.dataset.latex) {
+        fields.push(container.dataset.latex);
+      }
+    });
+    groups.push({ left, top, fields });
+  });
+  const dataStr = JSON.stringify(groups, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "mathboard-data.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Imports board data from a JSON string.
+importData(jsonData) {
+  try {
+    const groups = JSON.parse(jsonData);
+    // Clear the current canvas (remove all existing math groups).
+    this.canvas.innerHTML = '';
+    groups.forEach((groupData) => {
+       new MathGroup(this, groupData.left, groupData.top, groupData);
+    });
+    // Save the new state.
+    this.saveState();
+  } catch (error) {
+    console.error("Failed to import data:", error);
+  }
+}
+
+
+  // -------------------------
+  // EVENT INITIALIZERS (unchanged except where noted)
+  // -------------------------
   initEventListeners() {
     this.initGlobalKeyHandlers();
     this.initCanvasPanning();
@@ -372,12 +524,21 @@ class MathBoard {
       if (e.code === 'Space') {
         this.spaceDown = true;
       }
-      // Backspace deletion for selected math group.
-      if ((e.key === 'Backspace' || e.key === 'x') && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        const selectedGroup = document.querySelector('.math-group.selected');
-        if (selectedGroup) {
+      // Delete all selected math groups when Backspace, Delete, or "x" is pressed.
+      if (
+        (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.metaKey
+      ) {
+        const selectedGroups = document.querySelectorAll('.math-group.selected');
+        if (selectedGroups.length > 0) {
           e.preventDefault();
-          selectedGroup.remove();
+          selectedGroups.forEach((group) => {
+            group.remove();
+          });
+          // Save updated state
+          this.saveState();
         }
       }
     });
@@ -421,75 +582,78 @@ class MathBoard {
 
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
-      // Do nothing if panning or group dragging.
       if (this.isPanning || this.groupDragging) return;
-
-      // Deselect all groups.
-      document.querySelectorAll('.math-group').forEach((group) =>
-        group.classList.remove('selected')
-      );
-
-      let target = event.target;
-      const mathContainer = target.closest('.math-field-container');
-      // If clicking on a container that isn’t in edit mode, enable editing.
+      const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
         event.stopPropagation();
         MathField.edit(mathContainer);
         return;
       }
-      // If click is inside a math container, do nothing.
-      if (target.closest('.math-field-container')) return;
-
-      // Otherwise, select the parent math group.
-      while (target && !target.classList.contains('math-group')) {
-        target = target.parentElement;
-      }
-      if (target && target.classList.contains('math-group')) {
-        target.classList.add('selected');
+      if (event.target.closest('.math-field-container')) return;
+      const mathGroupTarget = event.target.closest('.math-group');
+      if (mathGroupTarget) {
+        if (!event.shiftKey) {
+          document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+          mathGroupTarget.classList.add('selected');
+        } else {
+          mathGroupTarget.classList.toggle('selected');
+        }
+      } else {
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
       }
     });
   }
 
   initGroupDragging() {
-    // Start dragging a math group.
     document.addEventListener('mousedown', (event) => {
-      // Only proceed for left-click and when space is not held.
       if (event.button !== 0 || this.spaceDown) return;
-      
-      // Prevent dragging if the click is inside an actively editing math field.
       if (event.target.closest('.mq-editable-field')) return;
-  
-      // Traverse up to find the math group.
       let target = event.target;
       while (target && !target.classList.contains('math-group')) {
         target = target.parentElement;
       }
       if (target && target.classList.contains('math-group')) {
+        let groups;
+        if (target.classList.contains('selected')) {
+          groups = Array.from(document.querySelectorAll('.math-group.selected'));
+        } else {
+          groups = [target];
+        }
         this.groupDragging = true;
-        this.draggedGroup = target;
-        this.dragOffsetX = event.clientX - target.offsetLeft;
-        this.dragOffsetY = event.clientY - target.offsetTop;
-        target.classList.add('dragging');
+        this.selectedGroups = groups;
+        this.dragStart = { x: event.clientX, y: event.clientY };
+        this.initialPositions = groups.map((group) => ({
+          group: group,
+          left: parseInt(group.style.left, 10),
+          top: parseInt(group.style.top, 10)
+        }));
+        groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
       }
     });
-  
+
     document.addEventListener('mousemove', (event) => {
-      if (this.groupDragging && this.draggedGroup) {
-        this.draggedGroup.style.left = event.clientX - this.dragOffsetX + 'px';
-        this.draggedGroup.style.top = event.clientY - this.dragOffsetY + 'px';
+      if (this.groupDragging && this.selectedGroups) {
+        const deltaX = event.clientX - this.dragStart.x;
+        const deltaY = event.clientY - this.dragStart.y;
+        this.initialPositions.forEach((item) => {
+          item.group.style.left = (item.left + deltaX) + 'px';
+          item.group.style.top = (item.top + deltaY) + 'px';
+        });
       }
     });
-  
+
     document.addEventListener('mouseup', () => {
-      if (this.groupDragging && this.draggedGroup) {
-        this.draggedGroup.classList.remove('dragging');
+      if (this.groupDragging && this.selectedGroups) {
+        this.selectedGroups.forEach((group) => group.classList.remove('dragging'));
         this.groupDragging = false;
-        this.draggedGroup = null;
+        this.selectedGroups = null;
+        this.initialPositions = null;
+        // Save state after dragging ends.
+        this.saveState();
       }
     });
   }
-  
 
   initWindowResizeHandler() {
     window.addEventListener('resize', () => {
@@ -502,7 +666,9 @@ class MathBoard {
     document.addEventListener('dblclick', (event) => {
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
+      // Create a new MathGroup and then save state.
       new MathGroup(this, coords.x, coords.y);
+      this.saveState();
     });
   }
 
@@ -521,26 +687,20 @@ class MathBoard {
   }
 
   initBoxSelection() {
-    // Track the box selection state.
     this.boxSelect = {
       isSelecting: false,
       startX: 0,
       startY: 0,
       element: null,
     };
-  
-    // Start box selection on mousedown if clicking on the canvas background.
+
     this.canvas.addEventListener('mousedown', (e) => {
-      // Only act on left-click, and if space is not held (panning takes precedence)
       if (e.button !== 0 || this.spaceDown) return;
-      // Only start box selection if clicking directly on the canvas.
       if (e.target !== this.canvas) return;
-  
       this.boxSelect.isSelecting = true;
       this.boxSelect.startX = e.clientX;
       this.boxSelect.startY = e.clientY;
-  
-      // Create the selection rectangle element.
+
       this.boxSelect.element = document.createElement('div');
       this.boxSelect.element.className = 'box-select-rect';
       this.boxSelect.element.style.position = 'absolute';
@@ -551,60 +711,36 @@ class MathBoard {
       this.boxSelect.element.style.top = `${this.boxSelect.startY}px`;
       this.boxSelect.element.style.width = '0px';
       this.boxSelect.element.style.height = '0px';
-  
-      // Append to document body so its position is in viewport coordinates.
+
       document.body.appendChild(this.boxSelect.element);
     });
-  
-    // Update the selection rectangle as the mouse moves.
+
     document.addEventListener('mousemove', (e) => {
       if (!this.boxSelect.isSelecting) return;
       const startX = this.boxSelect.startX;
       const startY = this.boxSelect.startY;
       const currentX = e.clientX;
       const currentY = e.clientY;
-      // Calculate rectangle position and size.
       const left = Math.min(startX, currentX);
       const top = Math.min(startY, currentY);
       const width = Math.abs(currentX - startX);
       const height = Math.abs(currentY - startY);
-  
+
       this.boxSelect.element.style.left = `${left}px`;
       this.boxSelect.element.style.top = `${top}px`;
       this.boxSelect.element.style.width = `${width}px`;
       this.boxSelect.element.style.height = `${height}px`;
     });
-  
-    // On mouseup, finalize the selection.
+
     document.addEventListener('mouseup', (e) => {
       if (!this.boxSelect.isSelecting) return;
       this.boxSelect.isSelecting = false;
-      // Get bounding rect of the selection element (in viewport coordinates).
       const selectionRect = this.boxSelect.element.getBoundingClientRect();
-      // Remove the selection rectangle.
       this.boxSelect.element.remove();
       this.boxSelect.element = null;
-  
-      // Optionally, clear previous selection.
-      document.querySelectorAll('.math-group').forEach((group) => {
-        group.classList.remove('selected');
-      });
-  
-      // For each math group, check if its bounding rectangle intersects the selection rectangle.
-      document.querySelectorAll('.math-group').forEach((group) => {
-        const groupRect = group.getBoundingClientRect();
-        if (
-          selectionRect.left < groupRect.right &&
-          selectionRect.right > groupRect.left &&
-          selectionRect.top < groupRect.bottom &&
-          selectionRect.bottom > groupRect.top
-        ) {
-          group.classList.add('selected');
-        }
-      });
+      this.selectStacksWithinBox(selectionRect);
     });
-  
-    // Cancel selection if the mouse leaves the canvas.
+
     this.canvas.addEventListener('mouseleave', () => {
       if (this.boxSelect.isSelecting && this.boxSelect.element) {
         this.boxSelect.element.remove();
@@ -612,62 +748,93 @@ class MathBoard {
       }
     });
   }
-  
-  
 
-  // screenToCanvas remains unchanged:
+  selectStacksWithinBox(selectionRect) {
+    document.querySelectorAll('.math-group').forEach((group) => {
+      group.classList.remove('selected');
+    });
+
+    document.querySelectorAll('.math-group').forEach((group) => {
+      const groupRect = group.getBoundingClientRect();
+      if (
+        groupRect.left >= selectionRect.left &&
+        groupRect.right <= selectionRect.right &&
+        groupRect.top >= selectionRect.top &&
+        groupRect.bottom <= selectionRect.bottom
+      ) {
+        group.classList.add('selected');
+      }
+    });
+  }
+
   screenToCanvas(x, y) {
     return {
       x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
       y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
     };
   }
-
-  
 }
+
 
 === /Users/makaip/Documents/GitHub/mathboard/scripts/mathgroup.js ===
 class MathGroup {
-    constructor(board, x, y) {
-      this.board = board;
-      this.element = document.createElement('div');
-      this.element.className = 'math-group';
-      // Set the position for this group.
-      this.element.style.left = `${x}px`;
-      this.element.style.top = `${y}px`;
-      this.element.tabIndex = -1; // Make focusable.
-  
-      // Attach a reference to this MathGroup instance on its DOM element.
-      this.element.mathGroup = this;
-  
-      board.canvas.appendChild(this.element);
-      this.attachFocusOutHandler();
+  // Now accepts an optional "data" parameter.
+  constructor(board, x, y, data = null) {
+    this.board = board;
+    this.element = document.createElement('div');
+    this.element.className = 'math-group';
+    // Append "px" when there's no saved state.
+    const left = data ? data.left : `${x}px`;
+    const top = data ? data.top : `${y}px`;
+    this.element.style.left = left;
+    this.element.style.top = top;
+    this.element.tabIndex = -1; // Make focusable.
+    this.element.mathGroup = this;
+    board.canvas.appendChild(this.element);
+    this.attachFocusOutHandler();
+
+    if (data && data.fields && data.fields.length) {
+      // Recreate finalized math fields from saved data.
+      data.fields.forEach((latex) => {
+        const container = document.createElement('div');
+        container.className = 'math-field-container';
+        container.dataset.latex = latex;
+        this.element.appendChild(container);
+        const staticMath = document.createElement('div');
+        staticMath.className = 'math-field';
+        container.appendChild(staticMath);
+        MQ.StaticMath(staticMath).latex(latex);
+      });
+      // Optionally add a new empty math field.
+      this.addMathField();
+    } else {
       this.addMathField();
     }
-  
-    attachFocusOutHandler() {
-      this.element.addEventListener('focusout', () => {
-        setTimeout(() => {
-          if (!this.element.contains(document.activeElement)) {
-            // If there is only one math field container and it’s empty…
-            if (this.element.children.length === 1) {
-              const container = this.element.children[0];
-              if (!container.dataset.latex || container.dataset.latex.trim() === '') {
-                this.remove();
-              }
+  }
+
+  attachFocusOutHandler() {
+    this.element.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (!this.element.contains(document.activeElement)) {
+          if (this.element.children.length === 1) {
+            const container = this.element.children[0];
+            if (!container.dataset.latex || container.dataset.latex.trim() === '') {
+              this.remove();
             }
           }
-        }, 50);
-      });
-    }
-  
-    addMathField() {
-      new MathField(this);
-    }
-  
-    remove() {
-      this.element.remove();
-    }
+        }
+      }, 50);
+    });
   }
-  
+
+  addMathField() {
+    new MathField(this);
+  }
+
+  remove() {
+    this.element.remove();
+    this.board.saveState();
+  }
+}
+
 

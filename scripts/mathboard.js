@@ -24,8 +24,102 @@ class MathBoard {
     this.selectionBox = null;
 
     this.initEventListeners();
+
+    // Load saved state (if any)
+    this.loadState();
   }
 
+  // -------------------------
+  // SAVE / LOAD STATE METHODS
+  // ------------------------- 
+  saveState() {
+    const groups = [];
+    const mathGroupElements = this.canvas.querySelectorAll('.math-group');
+    mathGroupElements.forEach((group) => {
+      const left = group.style.left;
+      const top = group.style.top;
+      const fields = [];
+      group.querySelectorAll('.math-field-container').forEach((container) => {
+        if (container.dataset.latex) {
+          fields.push(container.dataset.latex);
+        }
+      });
+      groups.push({ left, top, fields });
+    });
+    const stateString = JSON.stringify(groups);
+    // Save state in a cookie valid for 7 d ays.
+    document.cookie =
+      "mathBoardState=" +
+      encodeURIComponent(stateString) +
+      "; path=/; max-age=" +
+      60 * 60 * 24 * 7;
+  }
+
+  loadState() {
+    const cookieEntry = document
+      .cookie.split('; ')
+      .find((row) => row.startsWith("mathBoardState="));
+    if (!cookieEntry) return;
+    const stateString = decodeURIComponent(cookieEntry.split('=')[1]);
+    let groups;
+    try {
+      groups = JSON.parse(stateString);
+    } catch (e) {
+      console.error("Failed to parse state cookie:", e);
+      return;
+    }
+    groups.forEach((groupData) => {
+      new MathGroup(this, groupData.left, groupData.top, groupData);
+    });
+  }
+
+  // Exports the current state as a JSON file.
+exportData() {
+  const groups = [];
+  const mathGroupElements = this.canvas.querySelectorAll('.math-group');
+  mathGroupElements.forEach((group) => {
+    const left = group.style.left;
+    const top = group.style.top;
+    const fields = [];
+    group.querySelectorAll('.math-field-container').forEach((container) => {
+      if (container.dataset.latex) {
+        fields.push(container.dataset.latex);
+      }
+    });
+    groups.push({ left, top, fields });
+  });
+  const dataStr = JSON.stringify(groups, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "mathboard-data.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Imports board data from a JSON string.
+importData(jsonData) {
+  try {
+    const groups = JSON.parse(jsonData);
+    // Clear the current canvas (remove all existing math groups).
+    this.canvas.innerHTML = '';
+    groups.forEach((groupData) => {
+       new MathGroup(this, groupData.left, groupData.top, groupData);
+    });
+    // Save the new state.
+    this.saveState();
+  } catch (error) {
+    console.error("Failed to import data:", error);
+  }
+}
+
+
+  // -------------------------
+  // EVENT INITIALIZERS (unchanged except where noted)
+  // -------------------------
   initEventListeners() {
     this.initGlobalKeyHandlers();
     this.initCanvasPanning();
@@ -42,23 +136,30 @@ class MathBoard {
         this.spaceDown = true;
       }
       // Delete all selected math groups when Backspace, Delete, or "x" is pressed.
-      if ((e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
-          !e.ctrlKey && !e.altKey && !e.metaKey) {
+      if (
+        (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.metaKey
+      ) {
         const selectedGroups = document.querySelectorAll('.math-group.selected');
         if (selectedGroups.length > 0) {
           e.preventDefault();
-          selectedGroups.forEach((group) => group.remove());
+          selectedGroups.forEach((group) => {
+            group.remove();
+          });
+          // Save updated state
+          this.saveState();
         }
       }
     });
-  
+
     document.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         this.spaceDown = false;
       }
     });
   }
-  
 
   initCanvasPanning() {
     this.canvas.addEventListener('mousedown', (e) => {
@@ -90,80 +191,80 @@ class MathBoard {
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
-initDocumentClickHandler() {
-  document.addEventListener('click', (event) => {
-    // Do nothing if panning or group dragging.
-    if (this.isPanning || this.groupDragging) return;
-
-    // If clicking on a math-field container (that isn’t actively editing), enable editing.
-    const mathContainer = event.target.closest('.math-field-container');
-    if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
-      event.stopPropagation();
-      MathField.edit(mathContainer);
-      return;
-    }
-    if (event.target.closest('.math-field-container')) return;
-
-    // Determine if the click occurred on a math group.
-    const mathGroupTarget = event.target.closest('.math-group');
-
-    if (mathGroupTarget) {
-      if (!event.shiftKey) {
-        // Without shift: clear any other selections and select this group.
-        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
-        mathGroupTarget.classList.add('selected');
-      } else {
-        // With shift: toggle the selected state of this group.
-        mathGroupTarget.classList.toggle('selected');
+  initDocumentClickHandler() {
+    document.addEventListener('click', (event) => {
+      if (this.isPanning || this.groupDragging) return;
+      const mathContainer = event.target.closest('.math-field-container');
+      if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
+        event.stopPropagation();
+        MathField.edit(mathContainer);
+        return;
       }
-    } else {
-      // Clicked outside a math group: clear all selections.
-      document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
-    }
-  });
-}
-
+      if (event.target.closest('.math-field-container')) return;
+      const mathGroupTarget = event.target.closest('.math-group');
+      if (mathGroupTarget) {
+        if (!event.shiftKey) {
+          document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+          mathGroupTarget.classList.add('selected');
+        } else {
+          mathGroupTarget.classList.toggle('selected');
+        }
+      } else {
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      }
+    });
+  }
 
   initGroupDragging() {
-    // Start dragging a math group.
     document.addEventListener('mousedown', (event) => {
-      // Only proceed for left-click and when space is not held.
       if (event.button !== 0 || this.spaceDown) return;
-      
-      // Prevent dragging if the click is inside an actively editing math field.
       if (event.target.closest('.mq-editable-field')) return;
-  
-      // Traverse up to find the math group.
       let target = event.target;
       while (target && !target.classList.contains('math-group')) {
         target = target.parentElement;
       }
       if (target && target.classList.contains('math-group')) {
+        let groups;
+        if (target.classList.contains('selected')) {
+          groups = Array.from(document.querySelectorAll('.math-group.selected'));
+        } else {
+          groups = [target];
+        }
         this.groupDragging = true;
-        this.draggedGroup = target;
-        this.dragOffsetX = event.clientX - target.offsetLeft;
-        this.dragOffsetY = event.clientY - target.offsetTop;
-        target.classList.add('dragging');
+        this.selectedGroups = groups;
+        this.dragStart = { x: event.clientX, y: event.clientY };
+        this.initialPositions = groups.map((group) => ({
+          group: group,
+          left: parseInt(group.style.left, 10),
+          top: parseInt(group.style.top, 10)
+        }));
+        groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
       }
     });
-  
+
     document.addEventListener('mousemove', (event) => {
-      if (this.groupDragging && this.draggedGroup) {
-        this.draggedGroup.style.left = event.clientX - this.dragOffsetX + 'px';
-        this.draggedGroup.style.top = event.clientY - this.dragOffsetY + 'px';
+      if (this.groupDragging && this.selectedGroups) {
+        const deltaX = event.clientX - this.dragStart.x;
+        const deltaY = event.clientY - this.dragStart.y;
+        this.initialPositions.forEach((item) => {
+          item.group.style.left = (item.left + deltaX) + 'px';
+          item.group.style.top = (item.top + deltaY) + 'px';
+        });
       }
     });
-  
+
     document.addEventListener('mouseup', () => {
-      if (this.groupDragging && this.draggedGroup) {
-        this.draggedGroup.classList.remove('dragging');
+      if (this.groupDragging && this.selectedGroups) {
+        this.selectedGroups.forEach((group) => group.classList.remove('dragging'));
         this.groupDragging = false;
-        this.draggedGroup = null;
+        this.selectedGroups = null;
+        this.initialPositions = null;
+        // Save state after dragging ends.
+        this.saveState();
       }
     });
   }
-  
 
   initWindowResizeHandler() {
     window.addEventListener('resize', () => {
@@ -176,7 +277,9 @@ initDocumentClickHandler() {
     document.addEventListener('dblclick', (event) => {
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
+      // Create a new MathGroup and then save state.
       new MathGroup(this, coords.x, coords.y);
+      this.saveState();
     });
   }
 
@@ -195,26 +298,20 @@ initDocumentClickHandler() {
   }
 
   initBoxSelection() {
-    // Track the box selection state.
     this.boxSelect = {
       isSelecting: false,
       startX: 0,
       startY: 0,
       element: null,
     };
-  
-    // Start box selection on mousedown if clicking on the canvas background.
+
     this.canvas.addEventListener('mousedown', (e) => {
-      // Only act on left-click, and if space is not held (panning takes precedence)
       if (e.button !== 0 || this.spaceDown) return;
-      // Only start box selection if clicking directly on the canvas.
       if (e.target !== this.canvas) return;
-  
       this.boxSelect.isSelecting = true;
       this.boxSelect.startX = e.clientX;
       this.boxSelect.startY = e.clientY;
-  
-      // Create the selection rectangle element.
+
       this.boxSelect.element = document.createElement('div');
       this.boxSelect.element.className = 'box-select-rect';
       this.boxSelect.element.style.position = 'absolute';
@@ -225,60 +322,36 @@ initDocumentClickHandler() {
       this.boxSelect.element.style.top = `${this.boxSelect.startY}px`;
       this.boxSelect.element.style.width = '0px';
       this.boxSelect.element.style.height = '0px';
-  
-      // Append to document body so its position is in viewport coordinates.
+
       document.body.appendChild(this.boxSelect.element);
     });
-  
-    // Update the selection rectangle as the mouse moves.
+
     document.addEventListener('mousemove', (e) => {
       if (!this.boxSelect.isSelecting) return;
       const startX = this.boxSelect.startX;
       const startY = this.boxSelect.startY;
       const currentX = e.clientX;
       const currentY = e.clientY;
-      // Calculate rectangle position and size.
       const left = Math.min(startX, currentX);
       const top = Math.min(startY, currentY);
       const width = Math.abs(currentX - startX);
       const height = Math.abs(currentY - startY);
-  
+
       this.boxSelect.element.style.left = `${left}px`;
       this.boxSelect.element.style.top = `${top}px`;
       this.boxSelect.element.style.width = `${width}px`;
       this.boxSelect.element.style.height = `${height}px`;
     });
-  
-    // On mouseup, finalize the selection.
+
     document.addEventListener('mouseup', (e) => {
       if (!this.boxSelect.isSelecting) return;
       this.boxSelect.isSelecting = false;
-      // Get bounding rect of the selection element (in viewport coordinates).
       const selectionRect = this.boxSelect.element.getBoundingClientRect();
-      // Remove the selection rectangle.
       this.boxSelect.element.remove();
       this.boxSelect.element = null;
-  
-      // Optionally, clear previous selection.
-      document.querySelectorAll('.math-group').forEach((group) => {
-        group.classList.remove('selected');
-      });
-  
-      // For each math group, check if its bounding rectangle intersects the selection rectangle.
-      document.querySelectorAll('.math-group').forEach((group) => {
-        const groupRect = group.getBoundingClientRect();
-        if (
-          selectionRect.left < groupRect.right &&
-          selectionRect.right > groupRect.left &&
-          selectionRect.top < groupRect.bottom &&
-          selectionRect.bottom > groupRect.top
-        ) {
-          group.classList.add('selected');
-        }
-      });
+      this.selectStacksWithinBox(selectionRect);
     });
-  
-    // Cancel selection if the mouse leaves the canvas.
+
     this.canvas.addEventListener('mouseleave', () => {
       if (this.boxSelect.isSelecting && this.boxSelect.element) {
         this.boxSelect.element.remove();
@@ -286,16 +359,29 @@ initDocumentClickHandler() {
       }
     });
   }
-  
-  
 
-  // screenToCanvas remains unchanged:
+  selectStacksWithinBox(selectionRect) {
+    document.querySelectorAll('.math-group').forEach((group) => {
+      group.classList.remove('selected');
+    });
+
+    document.querySelectorAll('.math-group').forEach((group) => {
+      const groupRect = group.getBoundingClientRect();
+      if (
+        groupRect.left >= selectionRect.left &&
+        groupRect.right <= selectionRect.right &&
+        groupRect.top >= selectionRect.top &&
+        groupRect.bottom <= selectionRect.bottom
+      ) {
+        group.classList.add('selected');
+      }
+    });
+  }
+
   screenToCanvas(x, y) {
     return {
       x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
       y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
     };
   }
-
-  
 }
