@@ -52,6 +52,9 @@
   <!-- The huge canvas holds all math groups -->
   <div id="canvas"></div>
 
+  <!-- Right-Click Context Menu -->
+  <div id="context-menu" class="context-menu"></div>
+
   <!-- Hidden file input for importing JSON -->
   <input type="file" id="importInput" accept=".json" style="display: none;">
   
@@ -65,15 +68,12 @@
   <script src="scripts/mathboard.js"></script>
   <script src="scripts/mathgroup.js"></script>
   <script src="scripts/mathfield.js"></script>
+  <script src="scripts/versionmanager.js"></script>
+  <script src="scripts/contextmenu.js"></script>
   <script src="script.js"></script>
+  
 </body>
 </html>
-
-
-=== f:\Programming\GitHub\mathboard\out.txt ===
-
-
-=== f:\Programming\GitHub\mathboard\README.md ===
 
 
 === f:\Programming\GitHub\mathboard\script.js ===
@@ -82,7 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create and store MathBoard instance globally.
   window.mathBoard = new MathBoard();
 
-  // ----- New Hamburger Menu Logic -----
+  // Create a global VersionManager instance
+  window.versionManager = new VersionManager(window.mathBoard.fileManager);
+
+  // Example: Save an initial state snapshot.
+  window.versionManager.saveState();
+
+  // New Hamburger Menu Logic (existing code) ...
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('menu');
 
@@ -120,6 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const jsonData = e.target.result;
           window.mathBoard.fileManager.importData(jsonData);
+          // Save state after import
+          window.versionManager.saveState();
         } catch (err) {
           console.error("Error reading JSON file:", err);
         }
@@ -130,6 +138,30 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
+  // Listen for keyboard shortcuts to trigger undo (Ctrl+Z) and redo (Ctrl+Y).
+  document.addEventListener('keydown', (e) => {
+    // Check if the active element is editable.
+    const activeEl = document.activeElement;
+    const isEditable = activeEl &&
+      (activeEl.tagName === 'INPUT' ||
+       activeEl.tagName === 'TEXTAREA' ||
+       activeEl.isContentEditable ||
+       activeEl.classList.contains('mq-editable-field'));
+    
+    if (isEditable) {
+      // Allow native behavior inside text fields.
+      return;
+    }
+  
+    if (e.ctrlKey && e.key === 'z') { // Ctrl+Z for Undo
+      e.preventDefault();
+      window.versionManager.undo();
+    } else if (e.ctrlKey && e.key === 'y') { // Ctrl+Y for Redo
+      e.preventDefault();
+      window.versionManager.redo();
+    }
+  });
+  
 });
 
 
@@ -288,6 +320,7 @@ html, body {
   border-radius: 5px;
   margin-top: 5px;
   padding: 5px;
+  font-size: 14px;
 }
 
 #menu ul {
@@ -325,87 +358,124 @@ html, body {
 }
 
 
-=== f:\Programming\GitHub\mathboard\scripts\filemanager.js ===
-// scripts/filemanager.js
-class FileManager {
-    constructor(board) {
-      this.board = board;
+
+
+
+/* Context Menu Styles */
+.context-menu {
+  position: absolute;
+  background-color: #1d1d1d;
+  border: 1px solid #666;
+  border-radius: 5px;
+  display: none;
+  z-index: 2000;
+  min-width: 150px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  font-family: 'Inter', sans-serif;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Hovered state */
+.context-menu-item:hover {
+  background-color: rgba(0, 197, 154, 0.3);
+}
+
+/* Selected state (can be applied programmatically, if needed) */
+.context-menu-item.selected {
+  background-color: #00c59a;
+}
+
+/* Disabled state */
+.context-menu-item.disabled {
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Separator between groups */
+.context-menu-separator {
+  border-top: 1px solid #444;
+  margin: 4px 0;
+}
+
+
+=== f:\Programming\GitHub\mathboard\scripts\contextmenu.js ===
+class ContextMenu {
+    constructor(menuElement) {
+      this.menuElement = menuElement;
+      // Hide the menu if clicking anywhere outside or on window resize.
+      document.addEventListener('click', () => this.hide());
+      window.addEventListener('resize', () => this.hide());
     }
   
-    saveState() {
-      const groups = [];
-      const mathGroupElements = this.board.canvas.querySelectorAll('.math-group');
-      mathGroupElements.forEach((group) => {
-        const left = group.style.left;
-        const top = group.style.top;
-        const fields = [];
-        group.querySelectorAll('.math-field-container').forEach((container) => {
-          if (container.dataset.latex) {
-            fields.push(container.dataset.latex);
+    show(x, y, items) {
+      // Clear any existing menu items.
+      this.menuElement.innerHTML = '';
+  
+      items.forEach(item => {
+        if (item.separator) {
+          const sep = document.createElement('div');
+          sep.className = 'context-menu-separator';
+          this.menuElement.appendChild(sep);
+        } else {
+          const menuItem = document.createElement('div');
+          menuItem.className = 'context-menu-item';
+          menuItem.textContent = item.label;
+          if (item.disabled) {
+            menuItem.classList.add('disabled');
           }
-        });
-        groups.push({ left, top, fields });
+          menuItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!item.disabled && item.action) {
+              item.action();
+            }
+            this.hide();
+          });
+          this.menuElement.appendChild(menuItem);
+        }
       });
-      const stateString = JSON.stringify(groups);
-      localStorage.setItem("mathBoardState", stateString);
-    }
   
-    loadState() {
-      const stateString = localStorage.getItem("mathBoardState");
-      if (!stateString) return;
-      let groups;
-      try {
-        groups = JSON.parse(stateString);
-      } catch (e) {
-        console.error("Failed to parse state from localStorage:", e);
-        return;
+      // Adjust position if the menu might overflow the viewport.
+      const menuRect = this.menuElement.getBoundingClientRect();
+      if (x + menuRect.width > window.innerWidth) {
+        x = window.innerWidth - menuRect.width - 10;
       }
-      groups.forEach((groupData) => {
-        new MathGroup(this.board, groupData.left, groupData.top, groupData);
-      });
-    }
-  
-    exportData() {
-      const groups = [];
-      const mathGroupElements = this.board.canvas.querySelectorAll('.math-group');
-      mathGroupElements.forEach((group) => {
-        const left = group.style.left;
-        const top = group.style.top;
-        const fields = [];
-        group.querySelectorAll('.math-field-container').forEach((container) => {
-          if (container.dataset.latex) {
-            fields.push(container.dataset.latex);
-          }
-        });
-        groups.push({ left, top, fields });
-      });
-      const dataStr = JSON.stringify(groups, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "mathboard-data.json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  
-    importData(jsonData) {
-      try {
-        const groups = JSON.parse(jsonData);
-        // Clear the current canvas (remove all existing math groups).
-        this.board.canvas.innerHTML = '';
-        groups.forEach((groupData) => {
-           new MathGroup(this.board, groupData.left, groupData.top, groupData);
-        });
-        // Save the new state.
-        this.saveState();
-      } catch (error) {
-        console.error("Failed to import data:", error);
+      if (y + menuRect.height > window.innerHeight) {
+        y = window.innerHeight - menuRect.height - 10;
       }
+      this.menuElement.style.left = x + 'px';
+      this.menuElement.style.top = y + 'px';
+      this.menuElement.style.display = 'block';
+    }
+  
+    hide() {
+      this.menuElement.style.display = 'none';
     }
   }
+  
+  // Initialize the context menu.
+  const contextMenu = new ContextMenu(document.getElementById('context-menu'));
+  
+  // Example: Attach the custom context menu to right-click events.
+  // (Replace this example logic with your own target elements or conditions.)
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    const menuItems = [
+      { label: 'New Stack', action: () => { console.log('New Stack clicked'); } },
+      { separator: true },
+      { label: 'Cut', action: () => { console.log('Cut clicked'); } },
+      { label: 'Copy', action: () => { console.log('Copy clicked'); } },
+      { label: 'Paste', action: () => { console.log('Paste clicked'); } },
+      { separator: true },
+      { label: 'Delete', action: () => { console.log('Delete clicked'); } }
+    ];
+    contextMenu.show(e.pageX, e.pageY, menuItems);
+  });
   
 
 === f:\Programming\GitHub\mathboard\scripts\mathboard.js ===
@@ -414,6 +484,10 @@ const MQ = MathQuill.getInterface(2);
 class MathBoard {
   constructor() {
     this.canvas = document.getElementById('canvas');
+
+    this.mouseX = 0;
+    this.mouseY = 0;
+
     this.isPanning = false;
     this.panStart = { x: 0, y: 0 };
     this.canvasOffset = { x: 0, y: 0 };
@@ -430,6 +504,7 @@ class MathBoard {
     this.isBoxSelecting = false;
     this.boxSelectStart = { x: 0, y: 0 };
     this.selectionBox = null;
+    this.justBoxSelected = false;
 
     this.fileManager = new FileManager(this);
     this.fileManager.loadState();
@@ -453,6 +528,7 @@ class MathBoard {
       if (e.code === 'Space') {
         this.spaceDown = true;
       }
+
       if (
         (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
         !e.ctrlKey &&
@@ -469,17 +545,30 @@ class MathBoard {
           this.fileManager.saveState();
         }
       }
+
+      if (e.shiftKey && e.key === 'A' && !document.querySelector('.mq-focused')) {
+        e.preventDefault();
+        const coords = this.screenToCanvas(this.mouseX, this.mouseY);
+        new MathGroup(this, coords.x, coords.y);
+        this.fileManager.saveState();
+      }
     });
 
     document.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         this.spaceDown = false;
       }
+      
     });
   }
   
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
+      // If a box selection just finished, skip the normal click handling.
+      if (this.justBoxSelected) {
+        this.justBoxSelected = false;
+        return;
+      }
       if (this.isPanning || this.groupDragging) return;
       const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
@@ -501,7 +590,7 @@ class MathBoard {
       }
     });
   }
-
+  
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
       if (event.button !== 0 || this.spaceDown) return;
@@ -532,9 +621,16 @@ class MathBoard {
         groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
       }
+
+      if (!target) {
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      }
     });
 
     document.addEventListener('mousemove', (event) => {
+      this.mouseX = event.clientX;
+      this.mouseY = event.clientY;
+
       if (this.groupDragging && this.selectedGroups) {
         const deltaX = event.clientX - this.dragStart.x;
         const deltaY = event.clientY - this.dragStart.y;
@@ -712,7 +808,6 @@ class MathField {
           const previousContainer = container.previousElementSibling;
           container.remove();
           MathField.edit(previousContainer);
-          // Note: Assuming mathGroup instance is accessible, its board.saveState() should be called.
           return;
         }
       }
@@ -847,174 +942,4 @@ class MathGroup {
 }
 
 
-
-=== f:\Programming\GitHub\mathboard\scripts\navigation.js ===
-// navigation.js
-
-class Navigation {
-    constructor(board) {
-      this.board = board;
-      this.boxSelect = {
-        isSelecting: false,
-        startX: 0,
-        startY: 0,
-        element: null,
-      };
-    }
-  
-    init() {
-      this.initCanvasPanning();
-      this.initTrackpadNavigation();
-      this.initBoxSelection();
-      window.addEventListener('resize', () => {
-        this.clampPan();
-        this.updateTransform();
-      });
-    }
-  
-    initCanvasPanning() {
-      const canvas = this.board.canvas;
-      canvas.addEventListener('mousedown', (e) => {
-        // Start panning with middle mouse or left mouse when space is held.
-        if (e.button === 1 || (e.button === 0 && this.board.spaceDown)) {
-          this.board.isPanning = true;
-          this.board.panStart.x = e.clientX - this.board.canvasOffset.x;
-          this.board.panStart.y = e.clientY - this.board.canvasOffset.y;
-          e.preventDefault();
-        }
-      });
-  
-      canvas.addEventListener('mousemove', (e) => {
-        if (this.board.isPanning) {
-          this.board.canvasOffset.x = e.clientX - this.board.panStart.x;
-          this.board.canvasOffset.y = e.clientY - this.board.panStart.y;
-          this.clampPan();
-          this.updateTransform();
-        }
-      });
-  
-      canvas.addEventListener('mouseup', (e) => {
-        if (e.button === 1 || e.button === 0) {
-          this.board.isPanning = false;
-        }
-      });
-  
-      canvas.addEventListener('mouseleave', () => {
-        this.board.isPanning = false;
-      });
-  
-      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-    }
-  
-    clampPan() {
-      const minX = window.innerWidth - 10000;
-      const maxX = 10000;
-      this.board.canvasOffset.x = Math.min(maxX, Math.max(minX, this.board.canvasOffset.x));
-  
-      const minY = window.innerHeight - 10000;
-      const maxY = 10000;
-      this.board.canvasOffset.y = Math.min(maxY, Math.max(minY, this.board.canvasOffset.y));
-    }
-  
-    updateTransform() {
-      this.board.canvas.style.transform = `translate(${this.board.canvasOffset.x}px, ${this.board.canvasOffset.y}px)`;
-    }
-  
-    initTrackpadNavigation() {
-      const canvas = this.board.canvas;
-      canvas.addEventListener('wheel', (e) => {
-        // Trackpad heuristic: deltaMode 0 with horizontal scrolling or small vertical deltas.
-        if (e.deltaMode === 0 && (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) < 50)) {
-          e.preventDefault();
-          this.board.canvasOffset.x -= e.deltaX;
-          this.board.canvasOffset.y -= e.deltaY;
-          this.clampPan();
-          this.updateTransform();
-        }
-      }, { passive: false });
-    }
-  
-    initBoxSelection() {
-      const canvas = this.board.canvas;
-      canvas.addEventListener('mousedown', (e) => {
-        if (e.button !== 0 || this.board.spaceDown) return;
-        if (e.target !== canvas) return;
-        this.boxSelect.isSelecting = true;
-        this.boxSelect.startX = e.clientX;
-        this.boxSelect.startY = e.clientY;
-        this.boxSelect.element = document.createElement('div');
-        this.boxSelect.element.className = 'box-select-rect';
-        this.boxSelect.element.style.position = 'absolute';
-        this.boxSelect.element.style.border = '1px dashed #00c59a';
-        this.boxSelect.element.style.backgroundColor = 'rgba(0, 197, 154, 0.1)';
-        this.boxSelect.element.style.pointerEvents = 'none';
-        this.boxSelect.element.style.left = `${this.boxSelect.startX}px`;
-        this.boxSelect.element.style.top = `${this.boxSelect.startY}px`;
-        this.boxSelect.element.style.width = '0px';
-        this.boxSelect.element.style.height = '0px';
-        document.body.appendChild(this.boxSelect.element);
-      });
-  
-      document.addEventListener('mousemove', (e) => {
-        if (!this.boxSelect.isSelecting) return;
-        const startX = this.boxSelect.startX;
-        const startY = this.boxSelect.startY;
-        const currentX = e.clientX;
-        const currentY = e.clientY;
-        const left = Math.min(startX, currentX);
-        const top = Math.min(startY, currentY);
-        const width = Math.abs(currentX - startX);
-        const height = Math.abs(currentY - startY);
-        this.boxSelect.element.style.left = `${left}px`;
-        this.boxSelect.element.style.top = `${top}px`;
-        this.boxSelect.element.style.width = `${width}px`;
-        this.boxSelect.element.style.height = `${height}px`;
-      });
-  
-      document.addEventListener('mouseup', () => {
-        if (!this.boxSelect.isSelecting) return;
-        this.boxSelect.isSelecting = false;
-        const selectionRect = this.boxSelect.element.getBoundingClientRect();
-        this.boxSelect.element.remove();
-        this.boxSelect.element = null;
-        this.selectGroupsWithinBox(selectionRect);
-      });
-  
-      canvas.addEventListener('mouseleave', () => {
-        if (this.boxSelect.isSelecting && this.boxSelect.element) {
-          this.boxSelect.element.remove();
-          this.boxSelect.isSelecting = false;
-        }
-      });
-    }
-  
-    selectGroupsWithinBox(selectionRect) {
-      document.querySelectorAll('.math-group').forEach((group) => {
-        group.classList.remove('selected');
-      });
-  
-      document.querySelectorAll('.math-group').forEach((group) => {
-        const groupRect = group.getBoundingClientRect();
-        
-        if (
-          groupRect.left >= selectionRect.left &&
-          groupRect.right <= selectionRect.right &&
-          groupRect.top >= selectionRect.top &&
-          groupRect.bottom <= selectionRect.bottom
-        ) {
-          group.classList.add('selected');
-          console.log(groupRect);
-        }
-      });
-    }
-  
-    // Helper to convert screen coordinates to canvas coordinates.
-    screenToCanvas(x, y) {
-      return {
-        x: (x - (this.board.canvasInitialOffset.x + this.board.canvasOffset.x)) / this.board.scale,
-        y: (y - (this.board.canvasInitialOffset.y + this.board.canvasOffset.y)) / this.board.scale,
-      };
-    }
-  }
-  
 

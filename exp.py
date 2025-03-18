@@ -1,6 +1,5 @@
 import os
 
-# Clear the output file before running the script
 output_file = 'out.txt'
 if os.path.exists(output_file):
     open(output_file, 'w').close()
@@ -32,7 +31,8 @@ def write_to_output_file(files, output_file):
 
 if __name__ == "__main__":
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    exclude_files = ['exp.py', '.gitattributes']
+    exclude_files = ['exp.py', '.gitattributes', '.gitignore', 'out.txt', 'README.md', 'LICENSE', 'requirements.txt',
+                     'navigation.js', 'versionmanager.js', 'filemanager.js']
     output_file = 'out.txt'
 
     all_files = get_all_files(current_directory, exclude_files)

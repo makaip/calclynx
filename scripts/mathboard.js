@@ -3,6 +3,10 @@ const MQ = MathQuill.getInterface(2);
 class MathBoard {
   constructor() {
     this.canvas = document.getElementById('canvas');
+
+    this.mouseX = 0;
+    this.mouseY = 0;
+
     this.isPanning = false;
     this.panStart = { x: 0, y: 0 };
     this.canvasOffset = { x: 0, y: 0 };
@@ -43,6 +47,7 @@ class MathBoard {
       if (e.code === 'Space') {
         this.spaceDown = true;
       }
+
       if (
         (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
         !e.ctrlKey &&
@@ -59,12 +64,20 @@ class MathBoard {
           this.fileManager.saveState();
         }
       }
+
+      if (e.shiftKey && e.key === 'A' && !document.querySelector('.mq-focused')) {
+        e.preventDefault();
+        const coords = this.screenToCanvas(this.mouseX, this.mouseY);
+        new MathGroup(this, coords.x, coords.y);
+        this.fileManager.saveState();
+      }
     });
 
     document.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         this.spaceDown = false;
       }
+      
     });
   }
   
@@ -127,9 +140,16 @@ class MathBoard {
         groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
       }
+
+      if (!target) {
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      }
     });
 
     document.addEventListener('mousemove', (event) => {
+      this.mouseX = event.clientX;
+      this.mouseY = event.clientY;
+
       if (this.groupDragging && this.selectedGroups) {
         const deltaX = event.clientX - this.dragStart.x;
         const deltaY = event.clientY - this.dragStart.y;

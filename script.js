@@ -3,7 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create and store MathBoard instance globally.
   window.mathBoard = new MathBoard();
 
-  // ----- New Hamburger Menu Logic -----
+  // Create a global VersionManager instance
+  window.versionManager = new VersionManager(window.mathBoard.fileManager);
+
+  // Example: Save an initial state snapshot.
+  window.versionManager.saveState();
+
+  // New Hamburger Menu Logic (existing code) ...
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('menu');
 
@@ -41,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const jsonData = e.target.result;
           window.mathBoard.fileManager.importData(jsonData);
+          // Save state after import
+          window.versionManager.saveState();
         } catch (err) {
           console.error("Error reading JSON file:", err);
         }
@@ -51,4 +59,28 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
+  // Listen for keyboard shortcuts to trigger undo (Ctrl+Z) and redo (Ctrl+Y).
+  document.addEventListener('keydown', (e) => {
+    // Check if the active element is editable.
+    const activeEl = document.activeElement;
+    const isEditable = activeEl &&
+      (activeEl.tagName === 'INPUT' ||
+       activeEl.tagName === 'TEXTAREA' ||
+       activeEl.isContentEditable ||
+       activeEl.classList.contains('mq-editable-field'));
+    
+    if (isEditable) {
+      // Allow native behavior inside text fields.
+      return;
+    }
+  
+    if (e.ctrlKey && e.key === 'z') { // Ctrl+Z for Undo
+      e.preventDefault();
+      window.versionManager.undo();
+    } else if (e.ctrlKey && e.key === 'y') { // Ctrl+Y for Redo
+      e.preventDefault();
+      window.versionManager.redo();
+    }
+  });
+  
 });

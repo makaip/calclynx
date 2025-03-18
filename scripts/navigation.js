@@ -160,8 +160,6 @@ class Navigation {
       });
     }
     
-    
-  
     selectGroupsWithinBox(selectionRect) {
       document.querySelectorAll('.math-group').forEach((group) => {
         group.classList.remove('selected');

@@ -129,7 +129,9 @@ html, body {
     cursor: not-allowed;
   }
   
-  /* Hamburger Menu Styles */
+
+
+/* Hamburger Menu Styles */
 #menu-container {
   position: fixed;
   top: 10px;
@@ -152,6 +154,9 @@ html, body {
   border-radius: 5px;
   margin-top: 5px;
   padding: 5px;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  font-family: 'Inter', sans-serif;
 }
 
 #menu ul {
@@ -171,6 +176,10 @@ html, body {
   background-color: #333;
 }
 
+#menu li:active {
+  background-color: rgba(0, 197, 154, 0.3);
+}
+
 .submenu {
   display: none;
   position: absolute;
@@ -179,11 +188,58 @@ html, body {
   background-color: #1d1d1d;
   border: 1px solid #666;
   border-radius: 5px;
-  padding: 5px;
   min-width: 150px;
   z-index: 1001;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .menu-item:hover > .submenu {
   display: block;
+}
+
+
+
+
+/* Context Menu Styles */
+.context-menu {
+  position: absolute;
+  background-color: #1d1d1d;
+  border: 1px solid #666;
+  border-radius: 5px;
+  display: none;
+  z-index: 2000;
+  min-width: 150px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  font-family: 'Inter', sans-serif;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Hovered state */
+.context-menu-item:hover {
+  background-color: #333;
+}
+
+/* Selected state (can be applied programmatically, if needed) */
+.context-menu-item:active {
+  background-color: rgba(0, 197, 154, 0.3);
+}
+
+/* Disabled state */
+.context-menu-item.disabled {
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Separator between groups */
+.context-menu-separator {
+  border-top: 1px solid #444;
+  margin: 4px 0;
 }

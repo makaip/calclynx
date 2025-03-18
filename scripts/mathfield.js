@@ -125,7 +125,6 @@ class MathField {
           const previousContainer = container.previousElementSibling;
           container.remove();
           MathField.edit(previousContainer);
-          // Note: Assuming mathGroup instance is accessible, its board.saveState() should be called.
           return;
         }
       }
