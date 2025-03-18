@@ -11,6 +11,10 @@ class MathBoard {
     this.scale = 1;
     this.canvasInitialOffset = { x: -10000, y: -10000 };
 
+    // Initialize FileManager and load saved state (if any)
+    this.fileManager = new FileManager(this);
+    this.fileManager.loadState();
+
     // Variables for group dragging.
     this.groupDragging = false;
     this.draggedGroup = null;
@@ -18,113 +22,26 @@ class MathBoard {
     this.dragOffsetY = 0;
     this.margin = 10;
 
-    // Box select properties
+    // Box select properties.
     this.isBoxSelecting = false;
     this.boxSelectStart = { x: 0, y: 0 };
     this.selectionBox = null;
 
     this.initEventListeners();
 
-    // Load saved state (if any)
-    this.loadState();
+    this.navigation = new Navigation(this);
+    this.navigation.init();
   }
-
-  // -------------------------
-  // SAVE / LOAD STATE METHODS
-  // ------------------------- 
-// In mathboard.js
-
-saveState() {
-  const groups = [];
-  const mathGroupElements = this.canvas.querySelectorAll('.math-group');
-  mathGroupElements.forEach((group) => {
-    const left = group.style.left;
-    const top = group.style.top;
-    const fields = [];
-    group.querySelectorAll('.math-field-container').forEach((container) => {
-      if (container.dataset.latex) {
-        fields.push(container.dataset.latex);
-      }
-    });
-    groups.push({ left, top, fields });
-  });
-  const stateString = JSON.stringify(groups);
-  // Save state using localStorage
-  localStorage.setItem("mathBoardState", stateString);
-}
-
-loadState() {
-  const stateString = localStorage.getItem("mathBoardState");
-  if (!stateString) return;
-  let groups;
-  try {
-    groups = JSON.parse(stateString);
-  } catch (e) {
-    console.error("Failed to parse state from localStorage:", e);
-    return;
-  }
-  groups.forEach((groupData) => {
-    new MathGroup(this, groupData.left, groupData.top, groupData);
-  });
-}
-
-
-  // Exports the current state as a JSON file.
-exportData() {
-  const groups = [];
-  const mathGroupElements = this.canvas.querySelectorAll('.math-group');
-  mathGroupElements.forEach((group) => {
-    const left = group.style.left;
-    const top = group.style.top;
-    const fields = [];
-    group.querySelectorAll('.math-field-container').forEach((container) => {
-      if (container.dataset.latex) {
-        fields.push(container.dataset.latex);
-      }
-    });
-    groups.push({ left, top, fields });
-  });
-  const dataStr = JSON.stringify(groups, null, 2);
-  const blob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "mathboard-data.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-// Imports board data from a JSON string.
-importData(jsonData) {
-  try {
-    const groups = JSON.parse(jsonData);
-    // Clear the current canvas (remove all existing math groups).
-    this.canvas.innerHTML = '';
-    groups.forEach((groupData) => {
-       new MathGroup(this, groupData.left, groupData.top, groupData);
-    });
-    // Save the new state.
-    this.saveState();
-  } catch (error) {
-    console.error("Failed to import data:", error);
-  }
-}
-
 
   // -------------------------
   // EVENT INITIALIZERS (unchanged except where noted)
   // -------------------------
   initEventListeners() {
     this.initGlobalKeyHandlers();
-    this.initCanvasPanning();
     this.initDocumentClickHandler();
     this.initGroupDragging();
     this.initWindowResizeHandler();
     this.initDoubleClickHandler();
-    this.initBoxSelection();
-    this.initTrackpadNavigation();
   }
 
   initGlobalKeyHandlers() {
@@ -132,7 +49,6 @@ importData(jsonData) {
       if (e.code === 'Space') {
         this.spaceDown = true;
       }
-      // Delete all selected math groups when Backspace, Delete, or "x" is pressed.
       if (
         (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
         !e.ctrlKey &&
@@ -146,7 +62,7 @@ importData(jsonData) {
             group.remove();
           });
           // Save updated state
-          this.saveState();
+          this.fileManager.saveState();
         }
       }
     });
@@ -158,36 +74,7 @@ importData(jsonData) {
     });
   }
 
-  initCanvasPanning() {
-    this.canvas.addEventListener('mousedown', (e) => {
-      // Start panning with middle mouse or left mouse when space is held.
-      if (e.button === 1 || (e.button === 0 && this.spaceDown)) {
-        this.isPanning = true;
-        this.panStart.x = e.clientX - this.canvasOffset.x;
-        this.panStart.y = e.clientY - this.canvasOffset.y;
-        e.preventDefault();
-      }
-    });
-
-    this.canvas.addEventListener('mousemove', (e) => {
-      if (this.isPanning) {
-        this.canvasOffset.x = e.clientX - this.panStart.x;
-        this.canvasOffset.y = e.clientY - this.panStart.y;
-        this.clampPan();
-        this.updateTransform();
-      }
-    });
-
-    this.canvas.addEventListener('mouseup', (e) => {
-      if (e.button === 1 || e.button === 0) {
-        this.isPanning = false;
-      }
-    });
-
-    this.canvas.addEventListener('mouseleave', () => (this.isPanning = false));
-    this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-  }
-
+  
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
       if (this.isPanning || this.groupDragging) return;
@@ -258,33 +145,13 @@ importData(jsonData) {
         this.selectedGroups = null;
         this.initialPositions = null;
         // Save state after dragging ends.
-        this.saveState();
+        this.fileManager.saveState();
       }
     });
   }
 
-  initTrackpadNavigation() {
-    // Use {passive: false} so we can call preventDefault.
-    this.canvas.addEventListener('wheel', (e) => {
-      // Heuristic:
-      // - Trackpad events typically deliver deltas in pixel mode (deltaMode === 0).
-      // - They often provide horizontal scrolling (deltaX nonzero) or small vertical deltas.
-      if (
-        e.deltaMode === 0 &&
-        (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) < 50)
-      ) {
-        e.preventDefault();  // Prevent default scrolling behavior.
-        this.canvasOffset.x -= e.deltaX;
-        this.canvasOffset.y -= e.deltaY;
-        this.clampPan();
-        this.updateTransform();
-      }
-    }, { passive: false });
-  }
-
   initWindowResizeHandler() {
     window.addEventListener('resize', () => {
-      this.clampPan();
       this.updateTransform();
     });
   }
@@ -295,85 +162,12 @@ importData(jsonData) {
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       // Create a new MathGroup and then save state.
       new MathGroup(this, coords.x, coords.y);
-      this.saveState();
+      this.fileManager.saveState()
     });
-  }
-
-  clampPan() {
-    const minX = window.innerWidth - 10000;
-    const maxX = 10000;
-    this.canvasOffset.x = Math.min(maxX, Math.max(minX, this.canvasOffset.x));
-
-    const minY = window.innerHeight - 10000;
-    const maxY = 10000;
-    this.canvasOffset.y = Math.min(maxY, Math.max(minY, this.canvasOffset.y));
   }
 
   updateTransform() {
     this.canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
-  }
-
-  initBoxSelection() {
-    this.boxSelect = {
-      isSelecting: false,
-      startX: 0,
-      startY: 0,
-      element: null,
-    };
-
-    this.canvas.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 || this.spaceDown) return;
-      if (e.target !== this.canvas) return;
-      this.boxSelect.isSelecting = true;
-      this.boxSelect.startX = e.clientX;
-      this.boxSelect.startY = e.clientY;
-
-      this.boxSelect.element = document.createElement('div');
-      this.boxSelect.element.className = 'box-select-rect';
-      this.boxSelect.element.style.position = 'absolute';
-      this.boxSelect.element.style.border = '1px dashed #00c59a';
-      this.boxSelect.element.style.backgroundColor = 'rgba(0, 197, 154, 0.1)';
-      this.boxSelect.element.style.pointerEvents = 'none';
-      this.boxSelect.element.style.left = `${this.boxSelect.startX}px`;
-      this.boxSelect.element.style.top = `${this.boxSelect.startY}px`;
-      this.boxSelect.element.style.width = '0px';
-      this.boxSelect.element.style.height = '0px';
-
-      document.body.appendChild(this.boxSelect.element);
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!this.boxSelect.isSelecting) return;
-      const startX = this.boxSelect.startX;
-      const startY = this.boxSelect.startY;
-      const currentX = e.clientX;
-      const currentY = e.clientY;
-      const left = Math.min(startX, currentX);
-      const top = Math.min(startY, currentY);
-      const width = Math.abs(currentX - startX);
-      const height = Math.abs(currentY - startY);
-
-      this.boxSelect.element.style.left = `${left}px`;
-      this.boxSelect.element.style.top = `${top}px`;
-      this.boxSelect.element.style.width = `${width}px`;
-      this.boxSelect.element.style.height = `${height}px`;
-    });
-
-    document.addEventListener('mouseup', (e) => {
-      if (!this.boxSelect.isSelecting) return;
-      this.boxSelect.isSelecting = false;
-      const selectionRect = this.boxSelect.element.getBoundingClientRect();
-      this.boxSelect.element.remove();
-      this.boxSelect.element = null;
-      this.selectStacksWithinBox(selectionRect);
-    });
-
-    this.canvas.addEventListener('mouseleave', () => {
-      if (this.boxSelect.isSelecting && this.boxSelect.element) {
-        this.boxSelect.element.remove();
-        this.boxSelect.isSelecting = false;
-      }
-    });
   }
 
   selectStacksWithinBox(selectionRect) {

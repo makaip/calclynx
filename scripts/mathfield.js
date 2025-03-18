@@ -40,7 +40,7 @@ class MathField {
           const previousContainer = this.container.previousElementSibling;
           this.container.remove();
           MathField.edit(previousContainer);
-          this.mathGroup.board.saveState();
+          this.mathGroup.board.fileManager.saveState();
           return;
         }
       }
@@ -55,23 +55,24 @@ class MathField {
             this.mathGroup.remove();
           }
         }
-        this.mathGroup.board.saveState();
+        this.mathGroup.board.fileManager.saveState();
         return;
       }
+
       if (event.key === 'Enter') {
         event.preventDefault();
-        this.finalize();
+        
         if (event.ctrlKey) {
           this.mathFieldElement.blur();
         } else {
-          // If the current container is the last child, add a new math field at the end.
-          // Otherwise, insert a new math field right after this one.
           if (this.container === this.mathGroup.element.lastElementChild) {
             this.mathGroup.addMathField();
           } else {
             this.mathGroup.insertMathFieldAfter(this.container);
           }
         }
+
+        this.finalize();
       }
       
     });
@@ -84,7 +85,7 @@ class MathField {
       if (!this.mathGroup.element.querySelector('.math-field-container')) {
         this.mathGroup.remove();
       }
-      this.mathGroup.board.saveState();
+      this.mathGroup.board.fileManager.saveState();
       return;
     }
     this.container.dataset.latex = latex;
@@ -94,7 +95,7 @@ class MathField {
     this.container.appendChild(staticMath);
     MQ.StaticMath(staticMath).latex(latex);
     // Save the state after finalizing the field.
-    this.mathGroup.board.saveState();
+    this.mathGroup.board.fileManager.saveState();
   }
 
   // Static method to enable editing on a static math field.

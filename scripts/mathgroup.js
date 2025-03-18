@@ -54,7 +54,7 @@ class MathGroup {
 
   remove() {
     this.element.remove();
-    this.board.saveState();
+    this.board.fileManager.saveState();
   }
 
   insertMathFieldAfter(referenceContainer) {

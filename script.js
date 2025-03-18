@@ -1,15 +1,35 @@
+// script.js
 document.addEventListener('DOMContentLoaded', () => {
   // Create and store MathBoard instance globally.
   window.mathBoard = new MathBoard();
 
-  // Export data: triggers a JSON download.
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    window.mathBoard.exportData();
+  // ----- New Hamburger Menu Logic -----
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const menu = document.getElementById('menu');
+
+  // Toggle menu display when clicking the hamburger button.
+  hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
   });
 
-  // Import data: click triggers file input.
-  document.getElementById('importBtn').addEventListener('click', () => {
+  // Hide the menu when clicking outside the menu container.
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('menu-container').contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  });
+
+  // Export JSON functionality.
+  document.getElementById('exportOption').addEventListener('click', () => {
+    window.mathBoard.fileManager.exportData();
+    menu.style.display = 'none';
+  });
+
+  // Import JSON functionality.
+  document.getElementById('importOption').addEventListener('click', () => {
     document.getElementById('importInput').click();
+    menu.style.display = 'none';
   });
 
   // When a file is chosen, read its contents and import the data.
@@ -20,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.onload = function(e) {
         try {
           const jsonData = e.target.result;
-          window.mathBoard.importData(jsonData);
+          window.mathBoard.fileManager.importData(jsonData);
         } catch (err) {
           console.error("Error reading JSON file:", err);
         }
@@ -30,4 +50,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset the file input for future uploads.
     event.target.value = '';
   });
+
 });

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+
 /* Reset and basic styling */
 html, body {
     margin: 0;
@@ -6,6 +8,7 @@ html, body {
     width: 100%;
     height: 100%;
     background-color: #1d1d1d;
+    font-family: 'Inter', sans-serif;
   }
   
   /* Huge canvas with dotted background extending 20,000x20,000px */
@@ -126,3 +129,61 @@ html, body {
     cursor: not-allowed;
   }
   
+  /* Hamburger Menu Styles */
+#menu-container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
+}
+
+#hamburgerBtn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+#menu {
+  display: none;
+  background-color: #1d1d1d;
+  border: 1px solid #666;
+  border-radius: 5px;
+  margin-top: 5px;
+  padding: 5px;
+}
+
+#menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#menu li {
+  padding: 5px 10px;
+  color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+#menu li:hover {
+  background-color: #333;
+}
+
+.submenu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: #1d1d1d;
+  border: 1px solid #666;
+  border-radius: 5px;
+  padding: 5px;
+  min-width: 150px;
+  z-index: 1001;
+}
+
+.menu-item:hover > .submenu {
+  display: block;
+}
