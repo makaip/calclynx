@@ -103,7 +103,7 @@ class Navigation {
         this.boxSelect.element.style.height = '0px';
         document.body.appendChild(this.boxSelect.element);
       });
-  
+    
       document.addEventListener('mousemove', (e) => {
         if (!this.boxSelect.isSelecting) return;
         const startX = this.boxSelect.startX;
@@ -118,17 +118,40 @@ class Navigation {
         this.boxSelect.element.style.top = `${top}px`;
         this.boxSelect.element.style.width = `${width}px`;
         this.boxSelect.element.style.height = `${height}px`;
+    
+        // Get the current selection rectangle's bounds.
+        const selectionRect = this.boxSelect.element.getBoundingClientRect();
+        
+        // For each math group, check if it overlaps with the selection box.
+        document.querySelectorAll('.math-group').forEach((group) => {
+          const groupRect = group.getBoundingClientRect();
+          // Check for any overlap:
+          const isOverlapping =
+            groupRect.left < selectionRect.right &&
+            groupRect.right > selectionRect.left &&
+            groupRect.top < selectionRect.bottom &&
+            groupRect.bottom > selectionRect.top;
+          
+          if (isOverlapping) {
+            group.classList.add('selected');
+          } else {
+            group.classList.remove('selected');
+          }
+        });
       });
-  
-      document.addEventListener('mouseup', () => {
+    
+      document.addEventListener('mouseup', (e) => {
         if (!this.boxSelect.isSelecting) return;
         this.boxSelect.isSelecting = false;
-        const selectionRect = this.boxSelect.element.getBoundingClientRect();
-        this.boxSelect.element.remove();
-        this.boxSelect.element = null;
-        this.selectGroupsWithinBox(selectionRect);
+        // Remove the selection rectangle element
+        if (this.boxSelect.element) {
+          this.boxSelect.element.remove();
+          this.boxSelect.element = null;
+        }
+        // Set a flag to prevent the global click handler from clearing the selection immediately.
+        this.board.justBoxSelected = true;
       });
-  
+    
       canvas.addEventListener('mouseleave', () => {
         if (this.boxSelect.isSelecting && this.boxSelect.element) {
           this.boxSelect.element.remove();
@@ -136,6 +159,8 @@ class Navigation {
         }
       });
     }
+    
+    
   
     selectGroupsWithinBox(selectionRect) {
       document.querySelectorAll('.math-group').forEach((group) => {
@@ -143,7 +168,8 @@ class Navigation {
       });
   
       document.querySelectorAll('.math-group').forEach((group) => {
-        const groupRect = group.getBoundingClientRect();
+      const groupRect = group.getBoundingClientRect();
+        
         if (
           groupRect.left >= selectionRect.left &&
           groupRect.right <= selectionRect.right &&

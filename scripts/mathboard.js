@@ -2,7 +2,6 @@ const MQ = MathQuill.getInterface(2);
 
 class MathBoard {
   constructor() {
-    // Canvas and panning properties.
     this.canvas = document.getElementById('canvas');
     this.isPanning = false;
     this.panStart = { x: 0, y: 0 };
@@ -11,21 +10,19 @@ class MathBoard {
     this.scale = 1;
     this.canvasInitialOffset = { x: -10000, y: -10000 };
 
-    // Initialize FileManager and load saved state (if any)
-    this.fileManager = new FileManager(this);
-    this.fileManager.loadState();
-
-    // Variables for group dragging.
     this.groupDragging = false;
     this.draggedGroup = null;
     this.dragOffsetX = 0;
     this.dragOffsetY = 0;
     this.margin = 10;
 
-    // Box select properties.
     this.isBoxSelecting = false;
     this.boxSelectStart = { x: 0, y: 0 };
     this.selectionBox = null;
+    this.justBoxSelected = false;
+
+    this.fileManager = new FileManager(this);
+    this.fileManager.loadState();
 
     this.initEventListeners();
 
@@ -33,9 +30,6 @@ class MathBoard {
     this.navigation.init();
   }
 
-  // -------------------------
-  // EVENT INITIALIZERS (unchanged except where noted)
-  // -------------------------
   initEventListeners() {
     this.initGlobalKeyHandlers();
     this.initDocumentClickHandler();
@@ -73,10 +67,14 @@ class MathBoard {
       }
     });
   }
-
   
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
+      // If a box selection just finished, skip the normal click handling.
+      if (this.justBoxSelected) {
+        this.justBoxSelected = false;
+        return;
+      }
       if (this.isPanning || this.groupDragging) return;
       const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
@@ -98,15 +96,17 @@ class MathBoard {
       }
     });
   }
-
+  
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
       if (event.button !== 0 || this.spaceDown) return;
       if (event.target.closest('.mq-editable-field')) return;
+
       let target = event.target;
       while (target && !target.classList.contains('math-group')) {
         target = target.parentElement;
       }
+
       if (target && target.classList.contains('math-group')) {
         let groups;
         if (target.classList.contains('selected')) {
@@ -114,6 +114,7 @@ class MathBoard {
         } else {
           groups = [target];
         }
+
         this.groupDragging = true;
         this.selectedGroups = groups;
         this.dragStart = { x: event.clientX, y: event.clientY };
@@ -122,6 +123,7 @@ class MathBoard {
           left: parseInt(group.style.left, 10),
           top: parseInt(group.style.top, 10)
         }));
+
         groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
       }
@@ -144,7 +146,6 @@ class MathBoard {
         this.groupDragging = false;
         this.selectedGroups = null;
         this.initialPositions = null;
-        // Save state after dragging ends.
         this.fileManager.saveState();
       }
     });
@@ -160,7 +161,6 @@ class MathBoard {
     document.addEventListener('dblclick', (event) => {
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
-      // Create a new MathGroup and then save state.
       new MathGroup(this, coords.x, coords.y);
       this.fileManager.saveState()
     });
@@ -168,24 +168,6 @@ class MathBoard {
 
   updateTransform() {
     this.canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
-  }
-
-  selectStacksWithinBox(selectionRect) {
-    document.querySelectorAll('.math-group').forEach((group) => {
-      group.classList.remove('selected');
-    });
-
-    document.querySelectorAll('.math-group').forEach((group) => {
-      const groupRect = group.getBoundingClientRect();
-      if (
-        groupRect.left >= selectionRect.left &&
-        groupRect.right <= selectionRect.right &&
-        groupRect.top >= selectionRect.top &&
-        groupRect.bottom <= selectionRect.bottom
-      ) {
-        group.classList.add('selected');
-      }
-    });
   }
 
   screenToCanvas(x, y) {
