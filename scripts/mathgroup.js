@@ -26,10 +26,8 @@ class MathGroup {
         container.appendChild(staticMath);
         MQ.StaticMath(staticMath).latex(latex);
       });
-      // Optionally add a new empty math field.
-      this.addMathField();
     } else {
-      this.addMathField();
+      this.addMathField(true);
     }
   }
 
@@ -48,8 +46,8 @@ class MathGroup {
     });
   }
 
-  addMathField() {
-    new MathField(this);
+  addMathField(isNewField) {
+    new MathField(this, isNewField);
   }
 
   remove() {
@@ -58,14 +56,9 @@ class MathGroup {
   }
 
   insertMathFieldAfter(referenceContainer) {
-    // Create a new math field.
-    const newField = new MathField(this);
-    // Insert the new container right after the reference container.
+    const newField = new MathField(this, true);
     this.element.insertBefore(newField.container, referenceContainer.nextSibling);
-    // Focus on the new math field.
     newField.mathField.focus();
   }
-  
-  
 }
 

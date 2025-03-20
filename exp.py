@@ -44,13 +44,13 @@ if __name__ == "__main__":
                      'styles.css',
                      
                      'contextmenu.js',
-                     #'filemanager.js',
-                     #'mathboard.js',
+                     'filemanager.js',
+                     'mathboard.js',
                      'mathfield.js',
                      'mathgroup.js',
                      'navigation.js',
-                     #'versionmanager.js',
-                     #'script.js',
+                     'versionmanager.js',
+                     'script.js',
 
                      'README.md'
                      ]

@@ -1,10 +1,12 @@
 class MathField {
-  constructor(mathGroup) {
+  constructor(mathGroup, isNewField) {
     this.mathGroup = mathGroup;
     this.createContainer();
     this.createMathField();
     this.attachEventListeners();
-    this.mathField.focus();
+    if (isNewField) {
+      this.mathField.focus();
+    }
   }
 
   createContainer() {
@@ -86,7 +88,7 @@ class MathField {
           this.mathFieldElement.blur();
         } else {
           if (this.container === this.mathGroup.element.lastElementChild) {
-            this.mathGroup.addMathField();
+            this.mathGroup.addMathField(true);
           } else {
             this.mathGroup.insertMathFieldAfter(this.container);
           }
@@ -189,7 +191,7 @@ class MathField {
       
         const groupElement = container.parentElement;
         if (groupElement && groupElement.lastElementChild === container && groupElement.mathGroup) {
-          groupElement.mathGroup.addMathField();
+          groupElement.mathGroup.addMathField(true);
         } else if (groupElement && groupElement.mathGroup) {
           groupElement.mathGroup.insertMathFieldAfter(container);
         }
