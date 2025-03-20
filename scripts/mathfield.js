@@ -21,27 +21,28 @@ class MathField {
     this.container.appendChild(this.mathFieldElement);
     this.mathField = MQ.MathField(this.mathFieldElement, {
       spaceBehavesLikeTab: true,
+      autoCommands: 'pi theta sqrt',         // <-- Added autoCommands option
+      autoOperatorNames: 'sin cos tan log ln',  // <-- Added autoOperatorNames option
     });
   }
 
   attachEventListeners() {
     this.mathFieldElement.addEventListener('keydown', (event) => {
-      if (
-        event.key === 'Backspace' &&
-        !event.ctrlKey &&
-        !this.mathField.latex().trim()
-      ) {
-        const groupElement = this.mathGroup.element;
-        if (
-          groupElement.children.length > 1 &&
-          this.container !== groupElement.firstElementChild
-        ) {
-          event.preventDefault();
-          const previousContainer = this.container.previousElementSibling;
-          this.container.remove();
-          MathField.edit(previousContainer);
-          this.mathGroup.board.fileManager.saveState();
-          return;
+      if (event.key === 'Backspace' && !event.ctrlKey) {
+        const latexContent = this.mathField.latex().trim();
+        if (latexContent === "" || latexContent === "\\placeholder") {
+          const groupElement = this.mathGroup.element;
+          if (
+            groupElement.children.length > 1 &&
+            this.container !== groupElement.firstElementChild
+          ) {
+            event.preventDefault();
+            const previousContainer = this.container.previousElementSibling;
+            this.container.remove();
+            MathField.edit(previousContainer);
+            this.mathGroup.board.fileManager.saveState();
+            return;
+          }
         }
       }
   
@@ -75,7 +76,7 @@ class MathField {
         this.finalize();
       }
       
-    });
+    }, true);
   }
       
   finalize() {

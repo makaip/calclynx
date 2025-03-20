@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MathBoard</title>
+  <title>Calclinx</title>
   
   <!-- MathQuill CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
@@ -297,7 +297,9 @@ html, body {
     cursor: not-allowed;
   }
   
-  /* Hamburger Menu Styles */
+
+
+/* Hamburger Menu Styles */
 #menu-container {
   position: fixed;
   top: 10px;
@@ -321,6 +323,8 @@ html, body {
   margin-top: 5px;
   padding: 5px;
   font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  font-family: 'Inter', sans-serif;
 }
 
 #menu ul {
@@ -340,6 +344,10 @@ html, body {
   background-color: #333;
 }
 
+#menu li:active {
+  background-color: rgba(0, 197, 154, 0.3);
+}
+
 .submenu {
   display: none;
   position: absolute;
@@ -348,15 +356,16 @@ html, body {
   background-color: #1d1d1d;
   border: 1px solid #666;
   border-radius: 5px;
-  padding: 5px;
   min-width: 150px;
   z-index: 1001;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .menu-item:hover > .submenu {
   display: block;
 }
-
 
 
 
@@ -383,12 +392,12 @@ html, body {
 
 /* Hovered state */
 .context-menu-item:hover {
-  background-color: rgba(0, 197, 154, 0.3);
+  background-color: #333;
 }
 
 /* Selected state (can be applied programmatically, if needed) */
-.context-menu-item.selected {
-  background-color: #00c59a;
+.context-menu-item:active {
+  background-color: rgba(0, 197, 154, 0.3);
 }
 
 /* Disabled state */
@@ -403,80 +412,6 @@ html, body {
   margin: 4px 0;
 }
 
-
-=== f:\Programming\GitHub\mathboard\scripts\contextmenu.js ===
-class ContextMenu {
-    constructor(menuElement) {
-      this.menuElement = menuElement;
-      // Hide the menu if clicking anywhere outside or on window resize.
-      document.addEventListener('click', () => this.hide());
-      window.addEventListener('resize', () => this.hide());
-    }
-  
-    show(x, y, items) {
-      // Clear any existing menu items.
-      this.menuElement.innerHTML = '';
-  
-      items.forEach(item => {
-        if (item.separator) {
-          const sep = document.createElement('div');
-          sep.className = 'context-menu-separator';
-          this.menuElement.appendChild(sep);
-        } else {
-          const menuItem = document.createElement('div');
-          menuItem.className = 'context-menu-item';
-          menuItem.textContent = item.label;
-          if (item.disabled) {
-            menuItem.classList.add('disabled');
-          }
-          menuItem.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!item.disabled && item.action) {
-              item.action();
-            }
-            this.hide();
-          });
-          this.menuElement.appendChild(menuItem);
-        }
-      });
-  
-      // Adjust position if the menu might overflow the viewport.
-      const menuRect = this.menuElement.getBoundingClientRect();
-      if (x + menuRect.width > window.innerWidth) {
-        x = window.innerWidth - menuRect.width - 10;
-      }
-      if (y + menuRect.height > window.innerHeight) {
-        y = window.innerHeight - menuRect.height - 10;
-      }
-      this.menuElement.style.left = x + 'px';
-      this.menuElement.style.top = y + 'px';
-      this.menuElement.style.display = 'block';
-    }
-  
-    hide() {
-      this.menuElement.style.display = 'none';
-    }
-  }
-  
-  // Initialize the context menu.
-  const contextMenu = new ContextMenu(document.getElementById('context-menu'));
-  
-  // Example: Attach the custom context menu to right-click events.
-  // (Replace this example logic with your own target elements or conditions.)
-  document.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
-    const menuItems = [
-      { label: 'New Stack', action: () => { console.log('New Stack clicked'); } },
-      { separator: true },
-      { label: 'Cut', action: () => { console.log('Cut clicked'); } },
-      { label: 'Copy', action: () => { console.log('Copy clicked'); } },
-      { label: 'Paste', action: () => { console.log('Paste clicked'); } },
-      { separator: true },
-      { label: 'Delete', action: () => { console.log('Delete clicked'); } }
-    ];
-    contextMenu.show(e.pageX, e.pageY, menuItems);
-  });
-  
 
 === f:\Programming\GitHub\mathboard\scripts\mathboard.js ===
 const MQ = MathQuill.getInterface(2);
@@ -940,6 +875,3 @@ class MathGroup {
   
   
 }
-
-
-
