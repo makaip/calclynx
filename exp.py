@@ -31,9 +31,31 @@ def write_to_output_file(files, output_file):
 
 if __name__ == "__main__":
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    exclude_files = ['exp.py', '.gitattributes', '.gitignore', 'out.txt', 'README.md', 'LICENSE', 'requirements.txt',
-                     'navigation.js', 'versionmanager.js', 'filemanager.js', 'contextmenu.js']
+    exclude_files = ['exp.py', 
+                     '.gitattributes', 
+                     '.gitignore', 
+                     'out.txt', 
+                     
+                     'LICENSE', 
+                     'requirements.txt', 
+                     'static.yml', 
+                     
+                     'index.html',
+                     'styles.css',
+                     
+                     'contextmenu.js',
+                     #'filemanager.js',
+                     #'mathboard.js',
+                     'mathfield.js',
+                     'mathgroup.js',
+                     'navigation.js',
+                     #'versionmanager.js',
+                     #'script.js',
+
+                     'README.md'
+                     ]
     output_file = 'out.txt'
 
     all_files = get_all_files(current_directory, exclude_files)
     write_to_output_file(all_files, output_file)
+

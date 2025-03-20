@@ -86,8 +86,10 @@ class Navigation {
     initBoxSelection() {
       const canvas = this.board.canvas;
       canvas.addEventListener('mousedown', (e) => {
+        // Only left click and when not panning.
         if (e.button !== 0 || this.board.spaceDown) return;
-        if (e.target !== canvas) return;
+        // Only trigger box selection if NOT clicking inside a math group.
+        if (e.target.closest('.math-group')) return;
         this.boxSelect.isSelecting = true;
         this.boxSelect.startX = e.clientX;
         this.boxSelect.startY = e.clientY;

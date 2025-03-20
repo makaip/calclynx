@@ -83,19 +83,27 @@ class MathBoard {
   
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
-      // If a box selection just finished, skip the normal click handling.
+      // If this click was triggered immediately after a box selection, skip clearing the selection.
       if (this.justBoxSelected) {
         this.justBoxSelected = false;
         return;
       }
-      if (this.isPanning || this.groupDragging) return;
+  
+      // If click target is inside an editable math field, handle it there.
+      if (event.target.closest('.mq-editable-field')) {
+        return;
+      }
+  
+      // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
-      if (mathContainer && !mathContainer.querySelector('.mq-editable-field')) {
+      if (mathContainer) {
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
         event.stopPropagation();
         MathField.edit(mathContainer);
         return;
       }
-      if (event.target.closest('.math-field-container')) return;
+  
+      // Otherwise, if clicking on a math group (stack), handle selection.
       const mathGroupTarget = event.target.closest('.math-group');
       if (mathGroupTarget) {
         if (!event.shiftKey) {
@@ -182,7 +190,7 @@ class MathBoard {
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       new MathGroup(this, coords.x, coords.y);
-      this.fileManager.saveState()
+      this.fileManager.saveState();
     });
   }
 
@@ -197,3 +205,4 @@ class MathBoard {
     };
   }
 }
+

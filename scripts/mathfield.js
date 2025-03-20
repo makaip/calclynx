@@ -11,9 +11,28 @@ class MathField {
     this.container = document.createElement('div');
     this.container.className = 'math-field-container';
     this.container.dataset.latex = '';
-    this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+  
+    // Add this listener to clear math group selections when clicking inside the math field.
+    this.container.addEventListener('mousedown', (event) => {
+      document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+    });
+  
+    // Add a click listener that checks if we're in editing mode.
+    this.container.addEventListener('click', (event) => {
+      const isEditing = !!this.container.querySelector('.mq-editable-field');
+      if (isEditing) {
+        event.stopPropagation();
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      } else {
+        event.stopPropagation();
+        document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+        MathField.edit(this.container);
+      }
+    });
+    
     this.mathGroup.element.appendChild(this.container);
   }
+  
 
   createMathField() {
     this.mathFieldElement = document.createElement('div');
@@ -101,6 +120,12 @@ class MathField {
 
   // Static method to enable editing on a static math field.
   static edit(container) {
+    // Deselect the parent math group.
+    const mathGroup = container.closest('.math-group');
+    if (mathGroup) {
+      mathGroup.classList.remove('selected');
+    }
+    
     const existingLatex = container.dataset.latex || '';
     if (container.querySelector('.mq-editable-field')) return;
     container.innerHTML = '';
