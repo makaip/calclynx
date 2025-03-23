@@ -40,13 +40,17 @@ class MathField {
     this.mathFieldElement = document.createElement('div');
     this.mathFieldElement.className = 'math-field';
     this.container.appendChild(this.mathFieldElement);
+  
     this.mathField = MQ.MathField(this.mathFieldElement, {
       spaceBehavesLikeTab: true,
-      autoCommands: 'pi theta sqrt',         // <-- Added autoCommands option
-      autoOperatorNames: 'sin cos tan log ln',  // <-- Added autoOperatorNames option
+      sumStartsWithNEquals: true,
+
+      autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
+      autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
+
     });
   }
-
+  
   attachEventListeners() {
     this.mathFieldElement.addEventListener('keydown', (event) => {
       if (event.key === 'Backspace' && !event.ctrlKey) {

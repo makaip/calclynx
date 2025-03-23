@@ -40,17 +40,17 @@ if __name__ == "__main__":
                      'requirements.txt', 
                      'static.yml', 
                      
-                     'index.html',
-                     'styles.css',
+                     #'index.html',
+                     #'styles.css',
                      
-                     'contextmenu.js',
-                     'filemanager.js',
-                     'mathboard.js',
-                     'mathfield.js',
-                     'mathgroup.js',
-                     'navigation.js',
-                     'versionmanager.js',
-                     'script.js',
+                     #'contextmenu.js',
+                     #'filemanager.js',
+                     #'mathboard.js',
+                     #'mathfield.js',
+                     #'mathgroup.js',
+                     #'navigation.js',
+                     #'versionmanager.js',
+                     #'script.js',
 
                      'README.md'
                      ]
