@@ -42,7 +42,7 @@ class MathField {
     this.container.appendChild(this.mathFieldElement);
   
     this.mathField = MQ.MathField(this.mathFieldElement, {
-      spaceBehavesLikeTab: true,
+      spaceBehavesLikeTab: false,
       sumStartsWithNEquals: true,
 
       autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
