@@ -141,7 +141,7 @@ class MathField {
     container.appendChild(mathFieldElement);
   
     const mathField = MQ.MathField(mathFieldElement, {
-      spaceBehavesLikeTab: true,
+      spaceBehavesLikeTab: false,
     });
     mathField.latex(existingLatex);
     mathField.focus();
