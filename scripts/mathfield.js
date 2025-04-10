@@ -107,6 +107,12 @@ class MathField {
       }
       
     }, true);
+
+    this.mathFieldElement.addEventListener('blur', () => {
+      setTimeout(() => {
+        this.finalize();
+      }, 50);
+    });
   }
       
   finalize() {
@@ -216,11 +222,24 @@ class MathField {
   
     mathFieldElement.addEventListener('blur', function () {
       setTimeout(() => {
-        if (!mathField.latex().trim()) {
+        const latexValue = mathField.latex().trim();
+        if (!latexValue) {
           container.remove();
           const group = container.parentElement;
           if (group && !group.querySelector('.math-field-container')) {
             group.remove();
+          }
+        } else {
+          // Finalize if there's LaTeX
+          container.dataset.latex = latexValue;
+          container.innerHTML = '';
+          const staticMath = document.createElement('div');
+          staticMath.className = 'math-field';
+          container.appendChild(staticMath);
+          MQ.StaticMath(staticMath).latex(latexValue);
+          const group = container.parentElement;
+          if (group && group.mathGroup) {
+            group.mathGroup.board.fileManager.saveState();
           }
         }
       }, 50);
