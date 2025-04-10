@@ -47,7 +47,12 @@ class MathField {
 
       autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
       autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
-
+      handlers: {
+        edit: () => {
+          // Debug: keep dataset.latex in sync while typing
+          this.container.dataset.latex = this.mathField.latex().trim();
+        }
+      }
     });
   }
   
@@ -142,6 +147,12 @@ class MathField {
   
     const mathField = MQ.MathField(mathFieldElement, {
       spaceBehavesLikeTab: false,
+      handlers: {
+        edit: () => {
+          // Debug: keep dataset.latex in sync while typing
+          container.dataset.latex = mathField.latex().trim();
+        }
+      }
     });
     mathField.latex(existingLatex);
     mathField.focus();
