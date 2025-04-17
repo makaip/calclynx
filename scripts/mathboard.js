@@ -25,6 +25,8 @@ class MathBoard {
     this.selectionBox = null;
     this.justBoxSelected = false;
 
+    this.clipboard = null; // To store copied/cut group data
+
     this.fileManager = new FileManager(this);
     this.fileManager.loadState();
 
@@ -65,6 +67,19 @@ class MathBoard {
         }
       }
 
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'c') {
+          e.preventDefault();
+          this.copySelectedGroups();
+        } else if (e.key === 'x') {
+          e.preventDefault();
+          this.cutSelectedGroups();
+        } else if (e.key === 'v') {
+          e.preventDefault();
+          this.pasteGroups();
+        }
+      }
+
       if (e.shiftKey && e.key === 'A' && !document.querySelector('.mq-focused')) {
         e.preventDefault();
         const coords = this.screenToCanvas(this.mouseX, this.mouseY);
@@ -77,10 +92,9 @@ class MathBoard {
       if (e.code === 'Space') {
         this.spaceDown = false;
       }
-      
     });
   }
-  
+
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
       // If this click was triggered immediately after a box selection, skip clearing the selection.
@@ -88,12 +102,12 @@ class MathBoard {
         this.justBoxSelected = false;
         return;
       }
-  
+
       // If click target is inside an editable math field, handle it there.
       if (event.target.closest('.mq-editable-field')) {
         return;
       }
-  
+
       // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer) {
@@ -102,7 +116,7 @@ class MathBoard {
         MathField.edit(mathContainer);
         return;
       }
-  
+
       // Otherwise, if clicking on a math group (stack), handle selection.
       const mathGroupTarget = event.target.closest('.math-group');
       if (mathGroupTarget) {
@@ -117,7 +131,7 @@ class MathBoard {
       }
     });
   }
-  
+
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
       if (event.button !== 0 || this.spaceDown) return;
@@ -187,10 +201,11 @@ class MathBoard {
 
   initDoubleClickHandler() {
     document.addEventListener('dblclick', (event) => {
+      if (event.target.closest('.math-group')) return;
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       new MathGroup(this, coords.x, coords.y);
-      this.fileManager.saveState();
+      window.versionManager.saveState();
     });
   }
 
@@ -203,6 +218,73 @@ class MathBoard {
       x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
       y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
     };
+  }
+
+  copySelectedGroups() {
+    const selectedGroups = Array.from(document.querySelectorAll('.math-group.selected'));
+    if (selectedGroups.length === 0) {
+      this.clipboard = null;
+      return;
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    selectedGroups.forEach(group => {
+      const left = parseInt(group.style.left, 10);
+      const top = parseInt(group.style.top, 10);
+      if (left < minX) minX = left;
+      if (top < minY) minY = top;
+    });
+
+    this.clipboard = selectedGroups.map(group => {
+      const left = parseInt(group.style.left, 10);
+      const top = parseInt(group.style.top, 10);
+      const fields = [];
+      group.querySelectorAll('.math-field-container').forEach(container => {
+        if (container.dataset.latex) {
+          fields.push(container.dataset.latex);
+        }
+      });
+      return { relativeLeft: left - minX, relativeTop: top - minY, fields };
+    });
+    console.log("Copied to clipboard:", this.clipboard);
+  }
+
+  cutSelectedGroups() {
+    this.copySelectedGroups();
+    if (!this.clipboard) return;
+
+    const selectedGroups = document.querySelectorAll('.math-group.selected');
+    selectedGroups.forEach(group => group.remove());
+
+    window.versionManager.saveState();
+  }
+
+  pasteGroups() {
+    if (!this.clipboard) return;
+
+    document.querySelectorAll('.math-group.selected').forEach(group => group.classList.remove('selected'));
+
+    const pasteCenterCoords = this.screenToCanvas(this.mouseX, this.mouseY);
+    const pasteBaseX = pasteCenterCoords.x;
+    const pasteBaseY = pasteCenterCoords.y;
+
+    const pastedGroups = [];
+    this.clipboard.forEach(groupData => {
+      const newLeft = pasteBaseX + groupData.relativeLeft;
+      const newTop = pasteBaseY + groupData.relativeTop;
+      const data = {
+        left: `${newLeft}px`,
+        top: `${newTop}px`,
+        fields: groupData.fields
+      };
+      const newGroupInstance = new MathGroup(this, 0, 0, data);
+      pastedGroups.push(newGroupInstance.element);
+    });
+
+    pastedGroups.forEach(groupEl => groupEl.classList.add('selected'));
+
+    window.versionManager.saveState();
   }
 }
 

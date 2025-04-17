@@ -59,6 +59,10 @@ class ContextMenu {
   
     // Check if the right-click is on a math group element.
     const targetGroupElement = e.target.closest('.math-group');
+    const isAnythingSelected = !!document.querySelector('.math-group.selected');
+    const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
+    const canPaste = window.mathBoard && window.mathBoard.clipboard;
+  
     // Convert the screen coordinates to canvas coordinates.
     const canvasCoords = window.mathBoard
       ? window.mathBoard.screenToCanvas(e.pageX, e.pageY)
@@ -70,32 +74,60 @@ class ContextMenu {
         label: 'New Stack',
         action: () => {
           new MathGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.mathBoard.fileManager.saveState();
+          // Use version manager for state saving
+          window.versionManager.saveState();
         }
       },
       { separator: true },
-      {label: 'Cut', disabled: true},
-      {label: 'Copy', disabled: true},
-      {label: 'Paste', disabled: true},
+      {
+        label: 'Cut',
+        disabled: !canPerformClipboardAction,
+        action: () => {
+          if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
+            // If right-clicked on a non-selected group, select only it before cutting
+            document.querySelectorAll('.math-group.selected').forEach(g => g.classList.remove('selected'));
+            targetGroupElement.classList.add('selected');
+          }
+          window.mathBoard.cutSelectedGroups();
+        }
+      },
+      {
+        label: 'Copy',
+        disabled: !canPerformClipboardAction,
+        action: () => {
+           if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
+             // If right-clicked on a non-selected group, select only it before copying
+             document.querySelectorAll('.math-group.selected').forEach(g => g.classList.remove('selected'));
+             targetGroupElement.classList.add('selected');
+           }
+           window.mathBoard.copySelectedGroups();
+        }
+      },
+      {
+        label: 'Paste',
+        disabled: !canPaste,
+        action: () => {
+          window.mathBoard.pasteGroups(); // Paste uses internal mouse coords
+        }
+      },
       { separator: true },
       {
         label: 'Delete',
+        disabled: !canPerformClipboardAction, // Disable if nothing is selected or targeted
         action: () => {
-          if (targetGroupElement) {
-            // Delete the math group that was right-clicked.
-            targetGroupElement.mathGroup.remove();
+          if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
+            // If right-clicked on a non-selected group, delete only it
+             targetGroupElement.remove();
           } else {
             // Otherwise, delete all selected math groups.
             const selectedGroups = document.querySelectorAll('.math-group.selected');
             selectedGroups.forEach(group => group.remove());
           }
-          if (window.mathBoard) {
-            window.mathBoard.fileManager.saveState();
-          }
+          // Use version manager for state saving
+          window.versionManager.saveState();
         }
       }
     ];
   
     contextMenu.show(e.pageX, e.pageY, menuItems);
   });
-  

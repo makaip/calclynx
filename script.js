@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Example: Save an initial state snapshot.
   window.versionManager.saveState();
 
+  // Detect if user is on a Mac
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
   // New Hamburger Menu Logic (existing code) ...
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('menu');
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
-  // Listen for keyboard shortcuts to trigger undo (Ctrl+Z) and redo (Ctrl+Y).
+  // Listen for keyboard shortcuts to trigger undo, redo, select all, cut, copy, paste.
   document.addEventListener('keydown', (e) => {
     // Check if the active element is editable.
     const activeEl = document.activeElement;
@@ -70,16 +73,33 @@ document.addEventListener('DOMContentLoaded', () => {
        activeEl.classList.contains('mq-editable-field'));
     
     if (isEditable) {
-      // Allow native behavior inside text fields.
+      // Allow native behavior (like cut/copy/paste) inside text fields.
       return;
     }
   
-    if (e.ctrlKey && e.key === 'z') { // Ctrl+Z for Undo
+    // Check for modifier key based on platform (Ctrl for Windows/Linux, Command for Mac)
+    const modifierKey = isMac ? e.metaKey : e.ctrlKey;
+    
+    if (modifierKey && e.key === 'z') { // Undo (Ctrl+Z / Cmd+Z)
       e.preventDefault();
       window.versionManager.undo();
-    } else if (e.ctrlKey && e.key === 'y') { // Ctrl+Y for Redo
+    } else if (modifierKey && e.key === 'y') { // Redo (Ctrl+Y / Cmd+Y)
       e.preventDefault();
       window.versionManager.redo();
+    } else if (modifierKey && e.key === 'a') { // Select All (Ctrl+A / Cmd+A)
+      e.preventDefault();
+      // Select all math groups on the canvas
+      const allGroups = document.querySelectorAll('.math-group');
+      allGroups.forEach(group => group.classList.add('selected'));
+    } else if (modifierKey && e.key === 'c') { // Copy (Ctrl+C / Cmd+C)
+        e.preventDefault();
+        window.mathBoard.copySelectedGroups();
+    } else if (modifierKey && e.key === 'x') { // Cut (Ctrl+X / Cmd+X)
+        e.preventDefault();
+        window.mathBoard.cutSelectedGroups();
+    } else if (modifierKey && e.key === 'v') { // Paste (Ctrl+V / Cmd+V)
+        e.preventDefault();
+        window.mathBoard.pasteGroups();
     }
   });
 
