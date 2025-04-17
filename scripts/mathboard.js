@@ -19,6 +19,7 @@ class MathBoard {
     this.dragOffsetX = 0;
     this.dragOffsetY = 0;
     this.margin = 10;
+    this.gridSize = 20; // Define the grid size for snapping
 
     this.isBoxSelecting = false;
     this.boxSelectStart = { x: 0, y: 0 };
@@ -175,9 +176,27 @@ class MathBoard {
       if (this.groupDragging && this.selectedGroups) {
         const deltaX = event.clientX - this.dragStart.x;
         const deltaY = event.clientY - this.dragStart.y;
+        const snapToGrid = event.ctrlKey || event.metaKey; // Check for Ctrl/Cmd key
+
         this.initialPositions.forEach((item) => {
-          item.group.style.left = (item.left + deltaX) + 'px';
-          item.group.style.top = (item.top + deltaY) + 'px';
+          let newLeft = item.left + deltaX;
+          let newTop = item.top + deltaY;
+
+          if (snapToGrid) {
+            const canvasCoords = this.screenToCanvas(item.group.offsetLeft + deltaX, item.group.offsetTop + deltaY);
+            const initialCanvasCoords = this.screenToCanvas(item.left, item.top);
+            const canvasDeltaX = canvasCoords.x - initialCanvasCoords.x;
+            const canvasDeltaY = canvasCoords.y - initialCanvasCoords.y;
+
+            const snappedCanvasX = Math.round((initialCanvasCoords.x + canvasDeltaX) / this.gridSize) * this.gridSize;
+            const snappedCanvasY = Math.round((initialCanvasCoords.y + canvasDeltaY) / this.gridSize) * this.gridSize;
+
+            newLeft = Math.round(newLeft / this.gridSize) * this.gridSize;
+            newTop = Math.round(newTop / this.gridSize) * this.gridSize;
+          }
+
+          item.group.style.left = newLeft + 'px';
+          item.group.style.top = newTop + 'px';
         });
       }
     });
