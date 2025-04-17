@@ -135,8 +135,11 @@ class MathBoard {
 
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
-      if (event.button !== 0 || this.spaceDown) return;
-      if (event.target.closest('.mq-editable-field')) return;
+      // Ignore if not left click, if space is down, or if clicking inside an editable field
+      if (event.button !== 0 || this.spaceDown || event.target.closest('.mq-editable-field')) return;
+      
+      // Ignore clicks starting on the field drag handle
+      if (event.target.closest('.drag-handle')) return;
 
       let target = event.target;
       while (target && !target.classList.contains('math-group')) {

@@ -171,6 +171,7 @@ html, body {
   border-radius: 50%;
   justify-self: center; /* Center dots horizontally */
   align-self: center; /* Center dots vertically */
+  pointer-events: none; /* Ensure clicks go to the handle */
 }
 
 /* Style for the math field container being dragged */
@@ -179,6 +180,7 @@ html, body {
   background-color: rgba(50, 50, 50, 0.5); /* Slight background highlight */
   z-index: 10; /* Ensure it's above siblings */
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  pointer-events: none; /* Ignore pointer events while dragging */
 }
 
 /* Style for the placeholder indicating drop position */
