@@ -20,10 +20,21 @@ class MathGroup {
         const container = document.createElement('div');
         container.className = 'math-field-container';
         container.dataset.latex = latex;
+
+        // Create and add the drag handle
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'drag-handle';
+        for (let i = 0; i < 6; i++) {
+          const dot = document.createElement('span');
+          dot.className = 'drag-handle-dot';
+          dragHandle.appendChild(dot);
+        }
+        container.appendChild(dragHandle); // Add handle first
+
         this.element.appendChild(container);
         const staticMath = document.createElement('div');
         staticMath.className = 'math-field';
-        container.appendChild(staticMath);
+        container.appendChild(staticMath); // Add static math after handle
         MQ.StaticMath(staticMath).latex(latex);
       });
     } else {

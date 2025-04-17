@@ -13,14 +13,112 @@ class MathField {
     this.container = document.createElement('div');
     this.container.className = 'math-field-container';
     this.container.dataset.latex = '';
-  
-    // Add this listener to clear math group selections when clicking inside the math field.
+
+    // Create the drag handle
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    for (let i = 0; i < 6; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'drag-handle-dot';
+      dragHandle.appendChild(dot);
+    }
+    this.container.appendChild(dragHandle); // Add handle first
+
+    // --- Drag and Drop Logic ---
+    let draggedElement = null;
+    let placeholder = null;
+    let startY = 0;
+    let offsetY = 0; // Offset within the dragged element
+
+    const handleDragStart = (e) => {
+        if (e.button !== 0 || !e.target.classList.contains('drag-handle') && !e.target.closest('.drag-handle')) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+
+        draggedElement = this.container;
+        startY = e.clientY;
+        offsetY = e.clientY - draggedElement.getBoundingClientRect().top;
+
+        // Create placeholder
+        placeholder = document.createElement('div');
+        placeholder.className = 'drop-placeholder';
+        placeholder.style.height = `${draggedElement.offsetHeight}px`;
+
+        draggedElement.classList.add('dragging-field');
+        draggedElement.style.position = 'absolute';
+        draggedElement.style.width = `${draggedElement.offsetWidth}px`;
+        draggedElement.style.pointerEvents = 'none';
+        draggedElement.parentElement.insertBefore(placeholder, draggedElement);
+
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd, { once: true });
+
+        handleDragMove(e);
+    };
+
+    const handleDragMove = (e) => {
+        if (!draggedElement) return;
+
+        const currentY = e.clientY;
+        draggedElement.style.top = `${currentY - offsetY}px`;
+
+        const parent = placeholder.parentElement;
+        const siblings = Array.from(parent.children).filter(child =>
+            child !== draggedElement && child !== placeholder && child.classList.contains('math-field-container')
+        );
+
+        let nextSibling = null;
+        for (const sibling of siblings) {
+            const rect = sibling.getBoundingClientRect();
+            if (currentY > rect.top + rect.height / 2) {
+                nextSibling = sibling.nextElementSibling;
+            } else {
+                nextSibling = sibling;
+                break;
+            }
+        }
+
+        parent.insertBefore(placeholder, nextSibling);
+    };
+
+    const handleDragEnd = () => {
+        if (!draggedElement || !placeholder) return;
+
+        placeholder.parentElement.insertBefore(draggedElement, placeholder);
+
+        draggedElement.classList.remove('dragging-field');
+        draggedElement.style.position = '';
+        draggedElement.style.width = '';
+        draggedElement.style.top = '';
+        draggedElement.style.pointerEvents = '';
+
+        placeholder.remove();
+
+        draggedElement = null;
+        placeholder = null;
+
+        document.removeEventListener('mousemove', handleDragMove);
+
+        this.mathGroup.board.fileManager.saveState();
+        if (window.versionManager) {
+            window.versionManager.saveState();
+        }
+    };
+
+    dragHandle.addEventListener('mousedown', handleDragStart);
+    // --- End Drag and Drop Logic ---
+
     this.container.addEventListener('mousedown', (event) => {
-      document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      if (!event.target.classList.contains('drag-handle') && !event.target.closest('.drag-handle')) {
+          document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      }
     });
   
-    // Add a click listener that checks if we're in editing mode.
     this.container.addEventListener('click', (event) => {
+      if (event.target.classList.contains('drag-handle') || event.target.closest('.drag-handle')) {
+          return;
+      }
       const isEditing = !!this.container.querySelector('.mq-editable-field');
       if (isEditing) {
         event.stopPropagation();
@@ -39,7 +137,7 @@ class MathField {
   createMathField() {
     this.mathFieldElement = document.createElement('div');
     this.mathFieldElement.className = 'math-field';
-    this.container.appendChild(this.mathFieldElement);
+    this.container.appendChild(this.mathFieldElement); // Add math field after handle
   
     this.mathField = MQ.MathField(this.mathFieldElement, {
       spaceBehavesLikeTab: false,
@@ -49,7 +147,6 @@ class MathField {
       autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
       handlers: {
         edit: () => {
-          // Debug: keep dataset.latex in sync while typing
           this.container.dataset.latex = this.mathField.latex().trim();
         }
       }
@@ -126,18 +223,21 @@ class MathField {
       return;
     }
     this.container.dataset.latex = latex;
-    this.container.innerHTML = '';
+    const mathFieldElement = this.container.querySelector('.math-field');
+    if (mathFieldElement) mathFieldElement.remove();
+
     const staticMath = document.createElement('div');
     staticMath.className = 'math-field';
-    this.container.appendChild(staticMath);
+    if (this.container.firstChild.classList.contains('drag-handle')) {
+        this.container.insertBefore(staticMath, this.container.firstChild.nextSibling);
+    } else {
+        this.container.appendChild(staticMath);
+    }
     MQ.StaticMath(staticMath).latex(latex);
-    // Save the state after finalizing the field.
     this.mathGroup.board.fileManager.saveState();
   }
 
-  // Static method to enable editing on a static math field.
   static edit(container) {
-    // Deselect the parent math group.
     const mathGroup = container.closest('.math-group');
     if (mathGroup) {
       mathGroup.classList.remove('selected');
@@ -145,17 +245,30 @@ class MathField {
     
     const existingLatex = container.dataset.latex || '';
     if (container.querySelector('.mq-editable-field')) return;
-    container.innerHTML = '';
+    
+    const staticMathElement = container.querySelector('.math-field:not(.mq-editable-field)');
+    if (staticMathElement) staticMathElement.remove();
   
     const mathFieldElement = document.createElement('div');
     mathFieldElement.className = 'math-field';
-    container.appendChild(mathFieldElement);
+    if (container.firstChild && container.firstChild.classList.contains('drag-handle')) {
+        container.insertBefore(mathFieldElement, container.firstChild.nextSibling);
+    } else {
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'drag-handle';
+        for (let i = 0; i < 6; i++) {
+          const dot = document.createElement('span');
+          dot.className = 'drag-handle-dot';
+          dragHandle.appendChild(dot);
+        }
+        container.insertBefore(dragHandle, container.firstChild);
+        container.appendChild(mathFieldElement);
+    }
   
     const mathField = MQ.MathField(mathFieldElement, {
       spaceBehavesLikeTab: false,
       handlers: {
         edit: () => {
-          // Debug: keep dataset.latex in sync while typing
           container.dataset.latex = mathField.latex().trim();
         }
       }
@@ -205,6 +318,16 @@ class MathField {
         }
         container.dataset.latex = latex;
         container.innerHTML = '';
+
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'drag-handle';
+        for (let i = 0; i < 6; i++) {
+          const dot = document.createElement('span');
+          dot.className = 'drag-handle-dot';
+          dragHandle.appendChild(dot);
+        }
+        container.appendChild(dragHandle);
+
         const staticMath = document.createElement('div');
         staticMath.className = 'math-field';
         container.appendChild(staticMath);
@@ -230,9 +353,18 @@ class MathField {
             group.remove();
           }
         } else {
-          // Finalize if there's LaTeX
           container.dataset.latex = latexValue;
           container.innerHTML = '';
+
+          const dragHandle = document.createElement('div');
+          dragHandle.className = 'drag-handle';
+          for (let i = 0; i < 6; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'drag-handle-dot';
+            dragHandle.appendChild(dot);
+          }
+          container.appendChild(dragHandle);
+
           const staticMath = document.createElement('div');
           staticMath.className = 'math-field';
           container.appendChild(staticMath);
