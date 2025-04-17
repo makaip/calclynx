@@ -29,7 +29,7 @@ html, body {
     position: absolute;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0; /* Ensure no gap between containers */
     padding: 10px;
     cursor: grab; /* Indicates draggable area */
   }
@@ -66,39 +66,49 @@ html, body {
     display: flex;
     flex-direction: column;
     position: relative;
-    padding: 5px;
+    padding: 0 5px; /* Remove vertical padding, keep horizontal */
+  }
+  
+  /* Add gradient border between math fields */
+  .math-field-container:not(:last-child) {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a) 1;
   }
   
   /* Editable math field styling */
   .math-field {
-    border: 1px solid #444;
+    /* border: 1px solid #444; */ /* Removed border */
     min-height: 40px;
     display: inline-block;
     padding: 5px;
     font-size: 18px;
     white-space: nowrap;
     overflow: hidden;
-    background: #1e1e1e;
+    background: transparent;
     color: #ffffff;
-    border-radius: 5px;
+    border-radius: 0 !important; /* Ensure no border-radius */
   }
   
   /* MathQuill styling overrides */
   .mq-editable-field,
   .mq-math-mode {
-    background: #1e1e1e !important;
+    background: transparent !important;
     color: #ffffff !important;
-    border-color: #666 !important;
+    /* border-color: #666 !important; */ /* Removed border-color */
+    border: none !important; /* Ensure no border is applied */
+    border-radius: 0 !important; /* Ensure no border-radius */
   }
   
   .mq-focused {
-    border-color: #00c59a !important;
+    /* border-color: #00c59a !important; */ /* Removed border-color */
+    outline: 1px solid #00c59a !important; /* Optional: Use outline for focus instead of border */
+    border-radius: 0 !important; /* Ensure no border-radius */
+    /* Or remove outline completely if desired: */
+    /* outline: none !important; */ 
   }
-
-
   
   .mq-editable-field .mq-cursor {
-    border-left: 2px solid #ffffff !important;
+    border-left: 1px solid #ffffff !important; /* Changed border to white and thinner */
   }
   
 
@@ -129,6 +139,7 @@ html, body {
     cursor: not-allowed;
   }
   
+
 
 
 /* Hamburger Menu Styles */
