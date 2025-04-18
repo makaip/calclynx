@@ -70,10 +70,21 @@ html, body {
     padding: 0 5px 0 25px; /* Adjust padding: Keep right padding, add left padding for handle */
   }
   
-  /* Add gradient border between math fields */
+  /* Remove gradient border from the container itself */
   .math-field-container:not(:last-child) {
-    border-bottom: 1px solid;
-    border-image: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a) 1;
+    margin-bottom: 1px; /* Add margin to create space for the pseudo-element border */
+  }
+  
+  /* Add pseudo-element for the gradient border */
+  /* Corrected selector: Apply ::after to the element matched by :not(:last-child) */
+  .math-field-container:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; /* Position it in the space created by margin-bottom */
+    left: 25px; /* Start after the handle padding */
+    right: 5px; /* End before the right padding */
+    height: 1px;
+    background: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a); /* Apply gradient as background */
   }
   
   /* Editable math field styling */
@@ -140,7 +151,7 @@ html, body {
 /* Drag Handle Styles */
 .drag-handle {
   position: absolute;
-  left: 5px; /* Position handle inside the left padding */
+  left: 2px; /* Position handle inside the left padding */
   top: 50%;
   transform: translateY(-50%);
   width: 12px; /* Adjust width */
@@ -155,7 +166,7 @@ html, body {
   padding: 3px; /* Padding inside the handle */
   box-sizing: border-box;
   opacity: 0; /* Initially invisible */
-  transition: opacity 0.2s ease-in-out;
+  /* transition: opacity 0.2s ease-in-out; */
   pointer-events: none; /* Initially ignore pointer events */
 }
 
