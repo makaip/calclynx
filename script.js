@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
-  // Listen for keyboard shortcuts to trigger undo, redo, select all, cut, copy, paste.
+  // Listen for keyboard shortcuts to trigger undo, redo, select all.
   document.addEventListener('keydown', (e) => {
     // Check if the active element is editable.
     const activeEl = document.activeElement;
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Allow native behavior (like cut/copy/paste) inside text fields.
       return;
     }
-  
+
     // Check for modifier key based on platform (Ctrl for Windows/Linux, Command for Mac)
     const modifierKey = isMac ? e.metaKey : e.ctrlKey;
     
@@ -91,16 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Select all math groups on the canvas
       const allGroups = document.querySelectorAll('.math-group');
       allGroups.forEach(group => group.classList.add('selected'));
-    } else if (modifierKey && e.key === 'c') { // Copy (Ctrl+C / Cmd+C)
-        e.preventDefault();
-        window.mathBoard.copySelectedGroups();
-    } else if (modifierKey && e.key === 'x') { // Cut (Ctrl+X / Cmd+X)
-        e.preventDefault();
-        window.mathBoard.cutSelectedGroups();
-    } else if (modifierKey && e.key === 'v') { // Paste (Ctrl+V / Cmd+V)
-        e.preventDefault();
-        window.mathBoard.pasteGroups();
     }
+    // Clipboard shortcuts (cut/copy/paste) are now handled in clipboardHandlers.js
   });
 
 });

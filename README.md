@@ -1,7 +1,13 @@
-# MathBoard
+# CalcLynx
+
+![Build Status](https://img.shields.io/github/actions/workflow/status/makaip/mathboard/static.yml?style=for-the-badge&color=00c59a) &nbsp;
+![GitHub Stars](https://img.shields.io/github/stars/makaip/mathboard?style=for-the-badge)​ &nbsp;
+![Last Commit](https://img.shields.io/github/last-commit/makaip/mathboard?style=for-the-badge&color=00c59a)
+
+
 
 Calclinx is a web-based interactive math board that lets you create, edit, and manage mathematical expressions using a graphical interface. Built using HTML, CSS, JavaScript, and MathQuill, it offers a versatile canvas for creating math groups, editing formulas, and organizing your work with intuitive navigation and file management features.
-
+y
 ## Features
 
 - **Interactive Canvas:** A huge canvas with a dotted background for infinite drawing and positioning.
@@ -10,6 +16,9 @@ Calclinx is a web-based interactive math board that lets you create, edit, and m
 - **Drag-and-Drop:** Easily move math groups by clicking and dragging.
 - **Box Selection:** Select multiple math groups by clicking and dragging a selection box.
 - **Undo/Redo:** Keyboard shortcuts (Ctrl+Z for undo, Ctrl+Y for redo) to revert or reapply changes.
+- **Cut, Copy, Paste:** Use keyboard shortcuts or the context menu to cut, copy, and paste math groups.
+- **Snapping to Grid:** Hold Ctrl (or Cmd on Mac) while dragging to snap math groups to a grid.
+- **Context Menu:** Right-click to access options like creating, cutting, copying, pasting, and deleting math groups.
 - **Export/Import JSON:** Save your current math board state to a JSON file or import a previously saved state.
 - **Responsive Navigation:** Panning and zooming of the canvas with mouse, spacebar, or trackpad.
 
@@ -23,17 +32,26 @@ Calclinx is a web-based interactive math board that lets you create, edit, and m
 
 ### Managing Math Groups
 - **Drag-and-Drop:** Click and drag a math group (or multiple selected groups) to move them around.
+- **Snapping to Grid:** Hold Ctrl (or Cmd on Mac) while dragging to snap math groups to a grid.
 - **Box Selection:** Click and drag on an empty area to draw a selection box. Any math group that overlaps with the box will be selected.
+- **Cut, Copy, Paste:** Use Ctrl+X to cut, Ctrl+C to copy, and Ctrl+V to paste math groups. Alternatively, use the context menu by right-clicking on the canvas or a math group.
 
 ### Using the Hamburger Menu
 - **Export JSON:** Click on the "File" menu in the hamburger menu and select "Export JSON" to download the current board state.
-- **Import JSON:** Click on the "File" menu and select "Import JSON" to load a previously exported board state.
+- **Import JSON:** Click on the "File" menu and select "Import JSON" to load a previously saved board state.
 - **Other Options:** Additional menu options include Undo/Redo and Zoom In/Out under the "Edit" and "View" menus.
+
+### Using the Context Menu
+- **Right-Click on the Canvas:** Open the context menu to create a new math group.
+- **Right-Click on a Math Group:** Access options to cut, copy, paste, or delete the selected math group(s).
 
 ### Keyboard Shortcuts
 - **Ctrl+Z:** Undo the last action.
 - **Ctrl+Y:** Redo the last undone action.
 - **Shift+A:** Add a new math field at the mouse position if no MathQuill field is focused.
+- **Ctrl+X:** Cut selected math groups.
+- **Ctrl+C:** Copy selected math groups.
+- **Ctrl+V:** Paste math groups at the current mouse position.
 - **Backspace/Delete:** Remove selected math groups (when not editing a text field).
 
 ### Panning and Navigation
@@ -50,11 +68,8 @@ Calclinx is a web-based interactive math board that lets you create, edit, and m
 
 This project is licensed under the MIT License.
 
+## To-Do List
 
-# To-Do List  
-
-- **Bug:** If you write one line and then click off, it deletes the stack.  
-- **Feature:** Allow reordering of stack lines.  
 - **Visualization:** Draw a connected line between equivalent expressions, like:  
 ```
 ╭─
