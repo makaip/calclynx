@@ -68,19 +68,17 @@ class MathBoard {
         }
       }
 
+      
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'c') {
-          e.preventDefault();
           this.copySelectedGroups();
         } else if (e.key === 'x') {
-          e.preventDefault();
           this.cutSelectedGroups();
         } else if (e.key === 'v') {
-          e.preventDefault();
           this.pasteGroups();
         }
       }
-
+      
       if (e.shiftKey && e.key === 'A' && !document.querySelector('.mq-focused')) {
         e.preventDefault();
         const coords = this.screenToCanvas(this.mouseX, this.mouseY);
