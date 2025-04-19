@@ -1,8 +1,8 @@
 # CalcLynx
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/makaip/mathboard/static.yml?style=for-the-badge&color=00c59a) &nbsp;
-![GitHub Stars](https://img.shields.io/github/stars/makaip/mathboard?style=for-the-badge)​ &nbsp;
-![Last Commit](https://img.shields.io/github/last-commit/makaip/mathboard?style=for-the-badge&color=00c59a)
+![Build Status](https://img.shields.io/github/actions/workflow/status/makaip/mathboard/static.yml?style=flat-square&color=00c59a) &nbsp;
+![GitHub Stars](https://img.shields.io/github/stars/makaip/mathboard?style=flat-square&color=00c59a)​ &nbsp;
+![Last Commit](https://img.shields.io/github/last-commit/makaip/mathboard?style=flat-square&color=00c59a)
 
 
 
