@@ -16,7 +16,6 @@ class MathField {
     this.container.className = 'math-field-container';
     this.container.dataset.latex = '';
     this.container.mathFieldInstance = this; // Add reference from DOM element back to the instance
-    console.log("Creating container:", this.container);
 
     const dragHandle = document.createElement('div');
     dragHandle.className = 'drag-handle';
@@ -26,7 +25,6 @@ class MathField {
       dragHandle.appendChild(dot);
     }
     this.container.appendChild(dragHandle);
-    console.log("Drag handle created and appended:", dragHandle);
 
     this.container.addEventListener('mousedown', (event) => {
       if (!event.target.closest('.drag-handle')) {

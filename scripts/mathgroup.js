@@ -102,14 +102,12 @@ class MathGroup {
           // Check if the click originated on a drag handle within this group
           const handle = e.target.closest('.drag-handle');
           if (handle && this.element.contains(handle)) {
-              console.log("Delegated mousedown hit handle:", handle); // Debug log
               const fieldContainer = handle.closest('.math-field-container');
               if (fieldContainer) {
                   this.handleFieldDragStart(e, fieldContainer);
               }
           }
       }, true); // Use capture phase for delegation as well
-      console.log("Delegated field drag listener attached to group:", this.element);
   }
 
   handleFieldDragStart(e, fieldContainer) {
@@ -120,7 +118,6 @@ class MathGroup {
       e.preventDefault(); 
       // Stop propagation to prevent group drag and other listeners
       e.stopPropagation(); 
-      console.log("Field Drag Start (Delegated)");
 
       this.draggedFieldElement = fieldContainer;
       this.fieldDragStartY = e.clientY;
@@ -152,7 +149,6 @@ class MathGroup {
 
   handleFieldDragMove(e) {
       if (!this.draggedFieldElement) return;
-      // console.log("Field Drag Move (Delegated)"); // Optional: Can be noisy
 
       const currentY = e.clientY;
       const deltaY = currentY - this.fieldDragStartY;
@@ -186,7 +182,6 @@ class MathGroup {
 
   handleFieldDragEnd() {
       if (!this.draggedFieldElement || !this.fieldPlaceholder) return;
-      console.log("Field Drag End (Delegated)");
 
       // Move the actual element
       this.fieldPlaceholder.parentElement.insertBefore(this.draggedFieldElement, this.fieldPlaceholder);
