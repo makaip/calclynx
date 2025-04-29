@@ -159,6 +159,7 @@ class MathField {
 
   finalize() {
     const latex = this.mathField.latex().trim();
+    console.log("[DEBUG] latex:", latex);
     if (!latex) {
       this.container.remove();
       if (!this.mathGroup.element.querySelector('.math-field-container')) {
@@ -182,15 +183,20 @@ class MathField {
     MQ.StaticMath(staticMath).latex(latex);
     this.mathGroup.board.fileManager.saveState();
 
-    // Use new method and data attribute
+    console.log("[DEBUG] latex before equivalence check:", latex);
+    const hasText = latex.includes('\\text{') || latex.includes('\\\\text{');
+    console.log("[DEBUG] hasText check result:", hasText);
     if (window.expressionEquivalence) {
-      // Re-apply colors to update based on the final latex, then remove highlight
-      window.expressionEquivalence.applyIndicatorColors();
-      if (this.container.dataset.groupKey) {
-        window.expressionEquivalence.highlightGroupExpressions(this.container.dataset.groupKey, false);
+      if (!hasText) {
+        console.log("[DEBUG] Applying equivalence");
+        window.expressionEquivalence.applyIndicatorColors();
+        if (this.container.dataset.groupKey) {
+          window.expressionEquivalence.highlightGroupExpressions(this.container.dataset.groupKey, false);
+        } else {
+          window.expressionEquivalence.removeAllHighlights();
+        }
       } else {
-        // If it's no longer part of a group, ensure no highlights remain
-        window.expressionEquivalence.removeAllHighlights();
+        console.log("[DEBUG] '\\text{' found, skipping equivalence");
       }
     }
   }
@@ -309,6 +315,9 @@ class MathField {
     mathFieldElement.addEventListener('blur', function () {
       setTimeout(() => {
         const latexValue = mathField.latex().trim();
+        console.log("[DEBUG] blur latexValue:", latexValue);
+        const hasText = latexValue.includes('\\text{') || latexValue.includes('\\\\text{');
+        console.log("[DEBUG] blur hasText check:", hasText);
         if (!latexValue) {
           container.remove();
           const group = container.parentElement;
@@ -337,11 +346,16 @@ class MathField {
             group.mathGroup.board.fileManager.saveState();
             // Re-apply colors after blur/finalize and remove highlight
             if (window.expressionEquivalence) {
-              window.expressionEquivalence.applyIndicatorColors();
-              if (container.dataset.groupKey) {
-                 window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
+              if (!hasText) {
+                console.log("[DEBUG] Applying equivalence (edit blur)");
+                window.expressionEquivalence.applyIndicatorColors();
+                if (container.dataset.groupKey) {
+                  window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
+                } else {
+                  window.expressionEquivalence.removeAllHighlights();
+                }
               } else {
-                 window.expressionEquivalence.removeAllHighlights();
+                console.log("[DEBUG] '\\text{' found, skipping equivalence (edit blur)");
               }
             }
           }

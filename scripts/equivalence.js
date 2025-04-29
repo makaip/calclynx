@@ -31,6 +31,12 @@ class ExpressionEquivalence {
       // Skip empty expressions
       if (!latexExpression || latexExpression.trim() === '') return null;
 
+      // Skip normalization for text expressions
+      if (/(\\text|text)\{/.test(latexExpression)) {
+        console.log("[DEBUG] Skipping normalization for text expression:", latexExpression);
+        return null;
+      }
+
       // Only compute if not cached
       if (this.normalizationCache.has(latexExpression)) {
         return this.normalizationCache.get(latexExpression);
