@@ -32,8 +32,8 @@ class ExpressionEquivalence {
       if (!latexExpression || latexExpression.trim() === '') return null;
 
       // Skip normalization for text expressions
-      if (/(\\text|text)\{/.test(latexExpression)) {
-        console.log("[DEBUG] Skipping normalization for text expression:", latexExpression);
+      if (latexExpression.includes('\\text')) {
+        console.log("[DEBUG] Skipping normalization for '\\text' expression:", latexExpression);
         return null;
       }
 
@@ -89,6 +89,12 @@ class ExpressionEquivalence {
       mathFields.forEach((field, fieldIndex) => {
         const originalLatex = field.dataset.latex;
         if (!originalLatex || originalLatex.trim() === '') return;
+
+        // Skip any expression containing "\text"
+        if (originalLatex.includes('\\text')) {
+          console.log("[DEBUG] logEquivalentExpressions: skipping expression with '\\text':", originalLatex);
+          return;
+        }
         
         const location = { groupIndex, fieldIndex, expression: originalLatex };
 
@@ -181,6 +187,13 @@ class ExpressionEquivalence {
       group.querySelectorAll('.math-field-container').forEach((field, fieldIndex) => {
         const originalLatex = field.dataset.latex;
         if (!originalLatex || !originalLatex.trim()) return;
+
+        // Skip any expression containing "\text"
+        if (originalLatex.includes('\\text')) {
+          console.log("[DEBUG] applyIndicatorColors: skipping expression with '\\text':", originalLatex);
+          return;
+        }
+
         // Identical
         if (!identicalMap.has(originalLatex)) {
           identicalMap.set(originalLatex, []);
