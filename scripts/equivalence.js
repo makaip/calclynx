@@ -14,8 +14,9 @@ class ExpressionEquivalence {
     document.addEventListener('click', (event) => {
       this.removeAllHighlights();
       const container = event.target.closest('.math-field-container');
-      if (container && container.dataset.identicalExpr) {
-        this.highlightIdenticalExpressions(container.dataset.identicalExpr, true);
+      // Use the new data attribute and method name
+      if (container && container.dataset.groupKey) {
+        this.highlightGroupExpressions(container.dataset.groupKey, true);
       }
     });
   }
@@ -179,80 +180,108 @@ class ExpressionEquivalence {
           identicalMap.set(originalLatex, []);
         }
         identicalMap.get(originalLatex).push(field);
-        // Normalized
-        const norm = this.normalizeExpression(originalLatex);
-        if (norm) {
-          if (!normalizedMap.has(norm)) normalizedMap.set(norm, []);
-          normalizedMap.get(norm).push(field);
+        // Normalized (only if MathGene is loaded)
+        if (this.mathGeneLoaded) {
+            const norm = this.normalizeExpression(originalLatex);
+            if (norm) {
+              if (!normalizedMap.has(norm)) normalizedMap.set(norm, []);
+              normalizedMap.get(norm).push(field);
+            }
         }
       });
     });
 
-    // Generate colors for identical keys
+    // Generate colors for identical keys (only needed if MathGene isn't loaded or for purely identical groups)
     for (const key of identicalMap.keys()) {
-      if (!this.identicalColorsCache.has(key)) {
-        this.identicalColorsCache.set(key, this.getRandomColor());
-      }
-      identicalColors.set(key, this.identicalColorsCache.get(key));
+        if (identicalMap.get(key).length > 1) { // Only generate if it's actually a group
+            if (!this.identicalColorsCache.has(key)) {
+                this.identicalColorsCache.set(key, this.getRandomColor());
+            }
+            identicalColors.set(key, this.identicalColorsCache.get(key));
+        }
     }
-    // Generate colors for normalized keys
-    for (const key of normalizedMap.keys()) {
-      if (!this.equivalentColorsCache.has(key)) {
-        this.equivalentColorsCache.set(key, this.getRandomColor());
-      }
-      equivalentColors.set(key, this.equivalentColorsCache.get(key));
+    // Generate colors for normalized keys (if MathGene is loaded)
+    if (this.mathGeneLoaded) {
+        for (const key of normalizedMap.keys()) {
+            if (normalizedMap.get(key).length > 1) { // Only generate if it's actually a group
+                if (!this.equivalentColorsCache.has(key)) {
+                    this.equivalentColorsCache.set(key, this.getRandomColor());
+                }
+                equivalentColors.set(key, this.equivalentColorsCache.get(key));
+            }
+        }
     }
+
 
     // Now assign circle classes and colors
     mathGroups.forEach((group) => {
       group.querySelectorAll('.math-field-container').forEach((field) => {
         const expr = field.dataset.latex || '';
-        const norm = this.normalizeExpression(expr) || '';
+        // Get normalized form only if MathGene is loaded
+        const norm = this.mathGeneLoaded ? (this.normalizeExpression(expr) || '') : '';
         const identicalArr = identicalMap.get(expr);
-        const eqArr = normalizedMap.get(norm);
-        const isIdentical = identicalArr && identicalArr.length > 1;
-        const isEquivalent = eqArr && eqArr.length > 1;
+        // Get equivalent array only if MathGene is loaded and normalization succeeded
+        const eqArr = this.mathGeneLoaded && norm ? normalizedMap.get(norm) : null;
+
+        // Determine if part of a group
+        const isIdenticalGroup = identicalArr && identicalArr.length > 1;
+        const isEquivalentGroup = eqArr && eqArr.length > 1;
+
         const circle = field.querySelector('.circle-indicator');
         if (!circle) return;
 
-        // Clear existing classes
+        // Clear existing classes and styles
         circle.classList.remove('identical', 'equivalent');
-        field.classList.remove('identical-editing');
+        field.classList.remove('group-editing'); // Use new class name
         field.style.removeProperty('--circle-color');
+        delete field.dataset.groupKey; // Remove old/new data attribute
+        delete field.dataset.identicalExpr; // Clean up old attribute just in case
 
-        if (!isIdentical && !isEquivalent) {
-          // No shared color needed
-          return;
-        }
-
-        // If both identical & equivalent, use identical color (single color shared).
         let color;
-        if (isIdentical) {
-          color = identicalColors.get(expr);
-          circle.classList.add('identical');
-        } else {
-          color = equivalentColors.get(norm);
-          circle.classList.add('equivalent');
+        let groupKey;
+        let groupClass;
+
+        // Prioritize Equivalent Grouping if available and MathGene is loaded
+        if (this.mathGeneLoaded && isEquivalentGroup) {
+            color = equivalentColors.get(norm);
+            groupKey = norm; // Use normalized form as the key for the equivalent group
+            groupClass = 'equivalent';
         }
-        field.style.setProperty('--circle-color', color);
-        // We'll store the originalLatex for "editing" toggling
-        field.dataset.identicalExpr = expr;
+        // Fallback to Identical Grouping if not part of an equivalent group (or MathGene not loaded)
+        else if (isIdenticalGroup) {
+            color = identicalColors.get(expr);
+            groupKey = expr; // Use original expression as the key for the purely identical group
+            groupClass = 'identical';
+        }
+
+        // Apply color and class if part of any group
+        if (color && groupKey && groupClass) {
+            circle.classList.add(groupClass);
+            field.style.setProperty('--circle-color', color);
+            // Store the key used for grouping/coloring/highlighting
+            field.dataset.groupKey = groupKey;
+        }
       });
     });
   }
 
-  highlightIdenticalExpressions(expr, highlight) {
-    // Toggle .identical-editing on all containers with the given expression
-    if (!expr) return;
-    const containers = document.querySelectorAll(`.math-field-container[data-identical-expr="${expr}"]`);
+  // Renamed method to handle highlighting based on group key
+  highlightGroupExpressions(groupKey, highlight) {
+    if (!groupKey) return;
+    // Escape quotes within the attribute selector value if necessary
+    const escapedGroupKey = groupKey.replace(/"/g, '\\"');
+    // Select using the new data attribute
+    const containers = document.querySelectorAll(`.math-field-container[data-group-key="${escapedGroupKey}"]`);
     containers.forEach((c) => {
-      if (highlight) c.classList.add('identical-editing');
-      else c.classList.remove('identical-editing');
+      // Use the new class name
+      if (highlight) c.classList.add('group-editing');
+      else c.classList.remove('group-editing');
     });
   }
 
   removeAllHighlights() {
-    const containers = document.querySelectorAll('.math-field-container.identical-editing');
-    containers.forEach((c) => c.classList.remove('identical-editing'));
+    // Select using the new class name
+    const containers = document.querySelectorAll('.math-field-container.group-editing');
+    containers.forEach((c) => c.classList.remove('group-editing'));
   }
 }

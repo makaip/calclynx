@@ -34,8 +34,9 @@ class MathField {
       if (!event.target.closest('.drag-handle')) {
         document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
       }
-      if (window.expressionEquivalence && this.container.dataset.latex) {
-        window.expressionEquivalence.highlightIdenticalExpressions(this.container.dataset.latex, true);
+      // Use new method and data attribute
+      if (window.expressionEquivalence && this.container.dataset.groupKey) {
+        window.expressionEquivalence.highlightGroupExpressions(this.container.dataset.groupKey, true);
       }
     });
 
@@ -181,8 +182,16 @@ class MathField {
     MQ.StaticMath(staticMath).latex(latex);
     this.mathGroup.board.fileManager.saveState();
 
+    // Use new method and data attribute
     if (window.expressionEquivalence) {
-      window.expressionEquivalence.highlightIdenticalExpressions(this.container.dataset.latex, false);
+      // Re-apply colors to update based on the final latex, then remove highlight
+      window.expressionEquivalence.applyIndicatorColors();
+      if (this.container.dataset.groupKey) {
+        window.expressionEquivalence.highlightGroupExpressions(this.container.dataset.groupKey, false);
+      } else {
+        // If it's no longer part of a group, ensure no highlights remain
+        window.expressionEquivalence.removeAllHighlights();
+      }
     }
   }
 
@@ -226,8 +235,9 @@ class MathField {
     mathField.latex(existingLatex);
     mathField.focus();
 
-    if (window.expressionEquivalence && existingLatex) {
-      window.expressionEquivalence.highlightIdenticalExpressions(existingLatex, true);
+    // Use new method and data attribute
+    if (window.expressionEquivalence && container.dataset.groupKey) {
+      window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, true);
     }
 
     mathFieldElement.addEventListener('keydown', (event) => {
@@ -325,6 +335,15 @@ class MathField {
           const group = container.parentElement;
           if (group && group.mathGroup) {
             group.mathGroup.board.fileManager.saveState();
+            // Re-apply colors after blur/finalize and remove highlight
+            if (window.expressionEquivalence) {
+              window.expressionEquivalence.applyIndicatorColors();
+              if (container.dataset.groupKey) {
+                 window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
+              } else {
+                 window.expressionEquivalence.removeAllHighlights();
+              }
+            }
           }
         }
       }, 50);
