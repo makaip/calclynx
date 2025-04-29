@@ -24,6 +24,7 @@ class FileManager {
       // Log equivalent expressions after state is saved
       if (window.expressionEquivalence) {
         window.expressionEquivalence.logEquivalentExpressions();
+        window.expressionEquivalence.applyIndicatorColors();
       }
     }
   

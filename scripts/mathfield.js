@@ -17,6 +17,10 @@ class MathField {
     this.container.dataset.latex = '';
     this.container.mathFieldInstance = this; // Add reference from DOM element back to the instance
 
+    const circleIndicator = document.createElement('div');
+    circleIndicator.className = 'circle-indicator';
+    this.container.appendChild(circleIndicator);
+
     const dragHandle = document.createElement('div');
     dragHandle.className = 'drag-handle';
     for (let i = 0; i < 6; i++) {
@@ -173,6 +177,10 @@ class MathField {
     }
     MQ.StaticMath(staticMath).latex(latex);
     this.mathGroup.board.fileManager.saveState();
+
+    if (window.expressionEquivalence) {
+      window.expressionEquivalence.highlightIdenticalExpressions(this.container.dataset.latex, false);
+    }
   }
 
   static edit(container) {
@@ -214,6 +222,10 @@ class MathField {
     });
     mathField.latex(existingLatex);
     mathField.focus();
+
+    if (window.expressionEquivalence && existingLatex) {
+      window.expressionEquivalence.highlightIdenticalExpressions(existingLatex, true);
+    }
 
     mathFieldElement.addEventListener('keydown', (event) => {
       if (event.key === 'Backspace' && !event.ctrlKey && !mathField.latex().trim()) {

@@ -129,4 +129,97 @@ class ExpressionEquivalence {
     }
     console.log("--- Equivalence Check Complete ---"); // Add a footer for clarity
   }
+
+  getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+
+  applyIndicatorColors() {
+    // Assign a color to each identical group and each normalized group, then apply to containers.
+    const identicalColors = new Map();
+    const equivalentColors = new Map();
+
+    // Rebuild identicalMap and normalizedMap for all fields (similar to logEquivalentExpressions).
+    const identicalMap = new Map();
+    const normalizedMap = new Map();
+    const mathGroups = document.querySelectorAll('.math-group');
+    mathGroups.forEach((group, groupIndex) => {
+      group.querySelectorAll('.math-field-container').forEach((field, fieldIndex) => {
+        const originalLatex = field.dataset.latex;
+        if (!originalLatex || !originalLatex.trim()) return;
+        // Identical
+        if (!identicalMap.has(originalLatex)) {
+          identicalMap.set(originalLatex, []);
+        }
+        identicalMap.get(originalLatex).push(field);
+        // Normalized
+        const norm = this.normalizeExpression(originalLatex);
+        if (norm) {
+          if (!normalizedMap.has(norm)) normalizedMap.set(norm, []);
+          normalizedMap.get(norm).push(field);
+        }
+      });
+    });
+
+    // Generate colors for identical keys
+    for (const key of identicalMap.keys()) {
+      identicalColors.set(key, this.getRandomColor());
+    }
+    // Generate colors for normalized keys
+    for (const key of normalizedMap.keys()) {
+      equivalentColors.set(key, this.getRandomColor());
+    }
+
+    // Now assign circle classes and colors
+    mathGroups.forEach((group) => {
+      group.querySelectorAll('.math-field-container').forEach((field) => {
+        const expr = field.dataset.latex || '';
+        const norm = this.normalizeExpression(expr) || '';
+        const identicalArr = identicalMap.get(expr);
+        const eqArr = normalizedMap.get(norm);
+        const isIdentical = identicalArr && identicalArr.length > 1;
+        const isEquivalent = eqArr && eqArr.length > 1;
+        const circle = field.querySelector('.circle-indicator');
+        if (!circle) return;
+
+        // Clear existing classes
+        circle.classList.remove('identical', 'equivalent');
+        field.classList.remove('identical-editing');
+        field.style.removeProperty('--circle-color');
+
+        if (!isIdentical && !isEquivalent) {
+          // No shared color needed
+          return;
+        }
+
+        // If both identical & equivalent, use identical color (single color shared).
+        let color;
+        if (isIdentical) {
+          color = identicalColors.get(expr);
+          circle.classList.add('identical');
+        } else {
+          color = equivalentColors.get(norm);
+          circle.classList.add('equivalent');
+        }
+        field.style.setProperty('--circle-color', color);
+        // We'll store the originalLatex for "editing" toggling
+        field.dataset.identicalExpr = expr;
+      });
+    });
+  }
+
+  highlightIdenticalExpressions(expr, highlight) {
+    // Toggle .identical-editing on all containers with the given expression
+    if (!expr) return;
+    const containers = document.querySelectorAll(`.math-field-container[data-identical-expr="${expr}"]`);
+    containers.forEach((c) => {
+      if (highlight) c.classList.add('identical-editing');
+      else c.classList.remove('identical-editing');
+    });
+  }
 }

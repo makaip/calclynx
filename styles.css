@@ -208,6 +208,37 @@ html, body {
   cursor: grabbing;
 }
 
+/* Circle Indicator Styles */
+.circle-indicator {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.math-field-container:hover .circle-indicator {
+  opacity: 0;
+}
+
+.circle-indicator.identical {
+  /* Will fill background only when editing is active */
+  border-color: var(--circle-color, #ccc);
+}
+
+.circle-indicator.equivalent {
+  border-color: var(--circle-color, #ccc);
+  background: transparent;
+}
+
+.identical-editing .circle-indicator.identical {
+  background-color: var(--circle-color, #ccc);
+}
 
 /* Hamburger Menu Styles */
 #menu-container {
