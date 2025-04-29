@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     if (!document.getElementById('menu-container').contains(e.target)) {
       menu.style.display = 'none';
+    } else {
+      document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+      if (window.expressionEquivalence) {
+        window.expressionEquivalence.removeAllHighlights();
+      }
     }
   });
 

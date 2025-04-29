@@ -7,6 +7,17 @@ class ExpressionEquivalence {
     } else {
       this.mathGeneLoaded = true;
     }
+    this.identicalColorsCache = new Map();
+    this.equivalentColorsCache = new Map();
+    this.normalizationCache = new Map();
+
+    document.addEventListener('click', (event) => {
+      this.removeAllHighlights();
+      const container = event.target.closest('.math-field-container');
+      if (container && container.dataset.identicalExpr) {
+        this.highlightIdenticalExpressions(container.dataset.identicalExpr, true);
+      }
+    });
   }
 
   // Normalize expression using MathGene's expansion and simplification
@@ -18,6 +29,11 @@ class ExpressionEquivalence {
     try {
       // Skip empty expressions
       if (!latexExpression || latexExpression.trim() === '') return null;
+
+      // Only compute if not cached
+      if (this.normalizationCache.has(latexExpression)) {
+        return this.normalizationCache.get(latexExpression);
+      }
       
       // First, expand the expression
       const expanded = mgCalc.Expand(latexExpression);
@@ -25,20 +41,26 @@ class ExpressionEquivalence {
           // If expansion fails or returns nothing, try simplifying the original
           // console.warn(`Expansion failed for "${latexExpression}", attempting direct simplification.`); // Optional logging
           const simplifiedDirectly = mgCalc.Simplify(latexExpression);
-          return simplifiedDirectly ? simplifiedDirectly.latex : latexExpression;
+          const normalizedLatex = simplifiedDirectly ? simplifiedDirectly.latex : latexExpression;
+          this.normalizationCache.set(latexExpression, normalizedLatex);
+          return normalizedLatex;
       }
 
       // Then, simplify the expanded expression
       const simplified = mgCalc.Simplify(expanded.latex);
       // Ensure simplification returns a latex string
-      return simplified && simplified.latex ? simplified.latex : expanded.latex; 
+      const normalizedLatex = simplified && simplified.latex ? simplified.latex : expanded.latex;
+      this.normalizationCache.set(latexExpression, normalizedLatex);
+      return normalizedLatex; 
     } catch (error) {
       console.warn(`Could not normalize "${latexExpression}" after expand/simplify: ${error.message}`);
       // Fallback: try simplifying the original directly if expand/simplify chain failed
       try {
           const simplifiedDirectly = mgCalc.Simplify(latexExpression);
           // Ensure simplification returns a latex string
-          return simplifiedDirectly && simplifiedDirectly.latex ? simplifiedDirectly.latex : latexExpression; 
+          const normalizedLatex = simplifiedDirectly && simplifiedDirectly.latex ? simplifiedDirectly.latex : latexExpression;
+          this.normalizationCache.set(latexExpression, normalizedLatex);
+          return normalizedLatex; 
       } catch (innerError) {
           console.warn(`Direct simplification also failed for "${latexExpression}": ${innerError.message}`);
           return latexExpression; // Return original as last resort
@@ -168,11 +190,17 @@ class ExpressionEquivalence {
 
     // Generate colors for identical keys
     for (const key of identicalMap.keys()) {
-      identicalColors.set(key, this.getRandomColor());
+      if (!this.identicalColorsCache.has(key)) {
+        this.identicalColorsCache.set(key, this.getRandomColor());
+      }
+      identicalColors.set(key, this.identicalColorsCache.get(key));
     }
     // Generate colors for normalized keys
     for (const key of normalizedMap.keys()) {
-      equivalentColors.set(key, this.getRandomColor());
+      if (!this.equivalentColorsCache.has(key)) {
+        this.equivalentColorsCache.set(key, this.getRandomColor());
+      }
+      equivalentColors.set(key, this.equivalentColorsCache.get(key));
     }
 
     // Now assign circle classes and colors
@@ -221,5 +249,10 @@ class ExpressionEquivalence {
       if (highlight) c.classList.add('identical-editing');
       else c.classList.remove('identical-editing');
     });
+  }
+
+  removeAllHighlights() {
+    const containers = document.querySelectorAll('.math-field-container.identical-editing');
+    containers.forEach((c) => c.classList.remove('identical-editing'));
   }
 }

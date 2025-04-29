@@ -34,6 +34,9 @@ class MathField {
       if (!event.target.closest('.drag-handle')) {
         document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
       }
+      if (window.expressionEquivalence && this.container.dataset.latex) {
+        window.expressionEquivalence.highlightIdenticalExpressions(this.container.dataset.latex, true);
+      }
     });
 
     this.container.addEventListener('click', (event) => {
