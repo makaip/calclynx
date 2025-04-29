@@ -1,8 +1,8 @@
 # CalcLynx
 
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fmakaip.com%2Fmathboard&up_color=00c59a&style=flat-square)​ &nbsp;
-![Build Status](https://img.shields.io/github/actions/workflow/status/makaip/mathboard/static.yml?style=flat-square&color=00c59a) &nbsp;
-![Last Commit](https://img.shields.io/github/last-commit/makaip/mathboard?style=flat-square&color=00c59a)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fmakaip.com%2Fcalclynx&up_color=00c59a&style=flat-square)​ &nbsp;
+![Build Status](https://img.shields.io/github/actions/workflow/status/makaip/calclynx/static.yml?style=flat-square&color=00c59a) &nbsp;
+![Last Commit](https://img.shields.io/github/last-commit/makaip/calclynx?style=flat-square&color=00c59a)
 
 CalcLynx is a web-based interactive math board that lets you create, edit, and manage mathematical expressions using a graphical interface. Built using HTML, CSS, JavaScript, and MathQuill, it offers a versatile canvas for creating math groups, editing formulas, and organizing your work with intuitive navigation and file management features.
 
