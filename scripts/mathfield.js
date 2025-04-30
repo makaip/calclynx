@@ -159,7 +159,6 @@ class MathField {
 
   finalize() {
     const latex = this.mathField.latex().trim();
-    console.log("[DEBUG] latex:", latex);
     if (!latex) {
       this.container.remove();
       if (!this.mathGroup.element.querySelector('.math-field-container')) {
@@ -183,20 +182,15 @@ class MathField {
     MQ.StaticMath(staticMath).latex(latex);
     this.mathGroup.board.fileManager.saveState();
 
-    console.log("[DEBUG] latex before equivalence check:", latex);
     const hasText = latex.includes('\\text{') || latex.includes('\\\\text{');
-    console.log("[DEBUG] hasText check result:", hasText);
     if (window.expressionEquivalence) {
       if (!hasText) {
-        console.log("[DEBUG] Applying equivalence");
         window.expressionEquivalence.applyIndicatorColors();
         if (this.container.dataset.groupKey) {
           window.expressionEquivalence.highlightGroupExpressions(this.container.dataset.groupKey, false);
         } else {
           window.expressionEquivalence.removeAllHighlights();
         }
-      } else {
-        console.log("[DEBUG] '\\text{' found, skipping equivalence");
       }
     }
   }
@@ -315,9 +309,7 @@ class MathField {
     mathFieldElement.addEventListener('blur', function () {
       setTimeout(() => {
         const latexValue = mathField.latex().trim();
-        console.log("[DEBUG] blur latexValue:", latexValue);
         const hasText = latexValue.includes('\\text{') || latexValue.includes('\\\\text{');
-        console.log("[DEBUG] blur hasText check:", hasText);
         if (!latexValue) {
           container.remove();
           const group = container.parentElement;
@@ -347,15 +339,12 @@ class MathField {
             // Re-apply colors after blur/finalize and remove highlight
             if (window.expressionEquivalence) {
               if (!hasText) {
-                console.log("[DEBUG] Applying equivalence (edit blur)");
                 window.expressionEquivalence.applyIndicatorColors();
                 if (container.dataset.groupKey) {
                   window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
                 } else {
                   window.expressionEquivalence.removeAllHighlights();
                 }
-              } else {
-                console.log("[DEBUG] '\\text{' found, skipping equivalence (edit blur)");
               }
             }
           }

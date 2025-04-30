@@ -267,7 +267,6 @@ class MathBoard {
       });
       return { relativeLeft: left - minX, relativeTop: top - minY, fields };
     });
-    console.log("Copied to clipboard:", this.clipboard);
   }
 
   cutSelectedGroups() {

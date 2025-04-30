@@ -21,7 +21,6 @@ class FileManager {
       const stateString = JSON.stringify(groups);
       localStorage.setItem("mathBoardState", stateString);
       
-      // Log equivalent expressions after state is saved
       if (window.expressionEquivalence) {
         window.expressionEquivalence.logEquivalentExpressions();
         window.expressionEquivalence.applyIndicatorColors();
@@ -35,7 +34,6 @@ class FileManager {
       try {
         groups = JSON.parse(stateString);
       } catch (e) {
-        console.error("Failed to parse state from localStorage:", e);
         return;
       }
       groups.forEach((groupData) => {
@@ -80,7 +78,6 @@ class FileManager {
         // Save the new state and trigger equivalence check.
         this.saveState();
       } catch (error) {
-        console.error("Failed to import data:", error);
       }
     }
   }

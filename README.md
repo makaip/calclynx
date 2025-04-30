@@ -13,6 +13,7 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 - **Keyboard Shortcut (<kbd>Shift</kbd>+<kbd>A</kbd>):** Creates a new math field at the current mouse position.
 - **Click on a Math Field:** Click to edit an existing math expression.
 - **Enter Key (<kbd>Enter</kbd>):** Press to finalize your input. If editing the last math field in a group, a new math field will automatically be added.
+- **Reordering Math Fields:** Drag math fields within a group using the dotted handle on the left to reorder them.
 
 ### Managing Math Groups
 - **Drag-and-Drop:** Click and drag a math group (or multiple selected groups) to move them around.
@@ -38,6 +39,15 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 - <kbd>Ctrl</kbd>+<kbd>V</kbd>: Paste math groups at the current mouse position.
 - <kbd>Backspace</kbd>/<kbd>Delete</kbd>/<kbd>X</kbd>: Remove selected math groups (when not editing a text field).
 
+### Version Management
+- **Automatic State Saving:** Every significant change is automatically saved in the version history.
+- **Undo/Redo:** Navigate through your editing history using <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo and <kbd>Ctrl</kbd>+<kbd>Y</kbd> to redo.
+- **History Limit:** The system keeps track of up to 10 recent states by default to balance memory usage with editing convenience.
+
+### Expression Equivalence Detection
+- **Visual Indicators:** Identical or mathematically equivalent expressions are marked with colored indicators.
+- **Group Highlighting:** Click on a field with an indicator to highlight all equivalent expressions across the board.
+
 ### Panning and Navigation
 - **Canvas Panning:** Click and drag using the middle mouse button or hold the <kbd>Spacebar</kbd> and drag with the left mouse button.
 - **Trackpad Navigation:** Use your trackpad's scroll functionality to pan around the canvas.
@@ -46,3 +56,4 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 
 - **MathQuill:** Used for rendering and editing math expressions.
 - **jQuery:** For simplified DOM manipulation and event handling.
+- **MathGene:** Powers the expression equivalence detection system.
