@@ -11,6 +11,8 @@ class CommandPalette {
     this.inputElement = this.paletteElement.querySelector('.command-palette-input');
     this.optionsElement = this.paletteElement.querySelector('.command-palette-options');
     this.commands = [];
+    this.selectedIndex = -1; // Track the selected option
+    this.filteredCommands = []; // Store filtered commands
     this.setupEvents();
   }
 
@@ -26,15 +28,83 @@ class CommandPalette {
       </div>
     `;
     document.body.appendChild(modal);
+    
     return modal;
   }
 
   setupEvents() {
     // Handle search
     this.inputElement.addEventListener('input', () => this.renderOptions());
-    // Hide on Escape
+    
+    // Handle keyboard navigation
     this.inputElement.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.hide();
+      if (e.key === 'Escape') {
+        this.hide();
+        return;
+      }
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.moveSelection(1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.moveSelection(-1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        this.selectCurrent();
+      }
+    });
+    
+    // Make sure the modal closes when clicking outside
+    document.addEventListener('mousedown', (e) => {
+      if (this.paletteElement.style.display === 'block' && 
+          !this.paletteElement.querySelector('.command-palette-content').contains(e.target) &&
+          !e.target.classList.contains('command-palette-trigger')) {
+        this.hide();
+      }
+    });
+  }
+
+  // Method to move selection up or down
+  moveSelection(direction) {
+    if (this.filteredCommands.length === 0) return;
+    
+    this.selectedIndex += direction;
+    
+    // Handle wrapping
+    if (this.selectedIndex < 0) {
+      this.selectedIndex = this.filteredCommands.length - 1;
+    } else if (this.selectedIndex >= this.filteredCommands.length) {
+      this.selectedIndex = 0;
+    }
+    
+    this.updateSelectionVisual();
+  }
+  
+  // Method to select the current option
+  selectCurrent() {
+    if (this.filteredCommands.length === 0) return;
+    
+    // If no option is selected, use the first option
+    const indexToSelect = this.selectedIndex === -1 ? 0 : this.selectedIndex;
+    
+    if (indexToSelect >= 0 && indexToSelect < this.filteredCommands.length) {
+      const selectedCommand = this.filteredCommands[indexToSelect];
+      selectedCommand.action();
+      this.hide();
+    }
+  }
+  
+  // Update the visual selection indicator
+  updateSelectionVisual() {
+    const options = this.optionsElement.querySelectorAll('.command-palette-option');
+    
+    options.forEach((option, index) => {
+      if (index === this.selectedIndex) {
+        option.classList.add('selected');
+      } else {
+        option.classList.remove('selected');
+      }
     });
   }
 
@@ -45,6 +115,7 @@ class CommandPalette {
   show() {
     this.paletteElement.style.display = 'block';
     this.inputElement.value = '';
+    this.selectedIndex = -1; // Reset selection
     this.inputElement.focus();
     this.renderOptions();
   }
@@ -56,18 +127,33 @@ class CommandPalette {
   renderOptions() {
     const query = this.inputElement.value.toLowerCase();
     this.optionsElement.innerHTML = '';
-    const filtered = this.commands.filter(c => c.label.toLowerCase().includes(query));
+    this.filteredCommands = this.commands.filter(c => c.label.toLowerCase().includes(query));
+    this.selectedIndex = -1; // Reset selection when filtering changes
 
-    filtered.forEach(cmd => {
+    this.filteredCommands.forEach((cmd, index) => {
       const optionEl = document.createElement('div');
       optionEl.className = 'command-palette-option';
       optionEl.textContent = cmd.label;
+      
+      // Add hover effect to change selection
+      optionEl.addEventListener('mouseenter', () => {
+        this.selectedIndex = index;
+        this.updateSelectionVisual();
+      });
+      
       optionEl.addEventListener('click', () => {
         cmd.action();
         this.hide();
       });
+      
       this.optionsElement.appendChild(optionEl);
     });
+    
+    // Initialize first item as selected if available
+    if (this.filteredCommands.length > 0) {
+      this.selectedIndex = 0;
+      this.updateSelectionVisual();
+    }
   }
 }
 
@@ -84,14 +170,11 @@ document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     closeCommandPalette();
   }
-});
-
-// Event listener for clicks outside the command palette
-document.addEventListener('click', function(event) {
-  const palette = document.getElementById('command-palette');
-  if (palette && !palette.contains(event.target) && 
-      !event.target.classList.contains('command-palette-trigger')) {
-    closeCommandPalette();
+  
+  // Add keyboard shortcut for command palette (Ctrl+K or Cmd+K)
+  if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    event.preventDefault(); // Prevent browser's default behavior
+    window.commandPalette.show();
   }
 });
 
