@@ -281,8 +281,14 @@ class MathField {
           return;
         }
         container.dataset.latex = latex;
-        container.innerHTML = '';
+        container.innerHTML = ''; // Clear existing content
 
+        // Recreate circle indicator
+        const circleIndicator = document.createElement('div');
+        circleIndicator.className = 'circle-indicator';
+        container.appendChild(circleIndicator);
+
+        // Recreate drag handle
         const dragHandle = document.createElement('div');
         dragHandle.className = 'drag-handle';
         for (let i = 0; i < 6; i++) {
@@ -292,9 +298,10 @@ class MathField {
         }
         container.appendChild(dragHandle);
 
+        // Recreate static math
         const staticMath = document.createElement('div');
         staticMath.className = 'math-field';
-        container.appendChild(staticMath);
+        container.appendChild(staticMath); // Append after handle
         MQ.StaticMath(staticMath).latex(latex);
 
         const groupElement = container.parentElement;
@@ -318,8 +325,14 @@ class MathField {
           }
         } else {
           container.dataset.latex = latexValue;
-          container.innerHTML = '';
+          container.innerHTML = ''; // Clear existing content
 
+          // Recreate circle indicator
+          const circleIndicator = document.createElement('div');
+          circleIndicator.className = 'circle-indicator';
+          container.appendChild(circleIndicator);
+
+          // Recreate drag handle
           const dragHandle = document.createElement('div');
           dragHandle.className = 'drag-handle';
           for (let i = 0; i < 6; i++) {
@@ -329,9 +342,10 @@ class MathField {
           }
           container.appendChild(dragHandle);
 
+          // Recreate static math
           const staticMath = document.createElement('div');
           staticMath.className = 'math-field';
-          container.appendChild(staticMath);
+          container.appendChild(staticMath); // Append after handle
           MQ.StaticMath(staticMath).latex(latexValue);
           const group = container.parentElement;
           if (group && group.mathGroup) {
