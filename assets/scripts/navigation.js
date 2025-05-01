@@ -10,15 +10,51 @@ class Navigation {
         element: null,
       };
     }
-  
+
     init() {
       this.initCanvasPanning();
       this.initTrackpadNavigation();
       this.initBoxSelection();
+      this.initZoom();                 // ← add this line
       window.addEventListener('resize', () => {
-        this.clampPan();
         this.updateTransform();
       });
+    }
+
+    initZoom() {
+      const canvas = this.board.canvas;
+      const zoomFactor = 1.08;
+      const minScale   = 0.3;
+      const maxScale   = 3.33333;
+
+      canvas.addEventListener('wheel', e => {
+        // ignore if trackpad-pan heuristic already caught it
+        if (e.ctrlKey || e.deltaMode !== 0) {
+          e.preventDefault();
+
+          // 1. logical coords under cursor *before* scaling
+          const logical = this.screenToCanvas(e.clientX, e.clientY);
+
+          // 2. compute new scale
+          const direction = e.deltaY < 0 ? 1 : -1;
+          const factor    = Math.pow(zoomFactor, direction);
+          const newScale  = Math.min(maxScale, Math.max(minScale, this.board.scale * factor));
+
+          // 3. update scale
+          this.board.scale = newScale;
+
+          // 4. adjust pan offsets so logical point remains under cursor
+          // screenX = (logical.x * newScale) + initialOffsetX + canvasOffset.x
+          // ⇒ canvasOffset.x = screenX - initialOffsetX - logical.x * newScale
+          this.board.canvasOffset.x = e.clientX
+              - (this.board.canvasInitialOffset.x + logical.x * newScale);
+          this.board.canvasOffset.y = e.clientY
+              - (this.board.canvasInitialOffset.y + logical.y * newScale);
+
+          // 5. redraw
+          this.updateTransform();
+        }
+      }, { passive: false });
     }
   
     initCanvasPanning() {
@@ -37,7 +73,6 @@ class Navigation {
         if (this.board.isPanning) {
           this.board.canvasOffset.x = e.clientX - this.board.panStart.x;
           this.board.canvasOffset.y = e.clientY - this.board.panStart.y;
-          this.clampPan();
           this.updateTransform();
         }
       });
@@ -54,19 +89,12 @@ class Navigation {
   
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-  
-    clampPan() {
-      const minX = window.innerWidth - 10000;
-      const maxX = 10000;
-      this.board.canvasOffset.x = Math.min(maxX, Math.max(minX, this.board.canvasOffset.x));
-  
-      const minY = window.innerHeight - 10000;
-      const maxY = 10000;
-      this.board.canvasOffset.y = Math.min(maxY, Math.max(minY, this.board.canvasOffset.y));
-    }
-  
+
     updateTransform() {
-      this.board.canvas.style.transform = `translate(${this.board.canvasOffset.x}px, ${this.board.canvasOffset.y}px)`;
+      const { x, y } = this.board.canvasOffset;
+      const s        = this.board.scale;
+      this.board.canvas.style.transform =
+          `translate(${x}px, ${y}px) scale(${s})`;
     }
   
     initTrackpadNavigation() {
@@ -77,7 +105,6 @@ class Navigation {
           e.preventDefault();
           this.board.canvasOffset.x -= e.deltaX;
           this.board.canvasOffset.y -= e.deltaY;
-          this.clampPan();
           this.updateTransform();
         }
       }, { passive: false });
