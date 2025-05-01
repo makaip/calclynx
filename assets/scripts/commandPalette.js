@@ -1,55 +1,41 @@
 // Helper function to execute the correct MathGene calculation based on command name
 function executeMathGeneOperation(commandName, sourceMg) {
     // Check for both MathGene interfaces - mgCalc (as used in equivalence.js) or mgCalculate
-    if (typeof mgCalc !== 'undefined') {
-        console.log(`Executing MathGene command via mgCalc: ${commandName}`);
-        switch (commandName) {
-            case 'Simplify':
-                return mgCalc.Simplify(sourceMg);
-            case 'Expand':
-                return mgCalc.Expand(sourceMg);
-            case 'Evaluate':
-                return mgCalc.Simplify(sourceMg); // Use Simplify for Evaluate
-            case 'Factor':
-                return mgCalc.Factor ? mgCalc.Factor(sourceMg) : mgCalc.Simplify(sourceMg);
-            default:
-                console.warn("Unknown MathGene command:", commandName);
-                return sourceMg;
+    console.log(`Executing MathGene command via mgCalc: ${commandName}`);
+    
+    // Add special handling for "Solve for x" type commands
+    if (commandName.toLowerCase().startsWith('solve for ')) {
+        const variable = commandName.substring('solve for '.length).trim();
+        if (variable && mgCalc.Solve) {
+            return mgCalc.Solve(sourceMg, variable);
         }
-    } 
-    else if (typeof mgCalculate !== 'undefined') {
-        console.log(`Executing MathGene command via mgCalculate: ${commandName}`);
-        switch (commandName) {
-            case 'Simplify':
-                return mgCalculate.xReduce(sourceMg);
-            case 'Expand':
-                if (typeof mgCalculate.xprExpand !== 'function') {
-                    console.error("mgCalculate.xprExpand function not found.");
-                    throw new Error("Expand function missing");
-                }
-                return mgCalculate.xprExpand(sourceMg);
-            case 'Evaluate':
-                return mgCalculate.xReduce(sourceMg);
-            case 'Factor':
-                if (typeof mgCalculate.pFactor !== 'function') {
-                    console.error("mgCalculate.pFactor function not found.");
-                    throw new Error("Factor function missing");
-                }
-                return mgCalculate.pFactor(sourceMg);
-            default:
-                console.warn("Unknown MathGene command:", commandName);
-                return sourceMg;
-        }
+        return mgCalc.Simplify(sourceMg); // Fallback
     }
-    else {
-        console.error("No MathGene calculation library found globally.");
-        throw new Error("MathGene calculation library missing");
+    
+    switch (commandName) {
+        case 'Simplify':
+            return mgCalc.Simplify(sourceMg);
+        case 'Expand':
+            return mgCalc.Expand(sourceMg);
+        case 'Solve for':
+            return mgCalc.Simplify(sourceMg); // Use Simplify for Evaluate
+        case 'Factor':
+            return mgCalc.Factor ? mgCalc.Factor(sourceMg) : mgCalc.Simplify(sourceMg);
+        default:
+            console.warn("Unknown MathGene command:", commandName);
+            return sourceMg;
     }
 }
 
+// Helper function to check if LaTeX contains an equals sign
+function containsEqualsSign(latexStr) {
+    // Simple check for the equals sign in LaTeX (=)
+    return latexStr.includes('=');
+}
+
 function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance) {
-    console.log("applyMathGeneCommand called");
-    console.log("Command:", commandName);
+    console.log("applyMathGeneCommand called with command:", commandName);
+    console.log("Command type check:", typeof commandName);
     console.log("Source LaTeX:", sourceLatex);
     console.log("Target MathField Instance:", targetMathFieldInstance);
 
@@ -75,11 +61,50 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
 
     try {
         let sourceMg, resultMg, mathGeneResult;
+        let processedSourceLatex = sourceLatex;
+        
+        // For "Solve for" commands, check if there's an equals sign
+        if (typeof commandName === 'string' && commandName.toLowerCase().startsWith('solve for ')) {
+            if (!containsEqualsSign(sourceLatex)) {
+                // If no equals sign, assume expression = 0
+                processedSourceLatex = sourceLatex + ' = 0';
+                console.log("No equals sign in equation, assuming equals zero:", processedSourceLatex);
+            }
+        }
         
         // Use mgCalc if available (like in equivalence.js)
         if (hasMgCalc) {
+            console.log("Using mgCalc approach");
+            
             // When using mgCalc, we don't need to convert from LaTeX - it handles it directly
-            resultMg = executeMathGeneOperation(commandName, sourceLatex);
+            // Handle "Solve for x" using mgCalc.Solve
+            if (typeof commandName === 'string' && commandName.toLowerCase().startsWith('solve for ')) {
+                const variable = commandName.substring('solve for '.length).trim();
+                console.log("Extracted variable for Solve:", variable);
+                console.log("mgCalc.Solve available:", !!mgCalc.Solve);
+                
+                resultMg = mgCalc.Solve ? mgCalc.Solve(processedSourceLatex, variable) : mgCalc.Simplify(processedSourceLatex);
+                console.log("Solve result:", resultMg);
+            } else {
+                switch (commandName) {
+                    case 'Simplify':
+                        resultMg = mgCalc.Simplify(processedSourceLatex);
+                        break;
+                    case 'Expand':
+                        resultMg = mgCalc.Expand(processedSourceLatex);
+                        break;
+                    case 'Solve for':
+                        // Fallback if no variable specified
+                        resultMg = mgCalc.Simplify(processedSourceLatex);
+                        break;
+                    case 'Factor':
+                        resultMg = mgCalc.Factor ? mgCalc.Factor(processedSourceLatex) : mgCalc.Simplify(processedSourceLatex);
+                        break;
+                    default:
+                        console.warn("Unknown MathGene command:", commandName);
+                        resultMg = processedSourceLatex;
+                }
+            }
             
             // mgCalc returns an object with a latex property
             if (!resultMg || !resultMg.latex) {
@@ -95,7 +120,7 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
         }
         // Fall back to mgTrans/mgCalculate
         else if (hasMgTransCalculate) {
-            sourceMg = mgTrans.texImport(sourceLatex);
+            sourceMg = mgTrans.texImport(processedSourceLatex);
             console.log("Source MG:", sourceMg);
 
             resultMg = executeMathGeneOperation(commandName, sourceMg);
@@ -112,7 +137,7 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
             if (!mathGeneResult || typeof mathGeneResult.latex === 'undefined') {
                 console.error("mgTrans.Output did not return a valid result with a latex property.");
                 const originalOutputAttempt = mgTrans.Output(sourceMg);
-                const fallbackLatex = (originalOutputAttempt && originalOutputAttempt.latex) ? originalOutputAttempt.latex : sourceLatex;
+                const fallbackLatex = (originalOutputAttempt && originalOutputAttempt.latex) ? originalOutputAttempt.latex : processedSourceLatex;
                 targetMathFieldInstance.mathField.latex(`\\text{Error: Output failed} \\; ${fallbackLatex}`);
                 return;
             }
@@ -146,6 +171,7 @@ class CommandPalette {
     this.filteredCommands = [];
     this.currentReferenceElement = null;
     this.lastFocusedMathField = null; // Track last focused math field
+    this.variableInputMode = false;
     this.setupEvents();
     
     document.addEventListener('click', (event) => {
@@ -216,14 +242,145 @@ class CommandPalette {
   }
   
   selectCurrent() {
+    console.log("selectCurrent called with input:", this.inputElement.value);
+    const typedInput = this.inputElement.value.trim();
+    
+    // Special case: User typed "Solve for x" but no command is selected
+    if (this.selectedIndex < 0 && typedInput.toLowerCase().startsWith('solve for ')) {
+      console.log("No selection but detected 'Solve for x' pattern - proceeding anyway");
+      const variable = typedInput.substring('solve for '.length).trim();
+      
+      if (variable) {
+        let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
+        
+        if (!referenceContainer && this.lastFocusedMathField) {
+          referenceContainer = this.lastFocusedMathField;
+          console.log("Using fallback to last focused math field");
+        }
+
+        if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+          const mathGroupInstance = referenceContainer.parentElement.mathGroup;
+          const sourceLatex = referenceContainer.dataset.latex || '';
+          const newMathFieldInstance = mathGroupInstance.insertMathFieldAfter(referenceContainer);
+          newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
+          
+          console.log(`Directly solving for variable: ${variable}`);
+          applyMathGeneCommand(typedInput, sourceLatex, newMathFieldInstance);
+          this.hide();
+          return;
+        }
+      }
+      
+      // If we got here, we couldn't process the command
+      console.log("Couldn't process Solve command with no reference container");
+      this.hide();
+      return;
+    }
+    
     if (this.selectedIndex < 0 || this.selectedIndex >= this.filteredCommands.length) {
+      console.log("No valid selection index, hiding palette");
       this.hide();
       return;
     }
 
     const selectedCommand = this.filteredCommands[this.selectedIndex];
     const commandLabel = selectedCommand.label;
+    
+    console.log("Selected command:", commandLabel);
+    console.log("Typed input:", typedInput);
+    console.log("Variable input mode:", this.variableInputMode);
 
+    // Check if the user directly typed a complete "Solve for x" command
+    if (typedInput.toLowerCase().startsWith('solve for ') && !this.variableInputMode) {
+      console.log("Detected direct 'Solve for x' input pattern");
+      // User directly typed "Solve for x" - extract variable and process
+      const variable = typedInput.substring('solve for '.length).trim();
+      console.log("Extracted variable:", variable);
+      
+      if (variable) {
+        let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
+        
+        if (!referenceContainer && this.lastFocusedMathField) {
+          referenceContainer = this.lastFocusedMathField;
+          console.log("Using fallback to last focused math field");
+        }
+
+        if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+          const mathGroupInstance = referenceContainer.parentElement.mathGroup;
+          const sourceLatex = referenceContainer.dataset.latex || '';
+          const newMathFieldInstance = mathGroupInstance.insertMathFieldAfter(referenceContainer);
+          newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
+          
+          console.log(`Directly solving for variable: ${variable}`);
+          applyMathGeneCommand(typedInput, sourceLatex, newMathFieldInstance);
+          this.hide();
+          return;
+        } else {
+          console.warn("No reference container found for solve operation");
+        }
+      }
+    }
+
+    // Handle "Solve for" special case (when selected from list but no variable yet)
+    if (commandLabel === 'Solve for' && !this.variableInputMode) {
+      this.inputElement.value = 'Solve for ';
+      this.inputElement.classList.add('variable-input-mode');
+      this.variableInputMode = true;
+      this.inputElement.focus();
+      
+      // Position cursor at the right position
+      const cursorPosition = 'Solve for '.length;
+      this.inputElement.setSelectionRange(cursorPosition, cursorPosition);
+      return;
+    }
+
+    // If we're in variable input mode and Enter is pressed
+    if (this.variableInputMode) {
+      const variable = typedInput.substring('Solve for '.length).trim();
+      
+      if (!variable) {
+        // If no variable provided, just remind the user
+        this.inputElement.classList.add('error');
+        setTimeout(() => this.inputElement.classList.remove('error'), 500);
+        return;
+      }
+      
+      // Variable is entered, proceed with solving
+      this.variableInputMode = false;
+      this.inputElement.classList.remove('variable-input-mode');
+      
+      let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
+      
+      if (!referenceContainer && this.lastFocusedMathField) {
+        referenceContainer = this.lastFocusedMathField;
+        console.log("Using fallback to last focused math field");
+      }
+
+      if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+        const mathGroupInstance = referenceContainer.parentElement.mathGroup;
+        const sourceLatex = referenceContainer.dataset.latex || '';
+
+        const newMathFieldInstance = mathGroupInstance.insertMathFieldAfter(referenceContainer);
+
+        newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
+        
+        // Pass the full "Solve for variable" command to be processed
+        console.log(`Solving for variable: ${variable}`);
+        applyMathGeneCommand(`Solve for ${variable}`, sourceLatex, newMathFieldInstance);
+      } else {
+        console.warn("No reference math field found to apply Solve for:", variable);
+        const notification = document.createElement('div');
+        notification.textContent = `Please select a math field first before solving for ${variable}`;
+        notification.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#f44336; color:white; padding:10px; border-radius:4px; z-index:9999;';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+
+      this.hide();
+      return;
+    }
+
+    // For commands other than "Solve for variable"
     let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
     
     if (!referenceContainer && this.lastFocusedMathField) {
@@ -239,6 +396,8 @@ class CommandPalette {
 
       newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
       
+      // Use the command label from the selection instead of typed input for standard commands
+      console.log(`Processing standard command: ${commandLabel}`);
       applyMathGeneCommand(commandLabel, sourceLatex, newMathFieldInstance);
     } else {
       console.warn("No reference math field found to apply command:", commandLabel);
@@ -280,18 +439,36 @@ class CommandPalette {
   hide() {
     this.paletteElement.style.display = 'none';
     this.currentReferenceElement = null;
+    this.variableInputMode = false;
+    this.inputElement.classList.remove('variable-input-mode');
   }
 
   renderOptions() {
     const query = this.inputElement.value.toLowerCase();
+    console.log("Rendering options for query:", query);
     this.optionsElement.innerHTML = '';
-    this.filteredCommands = this.commands.filter(c => c.label.toLowerCase().includes(query));
+    
+    // Special case for "Solve for x" - keep the "Solve for" command visible
+    if (query.startsWith('solve for ') && query.length > 'solve for '.length) {
+      console.log("Special case: keeping 'Solve for' command for solve operation");
+      this.filteredCommands = this.commands.filter(c => 
+        c.label.toLowerCase() === 'solve for' || c.label.toLowerCase().includes(query)
+      );
+    } else {
+      this.filteredCommands = this.commands.filter(c => c.label.toLowerCase().includes(query));
+    }
+    
+    console.log("Filtered commands:", this.filteredCommands.map(c => c.label));
     this.selectedIndex = -1;
 
     this.filteredCommands.forEach((cmd, index) => {
       const optionEl = document.createElement('div');
       optionEl.className = 'command-palette-option';
-      optionEl.textContent = cmd.label;
+      if (cmd.label.toLowerCase() === 'solve for') {
+        optionEl.innerHTML = 'Solve for <span class="solve-for-variable">variable</span>';
+      } else {
+        optionEl.textContent = cmd.label;
+      }
       
       optionEl.addEventListener('mouseenter', () => {
         this.selectedIndex = index;
@@ -337,7 +514,6 @@ window.commandPalette = new CommandPalette();
 window.commandPalette.setCommands([
   new CommandOption('Simplify', () => {}),
   new CommandOption('Expand',   () => {}),
-  new CommandOption('Evaluate', () => {}),
+  new CommandOption('Solve for', () => {}),
   new CommandOption('Factor',   () => {}),
-  new CommandOption('Substitute', () => console.log('Substitute action (placeholder)')),
 ]);

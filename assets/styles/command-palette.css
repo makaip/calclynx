@@ -33,6 +33,23 @@
     border-color: #00c59a;
 }
 
+.command-palette-input.variable-input-mode {
+    position: relative;
+}
+
+.command-palette-input.variable-input-mode::after {
+    content: '';
+    position: absolute;
+    left: 10ch; /* Position after "Solve for " */
+    bottom: 2px;
+    height: calc(100% - 16px);
+    width: 30px;
+    background: rgba(255, 255, 170, 0.1);
+    border: 1px dashed #666;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
 .command-palette-options {
     max-height: 300px; /* Taller options container */
     overflow-y: auto;
@@ -53,4 +70,13 @@
 
 .command-palette-option:first-child {
     margin-top: 0;
+}
+
+.solve-for-variable {
+    display: inline-block;
+    border: 1px solid #666;
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-left: 0px;
+    color: #fff; 
 }
