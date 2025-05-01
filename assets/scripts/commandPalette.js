@@ -91,6 +91,12 @@ class CommandPalette {
     if (indexToSelect >= 0 && indexToSelect < this.filteredCommands.length) {
       const selectedCommand = this.filteredCommands[indexToSelect];
       selectedCommand.action();
+      const focusedField = document.querySelector('.mq-focused')?.closest('.math-field-container');
+      const referenceContainer = focusedField 
+        || document.querySelector('.math-field-container.selected-field');
+      if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+        referenceContainer.parentElement.mathGroup.insertMathFieldAfter(referenceContainer);
+      }
       this.hide();
     }
   }
@@ -142,8 +148,8 @@ class CommandPalette {
       });
       
       optionEl.addEventListener('click', () => {
-        cmd.action();
-        this.hide();
+        this.selectedIndex = index;
+        this.selectCurrent();
       });
       
       this.optionsElement.appendChild(optionEl);

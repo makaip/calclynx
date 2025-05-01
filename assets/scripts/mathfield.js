@@ -55,6 +55,11 @@ class MathField {
         document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
         MathField.edit(this.container);
       }
+
+      // Mark this container as selected-field, clear others
+      document.querySelectorAll('.math-field-container.selected-field')
+        .forEach(el => el.classList.remove('selected-field'));
+      this.container.classList.add('selected-field');
     });
 
     this.mathGroup.element.appendChild(this.container);

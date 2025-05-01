@@ -116,6 +116,12 @@ class MathBoard {
         return;
       }
 
+      // Remove container selection if clicking outside
+      if (!event.target.closest('.math-field-container')) {
+        document.querySelectorAll('.math-field-container.selected-field')
+          .forEach(el => el.classList.remove('selected-field'));
+      }
+
       // Otherwise, if clicking on a math group (stack), handle selection.
       const mathGroupTarget = event.target.closest('.math-group');
       if (mathGroupTarget) {
