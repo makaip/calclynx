@@ -93,6 +93,8 @@ class MathGroup {
 
     newFieldInstance.mathField.focus();
     // State saved by finalize/blur of the new field
+    
+    return newFieldInstance; // <<< Return the new instance
   }
 
   // --- Field Drag and Drop Logic (Delegated) ---
