@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Select all math groups on the canvas
       const allGroups = document.querySelectorAll('.math-group');
       allGroups.forEach(group => group.classList.add('selected'));
+    } else if (modifierKey && e.key.toLowerCase() === 'k') { // Show command palette (Ctrl+K / Cmd+K)
+      e.preventDefault();
+      window.commandPalette.show();
     }
     // Clipboard shortcuts (cut/copy/paste) are now handled in clipboardHandlers.js
   });

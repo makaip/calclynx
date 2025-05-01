@@ -1,0 +1,41 @@
+/* Drag Handle Styles */
+.drag-handle {
+    position: absolute;
+    left: 2px; /* Position handle inside the left padding */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px; /* Adjust width */
+    height: 18px; /* Adjust height */
+    background-color: rgba(200, 200, 200, 0.25); /* Greyish background with target opacity */
+    border-radius: 3px;
+    cursor: grab;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px; /* Space between dots */
+    padding: 3px; /* Padding inside the handle */
+    box-sizing: border-box;
+    opacity: 0; /* Initially invisible */
+    /* transition: opacity 0.2s ease-in-out; */
+    pointer-events: none; /* Initially ignore pointer events */
+}
+
+.math-field-container:hover .drag-handle {
+    opacity: 1; /* Make fully visible on hover (background already has 25% alpha) */
+    pointer-events: auto; /* Allow interaction when visible */
+}
+
+.drag-handle-dot {
+    width: 2px; /* Size of each dot */
+    height: 2px; /* Size of each dot */
+    background-color: rgba(255, 255, 255, 0.7); /* White dots */
+    border-radius: 50%;
+    justify-self: center; /* Center dots horizontally */
+    align-self: center; /* Center dots vertically */
+    pointer-events: none; /* Ensure clicks go to the handle */
+}
+
+/* Change cursor when grabbing the handle */
+.drag-handle:active {
+    cursor: grabbing;
+}

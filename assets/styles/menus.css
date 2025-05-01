@@ -1,0 +1,67 @@
+/* Hamburger Menu Styles */
+#menu-container {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+}
+
+#hamburgerBtn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+#menu {
+    display: none;
+    background-color: #1d1d1d;
+    border: 1px solid #666;
+    border-radius: 5px;
+    margin-top: 5px;
+    padding: 5px;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    font-family: 'Inter', sans-serif;
+}
+
+#menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#menu li {
+    padding: 5px 10px;
+    color: white;
+    cursor: pointer;
+    position: relative;
+}
+
+#menu li:hover {
+    background-color: #333;
+}
+
+#menu li:active {
+    background-color: rgba(0, 197, 154, 0.3);
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: #1d1d1d;
+    border: 1px solid #666;
+    border-radius: 5px;
+    min-width: 150px;
+    z-index: 1001;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.menu-item:hover > .submenu {
+    display: block;
+}

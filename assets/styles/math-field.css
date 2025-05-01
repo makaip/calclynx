@@ -1,0 +1,74 @@
+/* Math field container styling */
+.math-field-container {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Vertically center items */
+    flex-direction: row; /* Align items horizontally */
+    position: relative;
+    padding: 0 5px 0 25px; /* Adjust padding: Keep right padding, add left padding for handle */
+}
+  
+/* Remove gradient border from the container itself */
+.math-field-container:not(:last-child) {
+    margin-bottom: 1px; /* Add margin to create space for the pseudo-element border */
+}
+  
+/* Add pseudo-element for the gradient border */
+.math-field-container:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; /* Position it in the space created by margin-bottom */
+    left: 25px; /* Start after the handle padding */
+    right: 5px; /* End before the right padding */
+    height: 1px;
+    background: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a); /* Apply gradient as background */
+}
+  
+/* Editable math field styling */
+.math-field {
+    min-height: 40px;
+    display: inline-block;
+    padding: 5px;
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    background: transparent;
+    color: #ffffff;
+    border-radius: 0 !important; /* Ensure no border-radius */
+    flex-grow: 1; /* Allow math field to take available space */
+}
+  
+/* MathQuill styling overrides */
+.mq-editable-field,
+.mq-math-mode {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: none !important; /* Ensure no border is applied */
+    border-radius: 0 !important; /* Ensure no border-radius */
+}
+  
+.mq-focused {
+    outline: 1px solid #00c59a !important; /* Optional: Use outline for focus instead of border */
+    border-radius: 0 !important; /* Ensure no border-radius */
+}
+  
+.mq-editable-field .mq-cursor {
+    border-left: 1px solid #ffffff !important; /* Changed border to white and thinner */
+}
+
+/* Style for the math field container being dragged */
+.math-field-container.dragging-field {
+    opacity: 0.6;
+    background-color: rgba(50, 50, 50, 0.5); /* Slight background highlight */
+    z-index: 10; /* Ensure it's above siblings */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    pointer-events: none; /* Ignore pointer events while dragging */
+}
+  
+/* Style for the placeholder indicating drop position */
+.drop-placeholder {
+    height: 30px; /* Match approximate field height */
+    background-color: rgba(0, 197, 154, 0.1); /* Semi-transparent green */
+    border: 1px dashed #00c59a;
+    margin: 2px 0; /* Add some spacing */
+    box-sizing: border-box;
+}

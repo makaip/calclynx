@@ -1,0 +1,20 @@
+/* Huge canvas with dotted background extending 20,000x20,000px */
+#canvas {
+    position: absolute;
+    top: -10000px;
+    left: -10000px;
+    width: 20000px;
+    height: 20000px;
+    background-color: #1d1d1d;
+    background-image: radial-gradient(#282828 1px, transparent 1px);
+    background-size: 20px 20px;
+    transform-origin: 0 0;
+}
+
+.selection-box {
+    position: absolute;
+    border: 1px dashed #00c59a;
+    background-color: rgba(0, 197, 154, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+}

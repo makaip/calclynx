@@ -1,0 +1,41 @@
+/* Context Menu Styles */
+.context-menu {
+    position: absolute;
+    background-color: #1d1d1d;
+    border: 1px solid #666;
+    border-radius: 5px;
+    display: none;
+    z-index: 2000;
+    min-width: 150px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    font-family: 'Inter', sans-serif;
+}
+
+.context-menu-item {
+    padding: 8px 12px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Hovered state */
+.context-menu-item:hover {
+    background-color: #333;
+}
+
+/* Selected state (can be applied programmatically, if needed) */
+.context-menu-item:active {
+    background-color: rgba(0, 197, 154, 0.3);
+}
+
+/* Disabled state */
+.context-menu-item.disabled {
+    color: #888;
+    cursor: not-allowed;
+}
+
+/* Separator between groups */
+.context-menu-separator {
+    border-top: 1px solid #444;
+    margin: 4px 0;
+}
