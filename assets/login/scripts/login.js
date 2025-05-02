@@ -47,33 +47,33 @@ emailPasswordForm.addEventListener('submit', async (e) => {
     }
 
     try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
+        // Try signing in first
+        let { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password,
         });
 
+        // If sign-in fails (e.g., user not found), try signing up
+        if (error && error.message.includes('Invalid login credentials')) { // Or check for specific error code
+             ({ data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+            }));
+             // Optional: Handle email confirmation if enabled in Supabase settings
+             if (!error && data.user && !data.session) {
+                 displayError('Sign up successful! Please check your email to confirm your account.'); // Adjust message if auto-confirm is on
+                 return; // Don't redirect yet if confirmation is needed
+             }
+        }
+
         if (error) throw error;
 
-        // On successful login, redirect to a dashboard or home page
-        window.location.href = '/dashboard.html'; // Adjust the redirect URL as needed
+        // On successful login or sign up (if auto-confirmed), redirect
+        window.location.href = '/dashboard.html'; // Correct redirect URL
 
     } catch (error) {
-        console.error('Error signing in:', error);
-        displayError(error.message || 'Invalid login credentials.');
+        console.error('Error signing in/up:', error);
+        // Provide a more generic error for signup failures if needed
+        displayError(error.message || 'An error occurred during authentication.');
     }
 });
-
-// Optional: Check if user is already logged in on page load
-// (e.g., if they refresh after logging in or come back)
-async function checkUserSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        // If a session exists, redirect to the dashboard
-        // This prevents logged-in users from seeing the login page again
-        // window.location.href = '/dashboard.html';
-        console.log('User already logged in:', session.user.email);
-    }
-}
-
-// Check session on page load
-// checkUserSession(); // Uncomment if you want auto-redirect for logged-in users

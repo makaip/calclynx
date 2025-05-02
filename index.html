@@ -23,8 +23,8 @@
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
                 <div class="auth-buttons">
-                    <a href="/app.html" class="login-btn">Log In</a>
-                    <a href="/app.html" class="signup-btn">Sign Up</a>
+                    <a href="/login.html" class="login-btn">Log In</a>
+                    <a href="/login.html" class="signup-btn">Sign Up</a>
                 </div>
             </nav>
         </div>
@@ -36,7 +36,7 @@
                 <h1>The most intuitive math interface</h1>
                 <p>Type expressions, hit enter to create new lines, and reorder them as you work. Calclynx makes mathematical exploration intuitive and accessible, completely free.</p>
                 <div class="cta-buttons">
-                    <a href="/app.html" class="signup-btn">Sign Up</a>
+                    <a href="/login.html" class="signup-btn">Sign Up</a>
                     <button class="secondary-btn" onclick="document.getElementById('features').scrollIntoView({ behavior: 'smooth' });">Learn More</button>
                 </div>
             </div>
@@ -154,7 +154,7 @@
             <h2>Start Your Math Journey Today</h2>
             <p>Join students, teachers, and professionals who use Calclynx for a more intuitive math experience.</p>
             <div class="cta-buttons">
-                <button class="primary-btn">Sign Up Free</button>
+                <a href="/login.html" class="primary-btn">Sign Up Free</a>
             </div>
         </div>
     </section>
@@ -203,6 +203,10 @@
         </div>
     </footer>
 
-    <script src="assets/landing/script.js"></script>
+    <!-- Supabase Client (needed for session check) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="assets/supabaseinit.js"></script>
+
+    <script type="module" src="assets/landing/script.js"></script>
 </body>
 </html>

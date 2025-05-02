@@ -1,7 +1,22 @@
-document.addEventListener('DOMContentLoaded', (event) => {
-    // Code to run after the DOM is fully loaded
-    console.log('DOM fully loaded and parsed');
+import { supabaseClient } from '../supabaseinit.js'; // Import Supabase client
 
+// Function to check session and redirect if logged in
+async function checkSessionAndRedirect() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        // If a session exists, redirect to the dashboard
+        console.log('User already logged in, redirecting to dashboard...');
+        window.location.href = '/dashboard.html';
+    } else {
+        console.log('No active session found.');
+        // Initialize landing page features only if not redirecting
+        initializeLandingPageFeatures();
+    }
+}
+
+// Function to initialize all landing page specific JS
+function initializeLandingPageFeatures() {
+    console.log('Initializing landing page features.');
     // Mouse-based rotation for hero section image
     const heroImageContainer = document.querySelector('.hero-image'); // Target the container div
 
@@ -119,4 +134,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     // Add any other landing page specific JavaScript here
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
+    // Check session status first
+    checkSessionAndRedirect();
+    // Note: initializeLandingPageFeatures() is now called inside checkSessionAndRedirect
+    // if the user is not logged in.
 });
