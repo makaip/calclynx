@@ -57,3 +57,8 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 - **MathQuill:** Used for rendering and editing math expressions.
 - **jQuery:** For simplified DOM manipulation and event handling.
 - **MathGene:** Powers the expression equivalence detection system.
+
+
+ - site footer on dashboard
+ - settings & deletion page
+ - way to get back to dashboard from the app

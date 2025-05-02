@@ -16,8 +16,8 @@ export function initializeAuthButtons() {
                 signOutButton.disabled = false;
                 signOutButton.textContent = 'Sign Out';
             } else {
-                // Redirect to login page after successful sign out
-                window.location.href = '/login.html';
+                // Redirect to landing page after successful sign out
+                window.location.href = '/'; // Changed from '/login.html'
             }
         });
     }
