@@ -24,10 +24,7 @@ googleSignInButton.addEventListener('click', async (e) => {
     clearError();
     try {
         const { error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/dashboard.html' // Redirect after successful Google login
-            }
+            provider: 'google'
         });
         if (error) throw error;
         // Redirect happens automatically via Supabase

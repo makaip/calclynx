@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Calclynx</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Dashboard CSS -->
+    <link rel="stylesheet" href="assets/dashboard/dashboard.css">
+    <!-- Favicon -->
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Calclynx</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Sign Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Search Bar and New File Button -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-8">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search files..." aria-label="Search">
+                    <button class="btn btn-outline-primary-custom" type="submit">Search</button>
+                </form>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                <button class="btn btn-primary-custom btn-new-file">
+                    <i class="fas fa-plus me-1"></i> New File
+                </button>
+            </div>
+        </div>
+
+        <!-- File Viewer -->
+        <div class="card dashboard-card">
+            <div class="card-body file-viewer p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center checkbox-col">
+                                <input class="form-check-input" type="checkbox" id="selectAllCheckbox" title="Select all files">
+                            </th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Last Edited</th>
+                            <th scope="col">Size</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fileTableBody">
+                        <tr data-file-name="Project Budget">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Project Budget</a></td>
+                            <td>2023-10-26 10:30 AM</td>
+                            <td>15 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Project Budget">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Meeting Notes">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Meeting Notes</a></td>
+                            <td>2023-10-25 03:15 PM</td>
+                            <td>5 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Meeting Notes">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Analysis Report">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Analysis Report</a></td>
+                            <td>2023-10-24 09:00 AM</td>
+                            <td>1.2 MB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Analysis Report">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Old Data Set">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Old Data Set</a></td>
+                            <td>2022-01-15 11:00 AM</td>
+                            <td>550 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Old Data Set">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Calculations v1">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Calculations v1</a></td>
+                            <td>2023-10-20 08:20 PM</td>
+                            <td>8 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Calculations v1">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Calculations v2 Final">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Calculations v2 Final</a></td>
+                            <td>2023-10-21 09:00 AM</td>
+                            <td>9 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Calculations v2 Final">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-file-name="Calculations v3 Final Final">
+                            <td class="text-center checkbox-col">
+                                <input class="form-check-input file-checkbox" type="checkbox">
+                            </td>
+                            <td><a href="#">Calculations v3 Final Final</a></td>
+                            <td>2023-10-22 10:00 AM</td>
+                            <td>10 KB</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger action-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-bs-filename="Calculations v3 Final Final">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                Showing 7 files.
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="fileNameToDelete">this file</strong>? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Custom Dashboard JS -->
+    <script src="assets/dashboard/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #00c59a;
+    --primary-hover: #00b38a;
+    --dark-color: #1d1d1d;
+    --darker-color: #141414;
+    --light-color: #2c2c2c; /* Used for card/table backgrounds */
+    --lighter-color: #3a3a3a; /* Used for hover/focus/table header */
+    --text-color: #ffffff;
+    --text-secondary: #bbbbbb;
+    --border-color: #444444;
+    --danger-color: #ff3b30;
+    --danger-hover: #e03024;
+    --border-radius: 12px;
+    --button-radius: 8px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --transition: all 0.2s ease;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--dark-color); /* Use variable */
+    color: var(--text-color);
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Navbar Adjustments */
+.navbar {
+    background-color: var(--darker-color) !important; /* Use variable */
+    border-bottom: 1px solid var(--border-color) !important; /* Use variable */
+}
+
+.navbar-brand {
+    color: var(--text-color) !important; /* Keep brand white */
+    font-weight: 700;
+}
+
+.nav-link {
+    color: var(--text-secondary) !important; /* Use variable */
+}
+
+.nav-link:hover, .nav-link:focus {
+    color: var(--text-color) !important; /* Use variable */
+}
+
+/* Search Bar */
+.form-control {
+    background-color: var(--light-color); /* Use variable */
+    border: 1px solid var(--border-color); /* Use variable */
+    color: var(--text-color); /* Use variable */
+    border-radius: var(--button-radius);
+}
+
+.form-control:focus {
+    background-color: var(--lighter-color); /* Use variable */
+    border-color: var(--primary-color); /* Use variable */
+    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3);
+    color: var(--text-color); /* Use variable */
+}
+
+.form-control::placeholder {
+    color: var(--text-secondary); /* Use variable */
+}
+
+.btn-outline-primary-custom {
+    color: var(--primary-color); /* Use variable */
+    border-color: var(--primary-color); /* Use variable */
+    border-radius: var(--button-radius);
+    font-weight: 500;
+}
+
+.btn-outline-primary-custom:hover {
+    background-color: var(--primary-color); /* Use variable */
+    color: var(--darker-color); /* Use variable */
+    border-color: var(--primary-color); /* Use variable */
+}
+
+/* New File Button */
+.btn-new-file {
+    background-color: var(--primary-color);
+    color: var(--darker-color); /* Dark text on primary button */
+    border: none;
+    border-radius: var(--button-radius);
+    font-weight: 600;
+    padding: 0.5rem 1rem; /* Adjust padding if needed */
+}
+
+.btn-new-file:hover {
+    background-color: var(--primary-hover);
+    color: var(--darker-color);
+}
+
+.btn-new-file:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 197, 154, 0.4); /* Primary color focus */
+}
+
+/* Dashboard Card */
+.dashboard-card {
+    background-color: var(--light-color); /* Use variable */
+    border: 1px solid var(--border-color); /* Use variable */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.dashboard-card .card-footer {
+    background-color: var(--lighter-color); /* Use variable */
+    border-top: 1px solid var(--border-color); /* Use variable */
+    color: var(--text-secondary); /* Use variable */
+    font-size: 0.9rem;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+/* File Viewer Table */
+.file-viewer {
+    max-height: 65vh;
+    overflow-y: auto;
+    /* Apply radius to the scroll container itself */
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+.table {
+    --bs-table-bg: var(--light-color); /* Use variable */
+    --bs-table-color: var(--text-color); /* Use variable */
+    --bs-table-border-color: var(--border-color); /* Use variable */
+    --bs-table-hover-bg: var(--lighter-color); /* Use variable */
+    --bs-table-hover-color: var(--text-color); /* Use variable */
+}
+
+.table th {
+    position: sticky;
+    top: 0;
+    background-color: var(--lighter-color); /* Use variable for header background */
+    color: var(--text-secondary); /* Use variable */
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color); /* Use variable */
+    z-index: 1;
+}
+
+.table td {
+    color: var(--text-secondary); /* Use variable */
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.table td a {
+    color: var(--text-color); /* Use variable */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.table td a:hover {
+    color: var(--primary-color); /* Use variable */
+    text-decoration: underline;
+}
+
+.table th, .table td {
+    padding: 0.8rem 0.75rem; /* Adjust padding slightly */
+}
+
+.checkbox-col {
+    width: 3rem; /* Fixed width for checkbox column */
+    padding-left: 1rem !important; /* Ensure padding for checkbox */
+    padding-right: 0.5rem !important;
+}
+
+.table th.checkbox-col {
+    vertical-align: middle;
+}
+
+.table td.checkbox-col .form-check-input {
+    margin: 0; /* Remove default margins */
+}
+
+.table tbody tr.table-active,
+.table tbody tr.table-active:hover {
+    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.15); /* Use Bootstrap's state color slightly adjusted */
+    --bs-table-color-state: var(--text-color);
+}
+
+/* Style checkboxes */
+.form-check-input {
+    cursor: pointer;
+    border-color: var(--border-color);
+    width: 1.2em; /* Increase width */
+    height: 1.2em; /* Increase height */
+    margin-top: 0.1em; /* Adjust vertical alignment if needed */
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Modal Styles (Ensure they fit the dark theme) */
+.modal-content {
+    background-color: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Make close button visible on dark background */
+}
+
+/* Action Button (X) */
+.action-btn.btn-outline-danger {
+    color: var(--danger-color); /* Use variable */
+    border-color: var(--danger-color); /* Use variable */
+    border-radius: var(--button-radius); /* Keep slight radius or set to 0 for perfect square */
+    padding: 0.2rem 0; /* Adjust padding for square shape */
+    width: 28px; /* Set fixed width */
+    height: 28px; /* Set fixed height */
+    line-height: 1;
+    font-size: 0.9rem;
+    display: inline-flex; /* Use flexbox for centering */
+    align-items: center; /* Center icon vertically */
+    justify-content: center; /* Center icon horizontally */
+}
+
+.action-btn.btn-outline-danger:hover {
+    background-color: var(--danger-color); /* Use variable */
+    color: var(--text-color); /* Use variable */
+    border-color: var(--danger-color); /* Use variable */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-color); /* Use variable */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color); /* Use variable */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--lighter-color); /* Use variable */
+}
+
+/* Focus States */
+a:focus, button:focus, input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.5); /* Adjusted alpha for better visibility */
+}
+
+.navbar-brand:focus, .nav-link:focus {
+    box-shadow: none;
+    text-decoration: underline;
+    text-decoration-color: var(--primary-color);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+}
+
+.form-control:focus {
+     box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.4);
+}
+
+.action-btn:focus {
+    box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.5); /* Danger color focus */
+}
