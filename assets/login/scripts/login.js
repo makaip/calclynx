@@ -23,11 +23,18 @@ googleSignInButton.addEventListener('click', async (e) => {
     e.preventDefault();
     clearError();
     try {
+        // Construct the redirect URL dynamically based on the current origin
+        const redirectURL = window.location.origin + '/dashboard.html';
+        console.log('Redirecting to:', redirectURL); // Optional: for debugging
+
         const { error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google'
+            provider: 'google',
+            options: {
+                redirectTo: redirectURL // Use relative path combined with origin
+            }
         });
         if (error) throw error;
-        // Redirect happens automatically via Supabase
+        // Redirect should now consistently go to dashboard.html if successful
     } catch (error) {
         console.error('Error signing in with Google:', error);
         displayError(error.message || 'An error occurred during Google sign-in.');
@@ -69,7 +76,7 @@ emailPasswordForm.addEventListener('submit', async (e) => {
         if (error) throw error;
 
         // On successful login or sign up (if auto-confirmed), redirect
-        window.location.href = '/dashboard.html'; // Correct redirect URL
+        window.location.href = '/dashboard.html'; // Use relative path
 
     } catch (error) {
         console.error('Error signing in/up:', error);

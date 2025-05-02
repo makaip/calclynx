@@ -4,9 +4,9 @@ import { supabaseClient } from '../supabaseinit.js'; // Import Supabase client
 async function checkSessionAndRedirect() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        // If a session exists, redirect to the dashboard
+        // If a session exists, redirect to the relative dashboard URL
         console.log('User already logged in, redirecting to dashboard...');
-        window.location.href = '/dashboard.html';
+        window.location.href = '/dashboard.html'; // Use relative path
     } else {
         console.log('No active session found.');
         // Initialize landing page features only if not redirecting
