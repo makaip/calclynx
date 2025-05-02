@@ -1,0 +1,242 @@
+:root {
+    --primary-color: #00c59a;
+    --primary-hover: #00b38a;
+    --secondary-color: #333333;
+    --dark-color: #1d1d1d;
+    --darker-color: #141414;
+    --light-color: #2c2c2c;
+    --lighter-color: #3a3a3a;
+    --text-color: #ffffff;
+    --text-secondary: #bbbbbb;
+    --border-color: #444444;
+    --danger-color: #ff3b30;
+    --success-color: #4cd964;
+    --border-radius: 12px;
+    --button-radius: 8px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --transition: all 0.2s ease;
+    --google-button-bg: #ffffff; /* Google button specific */
+    --google-button-text: #333333; /* Google button specific */
+    --google-button-border: #dddddd; /* Google button specific */
+    --google-button-hover-bg: #f7f7f7; /* Google button specific */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    background-color: var(--darker-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-weight: 400;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: var(--transition);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.auth-box {
+    background-color: var(--dark-color);
+    padding: 40px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.logo {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    text-decoration: none;
+}
+
+.logo:hover {
+    text-decoration: none;
+}
+
+/* Updated heading/subtitle styles */
+.auth-box h2 {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: center;
+}
+
+.auth-box .subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 35px; /* Increased margin */
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* Google Sign In Button Styles */
+.google-signin-button {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--google-button-bg);
+    color: var(--google-button-text);
+    border: 1px solid var(--google-button-border);
+    border-radius: var(--button-radius);
+    font-size: 1rem;
+    font-weight: 500; /* Medium weight */
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; /* Align icon and text */
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between icon and text */
+    margin-bottom: 25px; /* Add margin below Google button */
+}
+
+.google-signin-button:hover {
+    background-color: var(--google-button-hover-bg);
+    border-color: #cccccc;
+}
+
+.google-signin-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4); /* Google blue focus */
+}
+
+.google-signin-button i.fa-google {
+    font-size: 1.2em;
+}
+
+/* Separator Styles */
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0; /* Adjust margin */
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.separator span {
+    padding: 0 15px; /* Space around OR */
+}
+
+/* Form Styles */
+#email-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px; /* Space between form elements */
+    margin-bottom: 20px; /* Space before error message */
+}
+
+.input-group {
+    text-align: left; /* Align labels and inputs left */
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.input-group input[type="email"],
+.input-group input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--button-radius);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.input-group input[type="email"]:focus,
+.input-group input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--lighter-color);
+    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3); /* Primary color focus glow */
+}
+
+/* Standard Sign In Button Styles */
+.signin-button {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--primary-color);
+    color: var(--dark-color); /* Dark text on primary button */
+    border: none;
+    border-radius: var(--button-radius);
+    font-size: 1rem;
+    font-weight: 600; /* Bold weight */
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 10px; /* Add some space above the button */
+}
+
+.signin-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.signin-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 197, 154, 0.4); /* Primary color focus */
+}
+
+.signin-button:disabled {
+    background-color: var(--light-color);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    margin-top: 20px; /* Adjusted margin */
+    min-height: 1.2em;
+    text-align: center;
+}
+
+/* Focus States for Accessibility */
+button:focus, a:focus {
+    outline: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-box {
+        padding: 30px 25px;
+    }
+    .auth-box h2 {
+        font-size: 1.5rem;
+    }
+}
