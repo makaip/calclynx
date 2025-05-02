@@ -4,6 +4,7 @@
 :root {
     --primary-color: #00c59a;
     --primary-hover: #00b38a;
+    --primary-rgb: 0, 197, 154;
     --dark-color: #1d1d1d;
     --darker-color: #141414;
     --light-color: #2c2c2c; /* Used for card/table backgrounds */
@@ -17,6 +18,8 @@
     --button-radius: 8px;
     --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     --transition: all 0.2s ease;
+
+    --bs-primary-rgb: var(--primary-rgb);
 }
 
 body {
@@ -57,7 +60,7 @@ body {
 .form-control:focus {
     background-color: var(--lighter-color); /* Use variable */
     border-color: var(--primary-color); /* Use variable */
-    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3); /* Use RGB variable */
     color: var(--text-color); /* Use variable */
 }
 
@@ -78,6 +81,33 @@ body {
     border-color: var(--primary-color); /* Use variable */
 }
 
+/* Override Bootstrap Primary Button */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--darker-color); /* Dark text on primary button */
+    border: none;
+    border-radius: var(--button-radius);
+    font-weight: 600;
+    padding: 0.5rem 1rem; /* Adjust padding if needed */
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    color: var(--darker-color);
+}
+
+.btn-primary:focus, .btn-primary.focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.4); /* Use RGB variable */
+    background-color: var(--primary-hover); /* Maintain hover color on focus */
+    color: var(--darker-color);
+}
+
+.btn-primary:active, .btn-primary.active {
+    background-color: var(--primary-hover);
+    color: var(--darker-color);
+}
+
 /* New File Button */
 .btn-new-file {
     background-color: var(--primary-color);
@@ -88,14 +118,24 @@ body {
     padding: 0.5rem 1rem; /* Adjust padding if needed */
 }
 
-.btn-new-file:hover {
-    background-color: var(--primary-hover);
-    color: var(--darker-color);
+/* Secondary button for Search */
+.btn-secondary {
+    background-color: var(--lighter-color);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--button-radius);
+    font-weight: 500;
 }
 
-.btn-new-file:focus {
+.btn-secondary:hover {
+    background-color: var(--border-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 197, 154, 0.4); /* Primary color focus */
+    box-shadow: 0 0 0 3px rgba(var(--bs-secondary-rgb), 0.4); /* Use Bootstrap secondary focus */
 }
 
 /* Dashboard Card */
@@ -182,7 +222,7 @@ body {
 
 .table tbody tr.table-active,
 .table tbody tr.table-active:hover {
-    --bs-table-bg-state: rgba(var(--bs-primary-rgb), 0.15); /* Use Bootstrap's state color slightly adjusted */
+    --bs-table-bg-state: rgba(var(--primary-rgb), 0.15); /* Use green tint */
     --bs-table-color-state: var(--text-color);
 }
 
@@ -203,7 +243,7 @@ body {
 .form-check-input:focus {
     border-color: var(--primary-color);
     outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25); /* Use green focus */
 }
 
 /* Modal Styles (Ensure they fit the dark theme) */
@@ -269,7 +309,7 @@ body {
 /* Focus States */
 a:focus, button:focus, input:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.5); /* Adjusted alpha for better visibility */
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.5); /* Adjusted alpha for better visibility */
 }
 
 .navbar-brand:focus, .nav-link:focus {
@@ -281,9 +321,17 @@ a:focus, button:focus, input:focus {
 }
 
 .form-control:focus {
-     box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.4);
+     box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.4);
 }
 
 .action-btn:focus {
     box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.5); /* Danger color focus */
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.4);
+}
+
+.btn-secondary:focus {
+    box-shadow: 0 0 0 3px rgba(var(--bs-secondary-rgb), 0.4);
 }
