@@ -1,0 +1,76 @@
+/* Circle Indicator Styles */
+.circle-indicator {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.math-field-container:hover .circle-indicator {
+    opacity: 0;
+}
+
+.circle-indicator.identical {
+    /* Will fill background only when editing is active */
+    border-color: var(--circle-color, #ccc);
+}
+
+.circle-indicator.equivalent {
+    border-color: var(--circle-color, #ccc);
+    background: transparent;
+}
+
+.identical-editing .circle-indicator.identical {
+    background-color: var(--circle-color, #ccc);
+}
+
+/* Sync Indicator Styles */
+#sync-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1002; /* Above menu */
+    display: none; /* Hidden by default */
+    padding: 5px;
+    background-color: rgba(40, 40, 40, 0.8); /* Semi-transparent background */
+    border-radius: 50%;
+    width: 34px; /* Container size */
+    height: 34px; /* Container size */
+    box-sizing: border-box;
+    pointer-events: none; /* Don't interfere with clicks */
+}
+
+#sync-indicator svg {
+    width: 24px; /* Icon size */
+    height: 24px; /* Icon size */
+    stroke: #ccc; /* Green color for the icon */
+    display: block; /* Center SVG in container */
+}
+
+/* Style for when syncing is active */
+#sync-indicator.syncing {
+    display: block; /* Show the indicator */
+    /* Optional: Add animation */
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}

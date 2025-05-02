@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Calclynx</title>
+    <link rel="stylesheet" href="assets/login/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <a href="/" class="logo">Calclynx</a>
+            <h2>Sign in to your account</h2>
+            <p class="subtitle">Continue with Google or enter your credentials.</p>
+            <button id="google-signin-button" class="google-signin-button">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </button>
+            <div class="separator">
+                <span>OR</span>
+            </div>
+            <form id="email-password-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="signin-button">Sign in</button>
+            </form>
+            <div id="auth-error-message" class="error-message"></div>
+            <p class="signup-link">Don't have an account? <a href="/login.html">Sign up</a></p> <!-- Or link to a separate signup page if you create one -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script type="module" src="assets/supabaseinit.js"></script>
+    <script type="module" src="assets/login/scripts/login.js"></script>
+</body>
+</html>
