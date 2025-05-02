@@ -36,8 +36,7 @@ class Navigation {
           const logical = this.screenToCanvas(e.clientX, e.clientY);
 
           // 2. compute new scale
-          const direction = e.deltaY < 0 ? 1 : -1;
-          const factor    = Math.pow(zoomFactor, direction);
+          const factor    = Math.pow(zoomFactor, -e.deltaY / 3);
           const newScale  = Math.min(maxScale, Math.max(minScale, this.board.scale * factor));
 
           // 3. update scale
