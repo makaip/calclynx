@@ -14,6 +14,14 @@
     cursor: pointer;
     padding: 5px; /* Add some padding for easier clicking */
     line-height: 1; /* Prevent extra vertical space */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Add transform to transition */
+}
+
+/* Hide and slide hamburger button when sidebar is open */
+body.sidebar-open #hamburgerBtn {
+    opacity: 0;
+    transform: translateX(-40px); /* Slide left */
+    pointer-events: none; /* Prevent interaction when hidden */
 }
 
 /* Sidebar Styles */
@@ -25,8 +33,7 @@
     height: 100%;
     background-color: #1e1e1e;
     border-right: 1px solid #444;
-    padding: 20px;
-    padding-top: 70px; /* Increased padding-top */ 
+    padding: 30px;
     box-sizing: border-box;
     z-index: 1000;
     transition: width 0.3s ease, left 0.3s ease; /* Re-add width transition */

@@ -80,3 +80,18 @@
     margin-left: 0px;
     color: #fff; 
 }
+
+.command-palette-option {
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    border-radius: 0;
+  }
+  
+  .command-palette-option:last-child {
+    border-bottom: none;
+  }
+  
+  .command-palette-option.selected {
+    background-color: #333;
+    color: white;
+  }
