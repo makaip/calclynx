@@ -7,25 +7,14 @@
   
   <!-- MathQuill CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="assets/app/styles/main.css" /> 
   
   <!-- Command Palette Selection Style -->
   <style>
-    .command-palette-option {
-      padding: 8px 12px;
-      border-bottom: 1px solid #333;
-      border-radius: 0;
-    }
-    
-    .command-palette-option:last-child {
-      border-bottom: none;
-    }
-    
-    .command-palette-option.selected {
-      background-color: #333;
-      color: white;
-    }
+
   </style>
 </head>
 <body>
@@ -42,8 +31,16 @@
     <ul>
       <li><a href="#">Item 1</a></li>
       <li><a href="#">Item 2</a></li>
-      <li><a href="#">Settings</a></li>
     </ul>
+
+    <!-- Sidebar Footer -->
+    <div id="sidebar-footer">
+        <a href="/settings.html" id="settings-link" title="Settings">
+            <i class="fas fa-cog" id="settings-icon"></i>
+        </a>
+        <span id="user-status-text"></span> <!-- Added user status span -->
+        <!-- Add other footer items like sign out here if needed -->
+    </div>
   </div>
 
   <!-- Main Content Area -->

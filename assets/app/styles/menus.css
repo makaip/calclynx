@@ -31,7 +31,7 @@ body.sidebar-open #hamburgerBtn {
     left: -400px; /* Start hidden off-screen (updated width) */
     width: 400px; /* Default width */
     height: 100%;
-    background-color: #1e1e1e;
+    background-color: #171717;
     border-right: 1px solid #444;
     padding: 30px;
     box-sizing: border-box;
@@ -55,6 +55,73 @@ body.sidebar-open #hamburgerBtn {
 #sidebar h2 {
     margin-top: 0; /* Reset margin-top as padding-top handles spacing */
     margin-bottom: 20px; /* Add space below title */
+}
+
+/* Placeholder for File List */
+#file-list {
+    margin-top: 20px; /* Space below the title */
+    flex-grow: 1; /* Allow file list to take up available space */
+    overflow-y: auto; /* Add scroll if file list is long */
+}
+
+#file-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#file-list ul li {
+    padding: 8px 10px; /* Padding for list items */
+    cursor: pointer;
+    border-radius: 4px; /* Slightly rounded corners */
+    margin-bottom: 4px; /* Space between items */
+    transition: background-color 0.2s ease;
+}
+
+#file-list ul li:hover {
+    background-color: #333; /* Hover background */
+    color: #00c59a;
+}
+
+/* Sidebar Footer for Settings */
+#sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 30px; /* Match sidebar padding */
+    box-sizing: border-box;
+    border-top: 1px solid #444; /* Separator line */
+    background-color: #171717; /* Match sidebar background */
+    display: flex; /* Use flex for alignment */
+    align-items: center; /* Center items vertically */
+}
+
+#settings-link {
+    color: #ccc; /* Default icon color */
+    text-decoration: none;
+    display: inline-flex; /* Align icon properly */
+    align-items: center;
+}
+
+#settings-icon {
+    font-size: 20px; /* Adjust icon size */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#settings-link:hover #settings-icon {
+    color: #00c59a; /* Hover color */
+}
+
+#user-status-text {
+    margin-left: 15px; /* Space between icon and text */
+    font-size: 0.85rem; /* Smaller font size */
+    color: #aaa; /* Subdued color */
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
+    max-width: calc(100% - 40px); /* Limit width (adjust as needed) */
 }
 
 #sidebar ul {

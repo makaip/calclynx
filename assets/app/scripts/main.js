@@ -73,6 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize version manager UI (if applicable)
   // Example: window.versionManager.initializeUI();
 
+  // Update user status display
+  updateUserStatus();
+
+  // Listen for auth state changes (e.g., login/logout in another tab)
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    console.log("Auth state changed:", _event, session);
+    updateUserStatus();
+    // Optionally reload file list or perform other actions on auth change
+    if (window.mathBoard && window.mathBoard.fileManager) {
+        // Re-check file loading/saving capabilities based on new auth state
+        window.mathBoard.fileManager.updateSaveIndicator(); // Update save state based on auth
+        // Potentially reload file list if sidebar is open and showing files
+    }
+  });
+
   // Load file data if fileId is present in URL
   window.mathBoard.fileManager.loadFileFromUrl();
 
@@ -94,3 +109,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 }); // End DOMContentLoaded
+
+// Function to update user status in the sidebar footer
+async function updateUserStatus() {
+  const userStatusTextElement = document.getElementById('user-status-text');
+  if (!userStatusTextElement) return;
+
+  try {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+      console.error("Error getting session:", error);
+      userStatusTextElement.textContent = 'Error loading status';
+      return;
+    }
+
+    if (session && session.user) {
+      // User is logged in
+      const userEmail = session.user.email;
+      userStatusTextElement.textContent = `Logged in as ${userEmail}`;
+      userStatusTextElement.title = `Logged in as ${userEmail}`; // Add title for full email on hover
+    } else {
+      // User is not logged in
+      userStatusTextElement.textContent = 'Log in to save your work';
+      userStatusTextElement.title = ''; // Clear title
+    }
+  } catch (err) {
+    console.error("Exception checking auth status:", err);
+    userStatusTextElement.textContent = 'Error loading status';
+  }
+}
