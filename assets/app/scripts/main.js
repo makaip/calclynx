@@ -19,43 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Detect if user is on a Mac
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-  
-  // New Hamburger Menu Logic (existing code) ...
+
+  // Get the hamburger button element (but don't add listeners)
   const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const menu = document.getElementById('menu');
 
-  // Toggle menu display when clicking the hamburger button.
-  hamburgerBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-  });
-
-  // Hide the menu when clicking outside the menu container.
-  document.addEventListener('click', (e) => {
-    if (!document.getElementById('menu-container').contains(e.target)) {
-      menu.style.display = 'none';
-    } else {
-      document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
-      if (window.expressionEquivalence) {
-        window.expressionEquivalence.removeAllHighlights();
-      }
-    }
-  });
-
-  // Export JSON functionality.
-  document.getElementById('exportOption').addEventListener('click', () => {
-    window.mathBoard.fileManager.exportData();
-    menu.style.display = 'none';
-  });
-
-  // Import JSON functionality.
-  document.getElementById('importOption').addEventListener('click', () => {
-    document.getElementById('importInput').click();
-    menu.style.display = 'none';
-  });
-
-  // When a file is chosen, read its contents and import the data.
-  document.getElementById('importInput').addEventListener('change', (event) => {
+  // Import JSON file handling (keep this if import is triggered elsewhere)
+  const importInput = document.getElementById('importInput');
+  importInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -75,40 +45,52 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
-  // Listen for keyboard shortcuts to trigger undo, redo, select all.
+  // Command Palette Initialization
+  const commandPalette = new CommandPalette(window.mathBoard);
+  // Add trigger for command palette (e.g., Ctrl+Shift+P or Cmd+Shift+P)
   document.addEventListener('keydown', (e) => {
-    // Check if the active element is editable.
-    const activeEl = document.activeElement;
-    const isEditable = activeEl &&
-      (activeEl.tagName === 'INPUT' ||
-       activeEl.tagName === 'TEXTAREA' ||
-       activeEl.isContentEditable ||
-       activeEl.classList.contains('mq-editable-field'));
-    
-    if (isEditable) {
-      // Allow native behavior (like cut/copy/paste) inside text fields.
-      return;
+    const modifier = isMac ? e.metaKey : e.ctrlKey;
+    if (modifier && e.shiftKey && e.key === 'P') {
+      e.preventDefault();
+      commandPalette.show();
     }
-
-    // Check for modifier key based on platform (Ctrl for Windows/Linux, Command for Mac)
-    const modifierKey = isMac ? e.metaKey : e.ctrlKey;
-    
-    if (modifierKey && e.key === 'z') { // Undo (Ctrl+Z / Cmd+Z)
-      e.preventDefault();
-      window.versionManager.undo();
-    } else if (modifierKey && e.key === 'y') { // Redo (Ctrl+Y / Cmd+Y)
-      e.preventDefault();
-      window.versionManager.redo();
-    } else if (modifierKey && e.key === 'a') { // Select All (Ctrl+A / Cmd+A)
-      e.preventDefault();
-      // Select all math groups on the canvas
-      const allGroups = document.querySelectorAll('.math-group');
-      allGroups.forEach(group => group.classList.add('selected'));
-    } else if (modifierKey && e.key.toLowerCase() === 'k') { // Show command palette (Ctrl+K / Cmd+K)
-      e.preventDefault();
-      window.commandPalette.show();
-    }
-    // Clipboard shortcuts (cut/copy/paste) are now handled in clipboardHandlers.js
   });
 
-});
+  // Initialize context menu (assuming contextmenu.js is loaded)
+  if (typeof ContextMenu !== 'undefined') {
+    // The context menu initialization is handled within contextmenu.js
+  } else {
+    console.error("ContextMenu class not found. Check script loading order.");
+  }
+
+  // Initialize navigation features
+  if (typeof Navigation !== 'undefined') {
+    window.navigation = new Navigation(window.mathBoard);
+  } else {
+    console.error("Navigation class not found. Check script loading order.");
+  }
+
+  // Initialize version manager UI (if applicable)
+  // Example: window.versionManager.initializeUI();
+
+  // Load file data if fileId is present in URL
+  window.mathBoard.fileManager.loadFileFromUrl();
+
+  // Initialize save indicator
+  const saveIndicator = new SaveIndicator('saveIndicator');
+  window.mathBoard.fileManager.setSaveIndicator(saveIndicator);
+
+  // Initial save state check
+  window.mathBoard.fileManager.updateSaveIndicator();
+
+  // Add event listener for beforeunload to check for unsaved changes
+  window.addEventListener('beforeunload', (event) => {
+    if (window.mathBoard.fileManager.hasUnsavedChanges()) {
+      // Standard way to trigger the browser's confirmation dialog
+      event.preventDefault();
+      // Chrome requires returnValue to be set
+      event.returnValue = '';
+    }
+  });
+
+}); // End DOMContentLoaded

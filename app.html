@@ -29,62 +29,45 @@
   </style>
 </head>
 <body>
-  <!-- Sync Indicator -->
-  <div id="sync-indicator">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud">
-      <polyline points="16 16 12 12 8 16"></polyline>
-      <line x1="12" y1="12" x2="12" y2="21"></line>
-      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
-      <polyline points="16 16 12 12 8 16"></polyline>
-    </svg>
-  </div>
-
   <!-- Hamburger Menu -->
   <div id="menu-container">
     <button id="hamburgerBtn">☰</button>
-    <div id="menu">
-      <ul>
-        <li class="menu-item">File
-          <ul class="submenu">
-            <li id="exportOption">Export JSON</li>
-            <li id="importOption">Import JSON</li>
-          </ul>
-        </li>
-        <li class="menu-item">Edit
-          <ul class="submenu">
-            <li>Undo</li>
-            <li>Redo</li>
-          </ul>
-        </li>
-        <li class="menu-item">View
-          <ul class="submenu">
-            <li>Zoom In</li>
-            <li>Zoom Out</li>
-          </ul>
-        </li>
-        <li class="menu-item">Insert
-          <ul class="submenu">
-            <li>New Math Group</li>
-          </ul>
-        </li>
-        <li class="menu-item">Tools
-          <ul class="submenu">
-            <li>Settings</li>
-          </ul>
-        </li>
-      </ul>
-    </div>
   </div>
-  
-  <!-- The huge canvas holds all math groups -->
-  <div id="canvas"></div>
 
-  <!-- Right-Click Context Menu -->
-  <div id="context-menu" class="context-menu"></div>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-resizer"></div> <!-- Add this line -->
+    <h2>Menu</h2>
+    <!-- Add sidebar content here -->
+    <ul>
+      <li><a href="#">Item 1</a></li>
+      <li><a href="#">Item 2</a></li>
+      <li><a href="#">Settings</a></li>
+    </ul>
+  </div>
 
-  <!-- Hidden file input for importing JSON -->
-  <input type="file" id="importInput" accept=".json" style="display: none;">
-  
+  <!-- Main Content Area -->
+  <div id="main-content">
+    <!-- Sync Indicator -->
+    <div id="sync-indicator">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud">
+        <polyline points="16 16 12 12 8 16"></polyline>
+        <line x1="12" y1="12" x2="12" y2="21"></line>
+        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+        <polyline points="16 16 12 12 8 16"></polyline>
+      </svg>
+    </div>
+
+    <!-- The huge canvas holds all math groups -->
+    <div id="canvas"></div>
+
+    <!-- Right-Click Context Menu -->
+    <div id="context-menu" class="context-menu"></div>
+
+    <!-- Hidden file input for importing JSON -->
+    <input type="file" id="importInput" accept=".json" style="display: none;">
+  </div>
+
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
@@ -110,6 +93,6 @@
   <script src="assets/app/scripts/mathgene-worker.js"></script>
   <script src="assets/app/scripts/commandpalette.js"></script>
   <script src="assets/app/scripts/main.js"></script>
-  
+  <script src="/assets/app/scripts/sidebar.js"></script>
 </body>
 </html>

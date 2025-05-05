@@ -1,10 +1,12 @@
 // Import the necessary MathGene scripts into the worker's scope
 // Paths are relative to the worker script's location
-try {
-    importScripts('../../../libs/mathgene/mg_translate.js', '../../../libs/mathgene/mg_calculate.js');
-} catch (e) {
-    console.error('mathgene-worker: Failed to import MathGene scripts.', e);
-    throw e; // Stop worker execution if libraries can't load
+if (typeof self !== 'undefined' && typeof self.importScripts === 'function') {
+    try {
+        self.importScripts('../../../libs/mathgene/mg_translate.js', '../../../libs/mathgene/mg_calculate.js');
+    } catch (e) {
+        console.error('mathgene-worker: Failed to import MathGene scripts.', e);
+        throw e;
+    }
 }
 
 // This worker assumes mgCalc is loaded globally in its scope

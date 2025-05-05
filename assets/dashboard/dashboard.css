@@ -108,6 +108,15 @@ body {
     color: var(--darker-color);
 }
 
+.btn-primary:disabled, .btn-primary.disabled {
+    background-color: var(--primary-color);
+    color: var(--darker-color);
+    opacity: 0.65; /* Standard Bootstrap disabled opacity */
+    cursor: not-allowed;
+    border-color: var(--primary-color); /* Ensure border matches */
+    box-shadow: none; /* Remove any focus shadow */
+}
+
 /* New File Button */
 .btn-new-file {
     background-color: var(--primary-color);
