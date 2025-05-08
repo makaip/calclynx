@@ -28,9 +28,11 @@
     <div id="sidebar-resizer"></div> <!-- Add this line -->
     <h2>Menu</h2>
     <!-- Add sidebar content here -->
-    <ul>
-      <li><a href="#">Item 1</a></li>
-      <li><a href="#">Item 2</a></li>
+
+    <h3 class="sidebar-heading">Your Files</h3>
+    <ul id="sidebar-file-list" class="sidebar-list">
+        <!-- File list will be populated here -->
+        <li><span class="loading-text">Loading files...</span></li>
     </ul>
 
     <!-- Sidebar Footer -->
@@ -86,10 +88,11 @@
   <script src="assets/app/scripts/versionmanager.js"></script>
   <script src="assets/app/scripts/contextmenu.js"></script>
   <script src="assets/app/scripts/equivalence.js"></script>
+  
   <!-- Worker script MUST be after MathGene scripts and equivalence.js -->
   <script src="assets/app/scripts/mathgene-worker.js"></script>
   <script src="assets/app/scripts/commandpalette.js"></script>
   <script src="assets/app/scripts/main.js"></script>
-  <script src="/assets/app/scripts/sidebar.js"></script>
+  <script src="assets/app/scripts/sidebar.js"></script> <!-- Removed leading slash -->
 </body>
 </html>

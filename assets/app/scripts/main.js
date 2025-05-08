@@ -80,33 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     console.log("Auth state changed:", _event, session);
     updateUserStatus();
-    // Optionally reload file list or perform other actions on auth change
-    if (window.mathBoard && window.mathBoard.fileManager) {
-        // Re-check file loading/saving capabilities based on new auth state
-        window.mathBoard.fileManager.updateSaveIndicator(); // Update save state based on auth
-        // Potentially reload file list if sidebar is open and showing files
+    // Reload file list in the sidebar
+    if (typeof window.loadUserFiles === 'function') {
+        window.loadUserFiles();
     }
   });
 
-  // Load file data if fileId is present in URL
-  window.mathBoard.fileManager.loadFileFromUrl();
-
-  // Initialize save indicator
-  const saveIndicator = new SaveIndicator('saveIndicator');
-  window.mathBoard.fileManager.setSaveIndicator(saveIndicator);
-
-  // Initial save state check
-  window.mathBoard.fileManager.updateSaveIndicator();
-
-  // Add event listener for beforeunload to check for unsaved changes
-  window.addEventListener('beforeunload', (event) => {
-    if (window.mathBoard.fileManager.hasUnsavedChanges()) {
-      // Standard way to trigger the browser's confirmation dialog
-      event.preventDefault();
-      // Chrome requires returnValue to be set
-      event.returnValue = '';
-    }
-  });
+  // Load file data if fileId is present in URL using the correct method
+  window.mathBoard.fileManager.loadState(); // Corrected function call
 
 }); // End DOMContentLoaded
 
