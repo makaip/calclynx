@@ -116,6 +116,7 @@
 
 .danger-button:hover {
   background-color: #e03024;
+  border: none;
 }
 
 .cancel-button {

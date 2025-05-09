@@ -146,7 +146,7 @@ class FileManager {
 
       } catch (error) {
         console.error("Error loading file content from cloud:", error);
-        alert(`Error loading file: ${error.message}. Starting with an empty board.`);
+        //alert(`Error loading file: ${error.message}. Starting with an empty board.`);
         // Initialize VersionManager with the empty state if needed
         if (window.versionManager) {
             const initialState = window.versionManager.getCurrentState(); // Should be empty '[]'
@@ -226,7 +226,7 @@ class FileManager {
         }
       } catch (error) {
          console.error("Error importing data:", error);
-         alert("Failed to load board data. The file might be corrupted.");
+         //alert("Failed to load board data. The file might be corrupted.");
          // Optionally clear the board or initialize empty state here as well
          this.board.canvas.innerHTML = '';
          if (window.versionManager) {

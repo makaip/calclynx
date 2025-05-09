@@ -93,30 +93,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to update user status in the sidebar footer
 async function updateUserStatus() {
-  const userStatusTextElement = document.getElementById('user-status-text');
-  if (!userStatusTextElement) return;
+  const userEmailDisplay = document.getElementById('user-email-display');
+  const authButton = document.getElementById('auth-button');
+
+  if (!userEmailDisplay || !authButton) return;
 
   try {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
 
     if (error) {
       console.error("Error getting session:", error);
-      userStatusTextElement.textContent = 'Error loading status';
+      userEmailDisplay.textContent = '';
       return;
     }
 
     if (session && session.user) {
       // User is logged in
       const userEmail = session.user.email;
-      userStatusTextElement.textContent = `Logged in as ${userEmail}`;
-      userStatusTextElement.title = `Logged in as ${userEmail}`; // Add title for full email on hover
+      
+      // Update email display
+      userEmailDisplay.textContent = userEmail;
+      userEmailDisplay.title = userEmail; // Add title for full email on hover
+      
+      // Update auth button to show Sign Out
+      authButton.textContent = "Sign Out";
+      authButton.onclick = async (e) => {
+        e.preventDefault();
+        try {
+          authButton.disabled = true;
+          authButton.textContent = "Signing Out...";
+          await supabaseClient.auth.signOut();
+          // Redirect will happen via onAuthStateChange listener
+        } catch (err) {
+          console.error("Error signing out:", err);
+          alert("Error signing out. Please try again.");
+          authButton.disabled = false;
+          authButton.textContent = "Sign Out";
+        }
+      };
     } else {
       // User is not logged in
-      userStatusTextElement.textContent = 'Log in to save your work';
-      userStatusTextElement.title = ''; // Clear title
+      userEmailDisplay.textContent = '';
+      userEmailDisplay.title = ''; // Clear title
+      
+      // Update auth button to show Sign In
+      authButton.textContent = "Sign In";
+      authButton.onclick = (e) => {
+        e.preventDefault();
+        window.location.href = '/login.html';
+      };
     }
   } catch (err) {
     console.error("Exception checking auth status:", err);
-    userStatusTextElement.textContent = 'Error loading status';
+    userEmailDisplay.textContent = '';
   }
 }

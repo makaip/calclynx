@@ -66,8 +66,8 @@ body.sidebar-open #hamburgerBtn {
     color: #aaa;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-top: 25px; /* Space above the heading */
-    margin-bottom: 10px; /* Space below the heading */
+    margin-top: 20px; /* Space above the heading */
+    margin-bottom: 5px; /* Space below the heading */
     font-weight: 500;
 }
 
@@ -181,7 +181,7 @@ body.sidebar-open #hamburgerBtn {
     border-top: 1px solid #444; /* Separator line */
     display: flex;
     align-items: center;
-    gap: 15px; /* Space between items */
+    justify-content: space-between; /* Changed from gap to space-between */
 }
 
 #settings-link {
@@ -201,7 +201,49 @@ body.sidebar-open #hamburgerBtn {
     white-space: nowrap; /* Prevent wrapping */
     overflow: hidden; /* Hide overflow */
     text-overflow: ellipsis; /* Add ellipsis if text is too long */
-    max-width: calc(100% - 40px); /* Limit width (adjust as needed) */
+    flex: 1; /* Allow this element to take available space */
+    margin-right: 10px; /* Add space before the auth button */
+}
+
+/* Add auth button styling */
+.auth-button {
+    background-color: var(--primary-color, #00c59a);
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--button-radius, 6px);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    margin-left: auto; /* Push to the right edge */
+    /* Add fixed dimensions to prevent any size changes */
+    box-sizing: border-box;
+}
+
+.auth-button:hover {
+    background-color: var(--primary-hover, #00b38a);
+    /* Ensure no size-changing properties */
+    box-shadow: none;
+    border: none; 
+    padding: 6px 12px; /* Keep same padding */
+}
+
+/* User email display under logo */
+.user-email-display {
+    font-size: 0.85rem;
+    color: #aaa; 
+    margin-top: -20px; /* Changed from -15px to positive value */
+    margin-bottom: 5px;
+    padding: 5px 2px; /* Added vertical padding */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.4; /* Ensure proper line height */
+    min-height: 20px; /* Ensure minimum height */
+    display: block; /* Ensure block display */
 }
 
 #sidebar ul {
