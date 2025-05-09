@@ -72,10 +72,15 @@ window.loadUserFiles = async function() {
             a.href = `/app.html?fileId=${file.id}`;
             a.title = file.file_name || 'Untitled'; // Tooltip for long names
 
+            // Create a wrapper for title and metadata
+            const fileLinkContent = document.createElement('div');
+            fileLinkContent.classList.add('file-link-content');
+
             // Create title span
             const titleSpan = document.createElement('span');
             titleSpan.classList.add('file-title');
             titleSpan.textContent = file.file_name || 'Untitled';
+            fileLinkContent.appendChild(titleSpan);
 
             // Create metadata div
             const metadataDiv = document.createElement('div');
@@ -96,16 +101,74 @@ window.loadUserFiles = async function() {
             metadataDiv.appendChild(lastModifiedSpan);
             metadataDiv.appendChild(separatorSpan);
             metadataDiv.appendChild(fileSizeSpan);
+            fileLinkContent.appendChild(metadataDiv);
 
-            a.appendChild(titleSpan);
-            a.appendChild(metadataDiv);
+            a.appendChild(fileLinkContent); // Add content wrapper to link
 
             if (file.id === currentFileId) {
                 a.classList.add('active'); // Highlight current file
             }
 
-            li.appendChild(a);
+            // --- Add triple-dot action button ---
+            const actionButton = document.createElement('button');
+            actionButton.classList.add('file-actions-button');
+            actionButton.innerHTML = '&#x22EE;'; // Vertical ellipsis (⋮)
+            actionButton.title = 'File actions';
+            a.appendChild(actionButton); // Append button to the <a> tag
+
+            li.appendChild(a); // Append link (now containing content and button) to list item
+
+            const actionMenu = document.createElement('div');
+            actionMenu.classList.add('file-actions-menu');
+            actionMenu.innerHTML = `
+                <ul>
+                    <li><a href="#" class="rename-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Rename</a></li>
+                    <li><a href="#" class="delete-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Delete</a></li>
+                </ul>
+            `;
+            li.appendChild(actionMenu);
+
+            actionButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent li click event and sidebar closing
+                e.preventDefault(); // Prevent default button behavior
+                // Hide all other open menus before showing this one
+                document.querySelectorAll('.file-actions-menu').forEach(menu => {
+                    if (menu !== actionMenu) {
+                        menu.style.display = 'none';
+                    }
+                });
+                actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            actionMenu.querySelector('.rename-file-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                actionMenu.style.display = 'none';
+                const fileId = e.target.dataset.fileId;
+                const fileName = e.target.dataset.fileName;
+                handleRenameFileClick(fileId, fileName);
+            });
+
+            actionMenu.querySelector('.delete-file-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                actionMenu.style.display = 'none';
+                const fileId = e.target.dataset.fileId;
+                const fileName = e.target.dataset.fileName;
+                handleDeleteFileClick(fileId, fileName);
+            });
+            // --- End action button and menu ---
+
             sidebarFileList.appendChild(li);
+        });
+
+        // Close action menus if clicking outside of them or their buttons
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.file-actions-button') && !e.target.closest('.file-actions-menu')) {
+                document.querySelectorAll('.file-actions-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
         });
 
     } catch (error) {
@@ -113,6 +176,160 @@ window.loadUserFiles = async function() {
         sidebarFileList.innerHTML = '<li><span class="error-text">Error loading files.</span></li>';
     }
 };
+
+// --- Rename File Modal Logic ---
+const renameFileModal = document.getElementById('renameFileModal');
+const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
+const cancelRenameFileBtn = document.getElementById('cancelRenameFileButton');
+const confirmRenameFileBtn = document.getElementById('confirmRenameFileButton');
+const newFileNameInput = document.getElementById('newFileNameInput');
+const renameErrorMessage = document.getElementById('rename-error-message');
+let fileIdToRename = null;
+
+function handleRenameFileClick(fileId, currentName) {
+    fileIdToRename = fileId;
+    if (newFileNameInput) newFileNameInput.value = currentName;
+    if (renameErrorMessage) renameErrorMessage.style.display = 'none';
+    if (renameFileModal) renameFileModal.style.display = 'block';
+    if (newFileNameInput) newFileNameInput.focus();
+}
+
+if (closeRenameFileModalBtn) {
+    closeRenameFileModalBtn.addEventListener('click', () => {
+        if (renameFileModal) renameFileModal.style.display = 'none';
+    });
+}
+if (cancelRenameFileBtn) {
+    cancelRenameFileBtn.addEventListener('click', () => {
+        if (renameFileModal) renameFileModal.style.display = 'none';
+    });
+}
+
+if (confirmRenameFileBtn) {
+    confirmRenameFileBtn.addEventListener('click', async () => {
+        const newName = newFileNameInput ? newFileNameInput.value.trim() : '';
+        if (!newName) {
+            if (renameErrorMessage) {
+                renameErrorMessage.textContent = 'File name cannot be empty.';
+                renameErrorMessage.style.display = 'block';
+            }
+            return;
+        }
+        if (renameErrorMessage) renameErrorMessage.style.display = 'none';
+
+        try {
+            confirmRenameFileBtn.disabled = true;
+            confirmRenameFileBtn.textContent = 'Renaming...';
+            if (window.mathBoard && window.mathBoard.fileManager) {
+                await window.mathBoard.fileManager.renameFile(fileIdToRename, newName);
+            } else {
+                throw new Error("FileManager not available.");
+            }
+            if (renameFileModal) renameFileModal.style.display = 'none';
+            if (typeof window.loadUserFiles === 'function') window.loadUserFiles(); 
+            // If the current file was renamed, fileManager.renameFile handles title update via this.updateFileTitle()
+        } catch (error) {
+            console.error('Error renaming file:', error);
+            if (renameErrorMessage) {
+                renameErrorMessage.textContent = error.message || 'Failed to rename file.';
+                renameErrorMessage.style.display = 'block';
+            }
+        } finally {
+            confirmRenameFileBtn.disabled = false;
+            confirmRenameFileBtn.textContent = 'Rename';
+        }
+    });
+}
+
+
+// --- Delete File Confirmation Modal Logic (Sidebar) ---
+const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
+const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
+const cancelDeleteSidebarFileBtn = document.getElementById('cancelDeleteSidebarFileButton');
+const confirmDeleteSidebarFileBtn = document.getElementById('confirmDeleteSidebarFileButton');
+const fileNameToDeleteSidebarElement = document.getElementById('fileNameToDeleteSidebar');
+const doNotAskAgainDeleteFileCheckbox = document.getElementById('doNotAskAgainDeleteFile');
+const deleteSidebarFileErrorMessage = document.getElementById('delete-sidebar-file-error-message');
+let fileIdToDeleteFromSidebar = null;
+
+function handleDeleteFileClick(fileId, fileName) {
+    fileIdToDeleteFromSidebar = fileId;
+    if (fileNameToDeleteSidebarElement) fileNameToDeleteSidebarElement.textContent = fileName;
+    if (deleteSidebarFileErrorMessage) deleteSidebarFileErrorMessage.style.display = 'none';
+    if (doNotAskAgainDeleteFileCheckbox) doNotAskAgainDeleteFileCheckbox.checked = false;
+
+    if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
+        confirmActualFileDelete(); 
+    } else {
+        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'block';
+    }
+}
+
+if (closeDeleteSidebarFileModalBtn) {
+    closeDeleteSidebarFileModalBtn.addEventListener('click', () => {
+        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
+    });
+}
+if (cancelDeleteSidebarFileBtn) {
+    cancelDeleteSidebarFileBtn.addEventListener('click', () => {
+        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
+    });
+}
+
+if (confirmDeleteSidebarFileBtn) {
+    confirmDeleteSidebarFileBtn.addEventListener('click', async () => {
+        if (doNotAskAgainDeleteFileCheckbox && doNotAskAgainDeleteFileCheckbox.checked) {
+            sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
+        }
+        await confirmActualFileDelete();
+    });
+}
+
+async function confirmActualFileDelete() {
+    if (!fileIdToDeleteFromSidebar) return;
+    try {
+        if (confirmDeleteSidebarFileBtn) {
+            confirmDeleteSidebarFileBtn.disabled = true;
+            confirmDeleteSidebarFileBtn.textContent = 'Deleting...';
+        }
+        if (window.mathBoard && window.mathBoard.fileManager) {
+            await window.mathBoard.fileManager.deleteFile(fileIdToDeleteFromSidebar);
+        } else {
+            throw new Error("FileManager not available.");
+        }
+        
+        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
+        if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentFileId = urlParams.get('fileId');
+        if (currentFileId === fileIdToDeleteFromSidebar) {
+            window.location.href = '/app.html'; 
+        }
+
+    } catch (error) {
+        console.error('Error deleting file from sidebar:', error);
+        if (deleteSidebarFileErrorMessage) {
+            deleteSidebarFileErrorMessage.textContent = error.message || 'Failed to delete file.';
+            deleteSidebarFileErrorMessage.style.display = 'block';
+        }
+    } finally {
+        if (confirmDeleteSidebarFileBtn) {
+            confirmDeleteSidebarFileBtn.disabled = false;
+            confirmDeleteSidebarFileBtn.textContent = 'Delete File';
+        }
+    }
+}
+
+// Close modals when clicking outside of their content area
+window.addEventListener('click', (event) => {
+    if (renameFileModal && event.target === renameFileModal) {
+        renameFileModal.style.display = 'none';
+    }
+    if (deleteSidebarFileModal && event.target === deleteSidebarFileModal) {
+        deleteSidebarFileModal.style.display = 'none';
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const hamburgerBtn = document.getElementById('hamburgerBtn');

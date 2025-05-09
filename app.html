@@ -121,6 +121,49 @@
     </div>
   </div>
 
+  <!-- Rename File Modal -->
+  <div id="renameFileModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Rename File</h2>
+        <span class="close-button" id="closeRenameFileModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Enter the new name for the file:</p>
+        <input type="text" id="newFileNameInput" placeholder="New file name">
+        <div id="rename-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button" id="cancelRenameFileButton">Cancel</button>
+        <button class="action-button" id="confirmRenameFileButton">Rename</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete File Confirmation Modal (Sidebar) -->
+  <div id="deleteSidebarFileModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm File Deletion</h2>
+        <span class="close-button" id="closeDeleteSidebarFileModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="doNotAskAgainDeleteFile">
+          <label class="form-check-label" for="doNotAskAgainDeleteFile">
+            Do not ask again for this session
+          </label>
+        </div>
+        <div id="delete-sidebar-file-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button" id="cancelDeleteSidebarFileButton">Cancel</button>
+        <button class="danger-button" id="confirmDeleteSidebarFileButton">Delete File</button>
+      </div>
+    </div>
+  </div>
+
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>

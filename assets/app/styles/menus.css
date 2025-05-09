@@ -140,27 +140,51 @@ body.sidebar-open #file-title {
 
 .sidebar-list li {
     margin-bottom: 2px; /* Small space between items */
+    position: relative; /* For positioning the action menu */
 }
 
-.sidebar-list li a {
+#sidebar .sidebar-list li a {
     color: #ccc;
     text-decoration: none;
-    display: flex; /* Changed from block */
-    flex-direction: column; /* Stack title and metadata */
-    padding: 4px 12px; /* Adjust padding */
-    border-radius: 4px; /* Slightly rounded corners */
-    /* Removed white-space, overflow, text-overflow - will be on child elements */
-    transition: background-color 0.2s ease, color 0.2s ease; /* Smooth transition */
+    /* display: flex; */ /* Replaced with grid */
+    /* justify-content: space-between; */ /* Replaced by grid column definition */
+    /* align-items: center; */ /* Replaced by grid align-items */
+    padding: 6px 8px; 
+    border-radius: 4px; 
+    transition: background-color 0.2s ease, color 0.2s ease; 
+    /* width: 100%; */ /* Replaced by grid taking full width of parent */
+    /* box-sizing: border-box; */ /* Replaced by grid taking full width of parent */
+    /* flex-wrap: nowrap; */ /* Not needed for grid in this setup */
+
+    display: grid;
+    grid-template-columns: 1fr auto; /* First column takes available space, second is auto-sized */
+    align-items: center; /* Vertically center items in the grid row */
+    gap: 8px; /* Space between the file content and the action button */
+    width: 100%; /* Ensure the grid container takes full width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    white-space: nowrap; /* Prevent inner content from wrapping, helps with ellipsis */
 }
 
-.sidebar-list li a .file-title {
+/* New wrapper for title and metadata to control flex behavior */
+.file-link-content {
+  /* flex: 1 1 0%; */ /* Removed flex property */
+  /* min-width: 0; */ /* Removed, grid handles shrinking */
+  overflow: hidden; /* Keep for ellipsis */
+  text-overflow: ellipsis; /* Keep for ellipsis */
+  white-space: nowrap; /* Keep for ellipsis */
+  /* margin-right: 8px; */ /* Replaced by grid gap */
+}
+
+
+
+#sidebar .sidebar-list li a .file-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block; /* Ensures it takes full width for ellipsis */
 }
 
-.sidebar-list li a .file-metadata {
+#sidebar .sidebar-list li a .file-metadata {
     font-size: 0.8em; /* Smaller font for metadata */
     color: #999; /* Lighter color for metadata */
     margin-top: 4px; /* Space between title and metadata */
@@ -170,13 +194,70 @@ body.sidebar-open #file-title {
     display: block; /* Ensures it takes full width for ellipsis */
 }
 
-.sidebar-list li a:hover {
+#sidebar .sidebar-list li a:hover {
     color: #ffffff;
     background-color: #2a2a2a; /* Darker background on hover */
 }
 
+/* Styles for the file actions button (triple-dot) */
+.file-actions-button {
+    background: transparent;
+    border: none;
+    color: #aaa; 
+    font-size: 1.2em; 
+    cursor: pointer;
+    line-height: 1; 
+    /* flex-shrink: 0; */ /* Removed, grid cell handles sizing */
+    border-radius: 3px;
+    /* transition-duration: 0s; */ /* Can be kept or removed, not critical for layout */
+}
+
+.file-actions-button:hover {
+    color: #fff;
+    background-color: #383838; /* Slight background on hover for the button */
+    border: none;
+}
+
+/* Styles for the file actions menu */
+/* Increased specificity for initial state */
+.sidebar-list > li > .file-actions-menu {
+    position: absolute;
+    top: calc(100% - 5px); /* Position slightly overlapping the bottom of li */
+    right: 8px; /* Align to the right, near the button's padding edge within 'a' */
+    background-color: #2c2c2c; /* Slightly darker than #333 for better contrast if needed */
+    border: 1px solid #333; /* Changed border color */
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.35); /* Slightly more pronounced shadow */
+    z-index: 1100; /* Ensure it's well above other sidebar items, including resizer */
+    min-width: auto; /* Allow it to be smaller if content is small */
+    width: auto; /* Let content determine width up to max-width */
+    max-width: 100px; /* Set max-width */
+    padding: 4px 0; /* Vertical padding for menu items */
+    display: none; /* Hidden by default */
+}
+
+.file-actions-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.file-actions-menu li a {
+    display: block;
+    padding: 7px 15px; /* Adjusted padding for menu items */
+    color: #ddd; /* Text color for menu items */
+    text-decoration: none;
+    font-size: 0.85em; /* Slightly smaller font for menu items */
+    white-space: nowrap;
+}
+
+.file-actions-menu li a:hover {
+    background-color: #00c59a; /* Primary color for hover */
+    color: #fff; /* White text on hover */
+}
+
 /* Style for the active file link */
-.sidebar-list li a.active {
+#sidebar .sidebar-list li a.active {
     font-weight: 500;
     text-decoration: underline; /* Add underline */
     text-decoration-color: #00c59a; /* Set underline color */
