@@ -122,6 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const minWidth = 200; // Minimum sidebar width
     const maxWidth = 800; // Maximum sidebar width
+    
+    // Add settings link handler
+    const settingsLink = document.getElementById('settings-link');
+    const settingsModal = document.getElementById('settings-modal');
+    
+    if (settingsLink && settingsModal) {
+        settingsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            settingsModal.style.display = 'block';
+        });
+    }
 
     let isResizing = false;
     let currentSidebarWidth = 400; // Initial width

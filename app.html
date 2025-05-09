@@ -26,7 +26,7 @@
   <!-- Sidebar -->
   <div id="sidebar">
     <div id="sidebar-resizer"></div> <!-- Add this line -->
-    <h2>Menu</h2>
+    <h2>Calclynx</h2>
     <!-- Add sidebar content here -->
 
     <h3 class="sidebar-heading">Your Files</h3>
@@ -67,6 +67,57 @@
     <input type="file" id="importInput" accept=".json" style="display: none;">
   </div>
 
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <span class="close-button" id="close-settings-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Account Management Section -->
+        <div class="settings-section">
+          <h3>Account Management</h3>
+          <div class="settings-info">
+            <p>Your email address: <strong id="userEmail">Loading...</strong></p>
+          </div>
+        </div>
+
+        <!-- Danger Zone Section -->
+        <div class="settings-section danger-zone">
+          <h3>Danger Zone</h3>
+          <div class="settings-info">
+            <p>Permanently delete your account and all associated data (including saved files). This action cannot be undone.</p>
+            <button class="danger-button" id="deleteAccountButton">Delete My Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div id="deleteAccountModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm Account Deletion</h2>
+        <span class="close-button" id="close-delete-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>This action is irreversible. All your files and data will be permanently deleted.</p>
+        <p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box below:</p>
+        <div class="input-group">
+          <label for="deleteConfirmInput">Confirm Email:</label>
+          <input type="email" id="deleteConfirmInput" placeholder="Enter your email address">
+          <div id="delete-error-message" class="error-message"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button" id="cancel-delete-button">Cancel</button>
+        <button class="danger-button" id="confirmDeleteAccountButton">Delete Account Permanently</button>
+      </div>
+    </div>
+  </div>
+
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
@@ -94,5 +145,6 @@
   <script src="assets/app/scripts/commandpalette.js"></script>
   <script src="assets/app/scripts/main.js"></script>
   <script src="assets/app/scripts/sidebar.js"></script> <!-- Removed leading slash -->
+  <script src="assets/app/scripts/settings-modal.js"></script>
 </body>
 </html>

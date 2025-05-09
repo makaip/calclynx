@@ -33,8 +33,8 @@
 /* Sync Indicator Styles */
 #sync-indicator {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
     z-index: 1002; /* Above menu */
     display: none; /* Hidden by default */
     padding: 5px;
