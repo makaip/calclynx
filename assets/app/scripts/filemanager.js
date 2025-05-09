@@ -6,6 +6,52 @@ class FileManager {
       const urlParams = new URLSearchParams(window.location.search);
       this.fileId = urlParams.get('fileId');
       this.syncIndicator = document.getElementById('sync-indicator'); // Get indicator element
+      
+      // Update file title initially
+      this.updateFileTitle();
+    }
+  
+    // Add method to update file title display
+    async updateFileTitle() {
+      const fileTitleElement = document.getElementById('file-title');
+      if (!fileTitleElement) return;
+
+      // Hide title by default
+      fileTitleElement.style.display = 'none';
+      fileTitleElement.textContent = ''; // Clear previous title
+
+      const currentPath = window.location.pathname;
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileIdFromUrl = urlParams.get('fileId');
+
+      // If on app.html without a fileId, or if this.fileId is not set, keep hidden
+      if (!this.fileId || (currentPath.endsWith('/app.html') && !fileIdFromUrl)) {
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('files')
+          .select('file_name')
+          .eq('id', this.fileId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching file title:', error);
+          // Keep hidden if error
+          return;
+        }
+
+        if (data && data.file_name && data.file_name !== 'Untitled') {
+          fileTitleElement.textContent = data.file_name;
+          fileTitleElement.style.display = ''; // Show the element (reverts to CSS default display)
+        } else {
+          // Keep hidden if file_name is null, empty, or "Untitled"
+        }
+      } catch (err) {
+        console.error('Exception fetching file title:', err);
+        // Keep hidden if exception
+      }
     }
   
     async saveState() {
@@ -143,6 +189,9 @@ class FileManager {
 
         const fileContentText = await blob.text();
         this.importData(fileContentText, false); // Pass flag to prevent immediate re-save
+        
+        // Update file title after successful load
+        this.updateFileTitle();
 
       } catch (error) {
         console.error("Error loading file content from cloud:", error);

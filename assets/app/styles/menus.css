@@ -4,23 +4,48 @@
     top: 15px;
     left: 15px;
     z-index: 1001; /* Ensure button is above sidebar */
+    display: flex; /* Use flexbox layout */
+    align-items: center; /* Align items vertically */
+    gap: 12px; /* Space between hamburger and title */
 }
 
 #hamburgerBtn {
     background: transparent;
     border: none;
     font-size: 24px;
-    color: white;
+    color: white; /* Ensured white color */
     cursor: pointer;
     padding: 5px; /* Add some padding for easier clicking */
     line-height: 1; /* Prevent extra vertical space */
     transition: opacity 0.3s ease, transform 0.3s ease; /* Add transform to transition */
+    font-family: 'Inter', sans-serif; /* Ensure hamburger also uses Inter if needed, or remove if not desired */
+}
+
+/* Add file title styles */
+#file-title {
+    color: white; /* Ensured white color */
+    font-size: 16px; /* Approx height of hamburger */
+    font-weight: 500;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Apply Inter font */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px; /* Limit width to prevent overflow */
+    line-height: 1.1; /* Align with hamburger if it also has line-height 1 */
 }
 
 /* Hide and slide hamburger button when sidebar is open */
 body.sidebar-open #hamburgerBtn {
     opacity: 0;
     transform: translateX(-40px); /* Slide left */
+    pointer-events: none; /* Prevent interaction when hidden */
+}
+
+/* Hide and slide file title when sidebar is open */
+body.sidebar-open #file-title {
+    opacity: 0;
+    transform: translateX(-40px); /* Slide left with hamburger */
     pointer-events: none; /* Prevent interaction when hidden */
 }
 
