@@ -2,6 +2,8 @@
 
 // Ensure this script runs after the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("sidebar-file-actions.js: DOMContentLoaded"); // Log DOMContentLoaded
+
     // --- Rename File Modal Logic ---
     const renameFileModal = document.getElementById('renameFileModal');
     const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
@@ -151,10 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const newBlankFileNameInput = document.getElementById('newBlankFileNameInput');
     const createBlankFileErrorMsg = document.getElementById('createBlankFile-error-message');
 
+    console.log("sidebar-file-actions.js: confirmCreateBlankFileBtn element:", confirmCreateBlankFileBtn); // Log if button is found
+
     // Note: generateUUID is expected to be globally available from sidebar.js
     window.handleCreateBlankFile = async function() {
+        console.log("sidebar-file-actions.js: handleCreateBlankFile invoked."); // Log function invocation
+
         if (!newBlankFileNameInput || !createBlankFileErrorMsg || !confirmCreateBlankFileBtn || !createBlankFileModal) {
-            console.error("Create blank file modal elements not found.");
+            console.error("sidebar-file-actions.js: Create blank file modal elements not found within handleCreateBlankFile.");
             return;
         }
 
@@ -247,7 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (createBlankFileModal) createBlankFileModal.style.display = 'none';
         });
     }
+
     if (confirmCreateBlankFileBtn) {
-        confirmCreateBlankFileBtn.addEventListener('click', window.handleCreateBlankFile);
+        console.log("sidebar-file-actions.js: Attaching click listener to confirmCreateBlankFileButton."); // Log listener attachment
+        confirmCreateBlankFileBtn.addEventListener('click', () => {
+            console.log("sidebar-file-actions.js: confirmCreateBlankFileButton clicked!"); // Log click event
+            window.handleCreateBlankFile();
+        });
+    } else {
+        console.error("sidebar-file-actions.js: confirmCreateBlankFileButton NOT FOUND in DOMContentLoaded. Listener not attached."); // Log if button not found
     }
 });

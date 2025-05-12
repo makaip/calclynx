@@ -226,12 +226,12 @@
   <script src="assets/app/scripts/commandpalette-init.js"></script>
 
   <!-- Sidebar Scripts -->
-  <!-- sidebar-file-actions.js defines handlers like handleRenameFileClick and modal logic -->
+  <!-- sidebar.js contains helpers (like generateUUID), loadUserFiles and main sidebar DOM logic -->
+  <script src="assets/app/scripts/sidebar.js"></script> 
+  <!-- sidebar-file-actions.js defines handlers like handleCreateBlankFile (uses generateUUID) and modal logic -->
   <script src="assets/app/scripts/sidebar-file-actions.js"></script>
   <!-- sidebar-ui-interactions.js handles other UI like new file dropdown, settings -->
   <script src="assets/app/scripts/sidebar-ui-interactions.js"></script>
-  <!-- sidebar.js contains helpers, loadUserFiles (which uses handlers from above) and main sidebar DOM logic -->
-  <script src="assets/app/scripts/sidebar.js"></script> 
   
   <script src="assets/app/scripts/settings-modal.js"></script>
 </body>
