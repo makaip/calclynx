@@ -96,6 +96,79 @@ body.sidebar-open #file-title {
     font-weight: 500;
 }
 
+/* Sidebar Section Header for "Your Files" and "New File" button */
+.sidebar-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px; /* Space below header */
+    margin-top: 15px; /* Space above header */
+}
+
+.sidebar-section-header .sidebar-heading {
+    margin-top: 0; /* Reset margin from h3 */
+    margin-bottom: 0; /* Reset margin from h3 */
+}
+
+/* New File button in Sidebar */
+#newFileBtnSidebar {
+    background-color: #00c59a; /* Primary color */
+    color: #141414; /* Dark text for contrast */
+    border: none;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease; /* Subtle hover transition */
+    display: flex; /* Align icon and text */
+    align-items: center; /* Align icon and text */
+}
+
+#newFileBtnSidebar:hover {
+    background-color: #00b38a; /* Slightly darker on hover */
+}
+
+#newFileBtnSidebar i {
+    margin-left: 5px; /* Space between text and icon */
+}
+
+/* Dropdown container for "New File" in sidebar */
+.dropdown#newFileDropdownContainerSidebar { /* Increased specificity */
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown content (hidden by default) */
+#newFileDropdownSidebar {
+    display: none; /* Hidden by default, JS will toggle */
+    position: absolute;
+    background-color: #2c2c2c; /* Dark background for dropdown */
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+    z-index: 1005; /* Ensure it's above other sidebar content */
+    border-radius: 4px;
+    right: 0; /* Align to the right of the button */
+    top: 100%; /* Position below the button */
+    margin-top: 5px; /* Small gap between button and dropdown */
+}
+
+/* Links inside the dropdown */
+#newFileDropdownSidebar a {
+    color: #ccc; /* Light grey text for links */
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hover effect for dropdown links */
+#newFileDropdownSidebar a:hover {
+    background-color: #00c59a; /* Primary color on hover */
+    color: #fff; /* White text on hover */
+}
+
 /* General list styling within the sidebar */
 .sidebar-list {
     list-style: none;
@@ -224,7 +297,7 @@ body.sidebar-open #file-title {
     position: absolute;
     top: calc(100% - 5px); /* Position slightly overlapping the bottom of li */
     right: 8px; /* Align to the right, near the button's padding edge within 'a' */
-    background-color: #2c2c2c; /* Slightly darker than #333 for better contrast if needed */
+    background-color: #1d1d1d; /* Slightly darker than #333 for better contrast if needed */
     border: 1px solid #333; /* Changed border color */
     border-radius: 4px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.35); /* Slightly more pronounced shadow */
@@ -313,14 +386,13 @@ body.sidebar-open #file-title {
 
 /* Add auth button styling */
 .auth-button {
-    background-color: var(--primary-color, #00c59a);
-    color: #000;
-    border: none;
-    padding: 6px 12px;
-    border-radius: var(--button-radius, 6px);
-    font-size: 0.9rem;
+    background-color: transparent;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
+    transition: all 0.2s;
     transition: background-color 0.2s ease;
     white-space: nowrap;
     margin-left: auto; /* Push to the right edge */
@@ -329,11 +401,9 @@ body.sidebar-open #file-title {
 }
 
 .auth-button:hover {
-    background-color: var(--primary-hover, #00b38a);
-    /* Ensure no size-changing properties */
-    box-shadow: none;
-    border: none; 
-    padding: 6px 12px; /* Keep same padding */
+  background-color: #333;
+  border-color: #555;
+  border: 1px solid #444;
 }
 
 /* User email display under logo */

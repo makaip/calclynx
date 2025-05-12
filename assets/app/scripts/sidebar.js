@@ -23,6 +23,14 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
+// Helper function to generate UUID - this is now global
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 // Make loadUserFiles globally accessible
 window.loadUserFiles = async function() {
     const sidebarFileList = document.getElementById('sidebar-file-list');
@@ -146,7 +154,12 @@ window.loadUserFiles = async function() {
                 actionMenu.style.display = 'none';
                 const fileId = e.target.dataset.fileId;
                 const fileName = e.target.dataset.fileName;
-                handleRenameFileClick(fileId, fileName);
+                // Call the globally defined handler from sidebar-file-actions.js
+                if (typeof window.handleRenameFileClick === 'function') {
+                    window.handleRenameFileClick(fileId, fileName);
+                } else {
+                    console.error('handleRenameFileClick function not found.');
+                }
             });
 
             actionMenu.querySelector('.delete-file-link').addEventListener('click', (e) => {
@@ -155,7 +168,12 @@ window.loadUserFiles = async function() {
                 actionMenu.style.display = 'none';
                 const fileId = e.target.dataset.fileId;
                 const fileName = e.target.dataset.fileName;
-                handleDeleteFileClick(fileId, fileName);
+                // Call the globally defined handler from sidebar-file-actions.js
+                if (typeof window.handleDeleteFileClick === 'function') {
+                    window.handleDeleteFileClick(fileId, fileName);
+                } else {
+                    console.error('handleDeleteFileClick function not found.');
+                }
             });
             // --- End action button and menu ---
 
@@ -177,157 +195,19 @@ window.loadUserFiles = async function() {
     }
 };
 
-// --- Rename File Modal Logic ---
-const renameFileModal = document.getElementById('renameFileModal');
-const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
-const cancelRenameFileBtn = document.getElementById('cancelRenameFileButton');
-const confirmRenameFileBtn = document.getElementById('confirmRenameFileButton');
-const newFileNameInput = document.getElementById('newFileNameInput');
-const renameErrorMessage = document.getElementById('rename-error-message');
-let fileIdToRename = null;
-
-function handleRenameFileClick(fileId, currentName) {
-    fileIdToRename = fileId;
-    if (newFileNameInput) newFileNameInput.value = currentName;
-    if (renameErrorMessage) renameErrorMessage.style.display = 'none';
-    if (renameFileModal) renameFileModal.style.display = 'block';
-    if (newFileNameInput) newFileNameInput.focus();
-}
-
-if (closeRenameFileModalBtn) {
-    closeRenameFileModalBtn.addEventListener('click', () => {
-        if (renameFileModal) renameFileModal.style.display = 'none';
-    });
-}
-if (cancelRenameFileBtn) {
-    cancelRenameFileBtn.addEventListener('click', () => {
-        if (renameFileModal) renameFileModal.style.display = 'none';
-    });
-}
-
-if (confirmRenameFileBtn) {
-    confirmRenameFileBtn.addEventListener('click', async () => {
-        const newName = newFileNameInput ? newFileNameInput.value.trim() : '';
-        if (!newName) {
-            if (renameErrorMessage) {
-                renameErrorMessage.textContent = 'File name cannot be empty.';
-                renameErrorMessage.style.display = 'block';
-            }
-            return;
-        }
-        if (renameErrorMessage) renameErrorMessage.style.display = 'none';
-
-        try {
-            confirmRenameFileBtn.disabled = true;
-            confirmRenameFileBtn.textContent = 'Renaming...';
-            if (window.mathBoard && window.mathBoard.fileManager) {
-                await window.mathBoard.fileManager.renameFile(fileIdToRename, newName);
-            } else {
-                throw new Error("FileManager not available.");
-            }
-            if (renameFileModal) renameFileModal.style.display = 'none';
-            if (typeof window.loadUserFiles === 'function') window.loadUserFiles(); 
-            // If the current file was renamed, fileManager.renameFile handles title update via this.updateFileTitle()
-        } catch (error) {
-            console.error('Error renaming file:', error);
-            if (renameErrorMessage) {
-                renameErrorMessage.textContent = error.message || 'Failed to rename file.';
-                renameErrorMessage.style.display = 'block';
-            }
-        } finally {
-            confirmRenameFileBtn.disabled = false;
-            confirmRenameFileBtn.textContent = 'Rename';
-        }
-    });
-}
-
-
-// --- Delete File Confirmation Modal Logic (Sidebar) ---
-const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
-const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
-const cancelDeleteSidebarFileBtn = document.getElementById('cancelDeleteSidebarFileButton');
-const confirmDeleteSidebarFileBtn = document.getElementById('confirmDeleteSidebarFileButton');
-const fileNameToDeleteSidebarElement = document.getElementById('fileNameToDeleteSidebar');
-const doNotAskAgainDeleteFileCheckbox = document.getElementById('doNotAskAgainDeleteFile');
-const deleteSidebarFileErrorMessage = document.getElementById('delete-sidebar-file-error-message');
-let fileIdToDeleteFromSidebar = null;
-
-function handleDeleteFileClick(fileId, fileName) {
-    fileIdToDeleteFromSidebar = fileId;
-    if (fileNameToDeleteSidebarElement) fileNameToDeleteSidebarElement.textContent = fileName;
-    if (deleteSidebarFileErrorMessage) deleteSidebarFileErrorMessage.style.display = 'none';
-    if (doNotAskAgainDeleteFileCheckbox) doNotAskAgainDeleteFileCheckbox.checked = false;
-
-    if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
-        confirmActualFileDelete(); 
-    } else {
-        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'block';
-    }
-}
-
-if (closeDeleteSidebarFileModalBtn) {
-    closeDeleteSidebarFileModalBtn.addEventListener('click', () => {
-        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
-    });
-}
-if (cancelDeleteSidebarFileBtn) {
-    cancelDeleteSidebarFileBtn.addEventListener('click', () => {
-        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
-    });
-}
-
-if (confirmDeleteSidebarFileBtn) {
-    confirmDeleteSidebarFileBtn.addEventListener('click', async () => {
-        if (doNotAskAgainDeleteFileCheckbox && doNotAskAgainDeleteFileCheckbox.checked) {
-            sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
-        }
-        await confirmActualFileDelete();
-    });
-}
-
-async function confirmActualFileDelete() {
-    if (!fileIdToDeleteFromSidebar) return;
-    try {
-        if (confirmDeleteSidebarFileBtn) {
-            confirmDeleteSidebarFileBtn.disabled = true;
-            confirmDeleteSidebarFileBtn.textContent = 'Deleting...';
-        }
-        if (window.mathBoard && window.mathBoard.fileManager) {
-            await window.mathBoard.fileManager.deleteFile(fileIdToDeleteFromSidebar);
-        } else {
-            throw new Error("FileManager not available.");
-        }
-        
-        if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
-        if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentFileId = urlParams.get('fileId');
-        if (currentFileId === fileIdToDeleteFromSidebar) {
-            window.location.href = '/app.html'; 
-        }
-
-    } catch (error) {
-        console.error('Error deleting file from sidebar:', error);
-        if (deleteSidebarFileErrorMessage) {
-            deleteSidebarFileErrorMessage.textContent = error.message || 'Failed to delete file.';
-            deleteSidebarFileErrorMessage.style.display = 'block';
-        }
-    } finally {
-        if (confirmDeleteSidebarFileBtn) {
-            confirmDeleteSidebarFileBtn.disabled = false;
-            confirmDeleteSidebarFileBtn.textContent = 'Delete File';
-        }
-    }
-}
-
 // Close modals when clicking outside of their content area
 window.addEventListener('click', (event) => {
-    if (renameFileModal && event.target === renameFileModal) {
-        renameFileModal.style.display = 'none';
+    const renameFileModalInstance = document.getElementById('renameFileModal');
+    if (renameFileModalInstance && event.target === renameFileModalInstance) {
+        renameFileModalInstance.style.display = 'none';
     }
-    if (deleteSidebarFileModal && event.target === deleteSidebarFileModal) {
-        deleteSidebarFileModal.style.display = 'none';
+    const deleteSidebarFileModalInstance = document.getElementById('deleteSidebarFileModal');
+    if (deleteSidebarFileModalInstance && event.target === deleteSidebarFileModalInstance) {
+        deleteSidebarFileModalInstance.style.display = 'none';
+    }
+    const createBlankFileModalInstance = document.getElementById('createBlankFileModal');
+    if (createBlankFileModalInstance && event.target === createBlankFileModalInstance) {
+        createBlankFileModalInstance.style.display = 'none';
     }
 });
 
@@ -339,17 +219,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const minWidth = 200; // Minimum sidebar width
     const maxWidth = 800; // Maximum sidebar width
-    
-    // Add settings link handler
-    const settingsLink = document.getElementById('settings-link');
-    const settingsModal = document.getElementById('settings-modal');
-    
-    if (settingsLink && settingsModal) {
-        settingsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            settingsModal.style.display = 'block';
+
+    // Consolidated click listener to close dropdowns/menus
+    // This one specifically handles the file action menus from loadUserFiles
+    document.addEventListener('click', (e) => {
+        // Close file action menus
+        const openActionMenus = document.querySelectorAll('.file-actions-menu');
+        openActionMenus.forEach(menu => {
+            if (menu.style.display === 'block' && !e.target.closest('.file-actions-button') && !menu.contains(e.target)) {
+                menu.style.display = 'none';
+            }
         });
-    }
+        // Note: New file dropdown closing is handled in sidebar-ui-interactions.js
+    });
 
     let isResizing = false;
     let currentSidebarWidth = 400; // Initial width
@@ -363,23 +245,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (body.classList.contains('sidebar-open')) {
                 sidebar.style.left = '0px';
             } else {
-                 sidebar.style.left = `-${clampedWidth}px`;
+                sidebar.style.left = `-${clampedWidth}px`;
             }
             currentSidebarWidth = clampedWidth;
         };
 
         // Function to set initial/final state WITH transition
         const applyWidthWithTransition = (width) => {
-             const clampedWidth = Math.max(minWidth, Math.min(width, maxWidth));
-             // Ensure transitions are enabled
-             sidebar.style.transition = 'width 0.3s ease, left 0.3s ease';
-             sidebar.style.width = `${clampedWidth}px`;
-             if (body.classList.contains('sidebar-open')) {
-                 sidebar.style.left = '0px';
-             } else {
-                  sidebar.style.left = `-${clampedWidth}px`;
-             }
-             currentSidebarWidth = clampedWidth;
+            const clampedWidth = Math.max(minWidth, Math.min(width, maxWidth));
+            // Ensure transitions are enabled
+            sidebar.style.transition = 'width 0.3s ease, left 0.3s ease';
+            sidebar.style.width = `${clampedWidth}px`;
+            if (body.classList.contains('sidebar-open')) {
+                sidebar.style.left = '0px';
+            } else {
+                sidebar.style.left = `-${clampedWidth}px`;
+            }
+            currentSidebarWidth = clampedWidth;
         };
 
         // Set initial state based on currentSidebarWidth

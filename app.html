@@ -31,7 +31,16 @@
     <!-- User email display under logo -->
     <div id="user-email-display" class="user-email-display"></div>
     
-    <h3 class="sidebar-heading">Your Files</h3>
+    <div class="sidebar-section-header">
+      <h3 class="sidebar-heading">Your Files</h3>
+      <div class="dropdown" id="newFileDropdownContainerSidebar">
+        <button id="newFileBtnSidebar" class="btn-new-file-sidebar">New File <i class="fas fa-caret-down"></i></button>
+        <div id="newFileDropdownSidebar" class="dropdown-content">
+          <a href="#" id="createBlankFileSidebarOpt">Blank File</a>
+          <a href="#" id="createFromJsonSidebarOpt">From JSON</a>
+        </div>
+      </div>
+    </div>
     <ul id="sidebar-file-list" class="sidebar-list">
         <!-- File list will be populated here -->
         <li><span class="loading-text">Loading files...</span></li>
@@ -121,6 +130,25 @@
     </div>
   </div>
 
+  <!-- Create New Blank File Modal -->
+  <div id="createBlankFileModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Blank File</h2>
+        <span class="close-button" id="closeCreateBlankFileModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Enter the name for your new blank file:</p>
+        <input type="text" id="newBlankFileNameInput" class="modal-input" placeholder="File name">
+        <div id="createBlankFile-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button" id="cancelCreateBlankFileButton">Cancel</button>
+        <button class="action-button" id="confirmCreateBlankFileButton">Create File</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Rename File Modal -->
   <div id="renameFileModal" class="modal">
     <div class="modal-content">
@@ -188,9 +216,23 @@
   
   <!-- Worker script MUST be after MathGene scripts and equivalence.js -->
   <script src="assets/app/scripts/mathgene-worker.js"></script>
-  <script src="assets/app/scripts/commandpalette.js"></script>
+
+  <!-- main.js initializes mathBoard, versionManager etc. -->
   <script src="assets/app/scripts/main.js"></script>
-  <script src="assets/app/scripts/sidebar.js"></script> <!-- Removed leading slash -->
+
+  <!-- Command Palette Scripts -->
+  <script src="assets/app/scripts/commandpalette-helpers.js"></script>
+  <script src="assets/app/scripts/commandpalette.js"></script> <!-- Class definition -->
+  <script src="assets/app/scripts/commandpalette-init.js"></script>
+
+  <!-- Sidebar Scripts -->
+  <!-- sidebar-file-actions.js defines handlers like handleRenameFileClick and modal logic -->
+  <script src="assets/app/scripts/sidebar-file-actions.js"></script>
+  <!-- sidebar-ui-interactions.js handles other UI like new file dropdown, settings -->
+  <script src="assets/app/scripts/sidebar-ui-interactions.js"></script>
+  <!-- sidebar.js contains helpers, loadUserFiles (which uses handlers from above) and main sidebar DOM logic -->
+  <script src="assets/app/scripts/sidebar.js"></script> 
+  
   <script src="assets/app/scripts/settings-modal.js"></script>
 </body>
 </html>

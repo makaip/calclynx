@@ -182,6 +182,7 @@
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   margin-bottom: 15px; /* Add some spacing below the input */
+  box-sizing: border-box; /* Prevent padding/border from causing overflow */
 }
 
 .modal-input:focus {
