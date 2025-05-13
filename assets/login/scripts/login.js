@@ -5,6 +5,7 @@ const emailPasswordForm = document.getElementById('email-password-form');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const errorMessageDiv = document.getElementById('auth-error-message');
+const loginButton = document.getElementById('login-button');
 
 // Function to display error messages
 function displayError(message) {
@@ -18,29 +19,6 @@ function clearError() {
     errorMessageDiv.style.display = 'none';
 }
 
-// Google Sign-in
-googleSignInButton.addEventListener('click', async (e) => {
-    e.preventDefault();
-    clearError();
-    try {
-        // Construct the redirect URL dynamically based on the current origin
-        const redirectURL = window.location.origin + '/dashboard.html';
-        console.log('Redirecting to:', redirectURL); // Optional: for debugging
-
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: redirectURL // Use relative path combined with origin
-            }
-        });
-        if (error) throw error;
-        // Redirect should now consistently go to dashboard.html if successful
-    } catch (error) {
-        console.error('Error signing in with Google:', error);
-        displayError(error.message || 'An error occurred during Google sign-in.');
-    }
-});
-
 // Email/Password Sign-in
 emailPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -53,34 +31,63 @@ emailPasswordForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    try {
-        // Try signing in first
-        let { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+    // Disable button
+    loginButton.disabled = true;
+    loginButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging In...';
 
-        // If sign-in fails (e.g., user not found), try signing up
-        if (error && error.message.includes('Invalid login credentials')) { // Or check for specific error code
-             ({ data, error } = await supabaseClient.auth.signUp({
-                email: email,
-                password: password,
-            }));
-             // Optional: Handle email confirmation if enabled in Supabase settings
-             if (!error && data.user && !data.session) {
-                 displayError('Sign up successful! Please check your email to confirm your account.'); // Adjust message if auto-confirm is on
-                 return; // Don't redirect yet if confirmation is needed
-             }
-        }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
 
-        if (error) throw error;
-
-        // On successful login or sign up (if auto-confirmed), redirect
-        window.location.href = '/dashboard.html'; // Use relative path
-
-    } catch (error) {
-        console.error('Error signing in/up:', error);
-        // Provide a more generic error for signup failures if needed
-        displayError(error.message || 'An error occurred during authentication.');
+    if (error) {
+        displayError(error.message);
+        loginButton.disabled = false;
+        loginButton.innerHTML = 'Login';
+    } else {
+        // Redirect to app.html
+        window.location.href = '/app.html';
     }
 });
+
+// Google Sign-in
+googleSignInButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    clearError();
+    googleSignInButton.disabled = true;
+    googleSignInButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in with Google...';
+
+    try {
+        const redirectURL = window.location.origin + '/app.html';
+        console.log('Redirecting to:', redirectURL);
+
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: redirectURL
+            }
+        });
+
+        if (error) {
+            displayError(`Google Sign-In Error: ${error.message}`);
+            googleSignInButton.disabled = false;
+            googleSignInButton.innerHTML = '<i class="fab fa-google me-2"></i> Sign in with Google';
+        }
+    } catch (error) {
+        console.error('Error signing in with Google:', error);
+        displayError(error.message || 'An error occurred during Google sign-in.');
+        googleSignInButton.disabled = false;
+        googleSignInButton.innerHTML = '<i class="fab fa-google me-2"></i> Sign in with Google';
+    }
+});
+
+// Auto-redirect if already logged in
+async function checkLoginStatus() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        window.location.href = '/app.html';
+    }
+}
+
+// Call on page load
+checkLoginStatus();
