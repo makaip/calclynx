@@ -80,10 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     console.log("Auth state changed:", _event, session);
     updateUserStatus();
-    // Reload file list in the sidebar
-    if (typeof window.loadUserFiles === 'function') {
-        window.loadUserFiles();
-    }
+    // The call to loadUserFiles() is now handled within updateUserStatus()
   });
 
   // Load file data if fileId is present in URL using the correct method
@@ -97,6 +94,12 @@ async function updateUserStatus() {
   const authButton = document.getElementById('auth-button');
 
   if (!userEmailDisplay || !authButton) return;
+
+  // Whenever status is updated, also reload the file list.
+  // loadUserFiles has its own check for the user session.
+  if (typeof window.loadUserFiles === 'function') {
+    window.loadUserFiles();
+  }
 
   try {
     const { data: { session }, error } = await supabaseClient.auth.getSession();

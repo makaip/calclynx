@@ -204,7 +204,6 @@
   <script src="libs/mathgene/mg_calculate.js"></script>
   
   <!-- Main Scripts -->
-  <script src="assets/app/scripts/app.js"></script>
   <script src="assets/app/scripts/filemanager.js"></script>
   <script src="assets/app/scripts/navigation.js"></script>
   <script src="assets/app/scripts/mathboard.js"></script>
@@ -217,14 +216,10 @@
   <!-- Worker script MUST be after MathGene scripts and equivalence.js -->
   <script src="assets/app/scripts/mathgene-worker.js"></script>
 
-  <!-- main.js initializes mathBoard, versionManager etc. -->
-  <script src="assets/app/scripts/main.js"></script>
-
   <!-- Command Palette Scripts -->
   <script src="assets/app/scripts/commandpalette-helpers.js"></script>
   <script src="assets/app/scripts/commandpalette.js"></script> <!-- Class definition -->
-  <script src="assets/app/scripts/commandpalette-init.js"></script>
-
+  
   <!-- Sidebar Scripts -->
   <!-- sidebar.js contains helpers (like generateUUID), loadUserFiles and main sidebar DOM logic -->
   <script src="assets/app/scripts/sidebar.js"></script> 
@@ -234,5 +229,11 @@
   <script src="assets/app/scripts/sidebar-ui-interactions.js"></script>
   
   <script src="assets/app/scripts/settings-modal.js"></script>
+
+  <!-- Main initialization scripts -->
+  <script src="assets/app/scripts/app.js"></script>
+  <!-- main.js initializes mathBoard, versionManager etc. -->
+  <script src="assets/app/scripts/main.js"></script>
+  <script src="assets/app/scripts/commandpalette-init.js"></script>
 </body>
 </html>

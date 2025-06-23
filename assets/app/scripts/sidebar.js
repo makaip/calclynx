@@ -111,10 +111,11 @@ window.loadUserFiles = async function() {
             metadataDiv.appendChild(fileSizeSpan);
             fileLinkContent.appendChild(metadataDiv);
 
+            li.appendChild(a); // Append link to list item
             a.appendChild(fileLinkContent); // Add content wrapper to link
 
             if (file.id === currentFileId) {
-                a.classList.add('active'); // Highlight current file
+                li.classList.add('active'); // Highlight current file by adding class to li
             }
 
             // --- Add triple-dot action button ---
@@ -122,15 +123,14 @@ window.loadUserFiles = async function() {
             actionButton.classList.add('file-actions-button');
             actionButton.innerHTML = '&#x22EE;'; // Vertical ellipsis (⋮)
             actionButton.title = 'File actions';
-            a.appendChild(actionButton); // Append button to the <a> tag
-
-            li.appendChild(a); // Append link (now containing content and button) to list item
+            li.appendChild(actionButton); // Append button to the li tag, not the a tag
 
             const actionMenu = document.createElement('div');
             actionMenu.classList.add('file-actions-menu');
             actionMenu.innerHTML = `
                 <ul>
                     <li><a href="#" class="rename-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Rename</a></li>
+                    <li><a href="#" class="download-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Download as JSON</a></li>
                     <li><a href="#" class="delete-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Delete</a></li>
                 </ul>
             `;
@@ -146,6 +146,19 @@ window.loadUserFiles = async function() {
                     }
                 });
                 actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            actionMenu.querySelector('.download-file-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                actionMenu.style.display = 'none';
+                const fileId = e.target.dataset.fileId;
+                const fileName = e.target.dataset.fileName;
+                if (typeof window.handleDownloadFileClick === 'function') {
+                    window.handleDownloadFileClick(fileId, fileName);
+                } else {
+                    console.error('handleDownloadFileClick function not found.');
+                }
             });
 
             actionMenu.querySelector('.rename-file-link').addEventListener('click', (e) => {

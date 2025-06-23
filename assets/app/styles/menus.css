@@ -212,8 +212,13 @@ body.sidebar-open #file-title {
 }
 
 .sidebar-list li {
-    margin-bottom: 2px; /* Small space between items */
-    position: relative; /* For positioning the action menu */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Pushes items to opposite ends */
+    align-items: center; /* Vertically centers items */
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    position: relative; /* Needed for absolute positioning of the menu */
+    transition: background-color 0.2s ease;
 }
 
 #sidebar .sidebar-list li a {
@@ -236,6 +241,8 @@ body.sidebar-open #file-title {
     width: 100%; /* Ensure the grid container takes full width */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
     white-space: nowrap; /* Prevent inner content from wrapping, helps with ellipsis */
+    flex-grow: 1; /* Allow the link to take up available space */
+    margin-right: 8px; /* Add some space between the link and the button */
 }
 
 /* New wrapper for title and metadata to control flex behavior */
@@ -286,27 +293,24 @@ body.sidebar-open #file-title {
 }
 
 .file-actions-button:hover {
-    color: #fff;
-    background-color: #383838; /* Slight background on hover for the button */
-    border: none;
+  background-color: #444;
+  border: none;
 }
 
 /* Styles for the file actions menu */
 /* Increased specificity for initial state */
 .sidebar-list > li > .file-actions-menu {
-    position: absolute;
-    top: calc(100% - 5px); /* Position slightly overlapping the bottom of li */
-    right: 8px; /* Align to the right, near the button's padding edge within 'a' */
-    background-color: #1d1d1d; /* Slightly darker than #333 for better contrast if needed */
-    border: 1px solid #333; /* Changed border color */
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.35); /* Slightly more pronounced shadow */
-    z-index: 1100; /* Ensure it's well above other sidebar items, including resizer */
-    min-width: auto; /* Allow it to be smaller if content is small */
-    width: auto; /* Let content determine width up to max-width */
-    max-width: 100px; /* Set max-width */
-    padding: 4px 0; /* Vertical padding for menu items */
-    display: none; /* Hidden by default */
+  display: none; /* Hidden by default */
+  position: absolute;
+  top: 35px; /* Position below the button */
+  right: 5px; /* Align with the right edge of the list item */
+  background-color: #2c2c2c;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1001; /* Ensure it's above other elements */
+  min-width: 150px; /* Set a minimum width for the dropdown */
+  width: max-content; /* Adjust width to content */
 }
 
 .file-actions-menu ul {
@@ -330,7 +334,7 @@ body.sidebar-open #file-title {
 }
 
 /* Style for the active file link */
-#sidebar .sidebar-list li a.active {
+#sidebar .sidebar-list li.active a {
     font-weight: 500;
     text-decoration: underline; /* Add underline */
     text-decoration-color: #00c59a; /* Set underline color */

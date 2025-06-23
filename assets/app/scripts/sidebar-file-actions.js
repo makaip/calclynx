@@ -13,6 +13,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const renameErrorMessage = document.getElementById('rename-error-message');
     let fileIdToRename = null;
 
+    window.handleDownloadFileClick = async function(fileId, fileName) {
+        try {
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session) {
+                console.error("User not logged in, cannot download file.");
+                alert("You must be logged in to download files.");
+                return;
+            }
+            const userId = session.user.id;
+            const filePath = `${userId}/${fileId}.json`;
+
+            const { data: blob, error: downloadError } = await supabaseClient
+                .storage
+                .from('storage')
+                .download(filePath);
+
+            if (downloadError) {
+                throw downloadError;
+            }
+
+            if (!blob) {
+                throw new Error("File not found or empty.");
+            }
+
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            link.href = url;
+            link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            alert(`Error downloading file: ${error.message}`);
+        }
+    }
+
     window.handleRenameFileClick = function(fileId, currentName) {
         fileIdToRename = fileId;
         if (newFileNameInput) newFileNameInput.value = currentName;
