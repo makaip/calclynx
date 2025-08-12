@@ -333,13 +333,18 @@ body.sidebar-open #file-title {
     color: #fff; /* White text on hover */
 }
 
-/* Style for the active file link */
-#sidebar .sidebar-list li.active a {
+/* Style for the active file link - only apply to direct child link, not action menu links */
+#sidebar .sidebar-list li.active > a {
     font-weight: 500;
     text-decoration: underline; /* Add underline */
     text-decoration-color: #00c59a; /* Set underline color */
     text-decoration-thickness: 2px; /* Optional: make underline thicker */
     text-underline-offset: 3px; /* Optional: space between text and underline */
+}
+
+/* Ensure action menu links don't inherit underline from active file */
+#sidebar .sidebar-list li.active .file-actions-menu a {
+    text-decoration: none; /* Remove underline from action menu links */
 }
 
 /* Styles for loading/error/info text */
