@@ -197,43 +197,47 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="assets/app/scripts/initsupabaseapp.js"></script>
+  <!-- Authentication Scripts -->
+  <script src="assets/app/scripts/auth/initsupabaseapp.js"></script>
 
   <!-- MathGene Library -->
   <script src="libs/mathgene/mg_translate.js"></script>
   <script src="libs/mathgene/mg_calculate.js"></script>
   
-  <!-- Main Scripts -->
-  <script src="assets/app/scripts/filemanager.js"></script>
-  <script src="assets/app/scripts/navigation.js"></script>
-  <script src="assets/app/scripts/mathboard.js"></script>
-  <script src="assets/app/scripts/mathgroup.js"></script>
-  <script src="assets/app/scripts/mathfield.js"></script>
-  <script src="assets/app/scripts/versionmanager.js"></script>
-  <script src="assets/app/scripts/contextmenu.js"></script>
-  <script src="assets/app/scripts/equivalence.js"></script>
+  <!-- File Management Scripts -->
+  <script src="assets/app/scripts/file/filemanager.js"></script>
+  <script src="assets/app/scripts/file/versionmanager.js"></script>
+  
+  <!-- Math Scripts -->
+  <script src="assets/app/scripts/math/navigation.js"></script>
+  <script src="assets/app/scripts/math/mathboard.js"></script>
+  <script src="assets/app/scripts/math/mathgroup.js"></script>
+  <script src="assets/app/scripts/math/mathfield.js"></script>
+  <script src="assets/app/scripts/math/equivalence.js"></script>
   
   <!-- Worker script MUST be after MathGene scripts and equivalence.js -->
-  <script src="assets/app/scripts/mathgene-worker.js"></script>
+  <script src="assets/app/scripts/utils/mathgene-worker.js"></script>
 
-  <!-- Command Palette Scripts -->
-  <script src="assets/app/scripts/commandpalette-helpers.js"></script>
-  <script src="assets/app/scripts/commandpalette.js"></script> <!-- Class definition -->
+  <!-- UI Scripts -->
+  <script src="assets/app/scripts/ui/contextmenu.js"></script>
+  <script src="assets/app/scripts/ui/commandpalette-helpers.js"></script>
+  <script src="assets/app/scripts/ui/commandpalette.js"></script> <!-- Class definition -->
   
   <!-- Sidebar Scripts -->
   <!-- sidebar.js contains helpers (like generateUUID), loadUserFiles and main sidebar DOM logic -->
-  <script src="assets/app/scripts/sidebar.js"></script> 
+  <script src="assets/app/scripts/ui/sidebar.js"></script> 
   <!-- sidebar-file-actions.js defines handlers like handleCreateBlankFile (uses generateUUID) and modal logic -->
-  <script src="assets/app/scripts/sidebar-file-actions.js"></script>
+  <script src="assets/app/scripts/ui/sidebar-file-actions.js"></script>
   <!-- sidebar-ui-interactions.js handles other UI like new file dropdown, settings -->
-  <script src="assets/app/scripts/sidebar-ui-interactions.js"></script>
+  <script src="assets/app/scripts/ui/sidebar-ui-interactions.js"></script>
   
-  <script src="assets/app/scripts/settings-modal.js"></script>
+  <!-- Settings Scripts -->
+  <script src="assets/app/scripts/ui/settings-modal.js"></script>
 
-  <!-- Main initialization scripts -->
-  <script src="assets/app/scripts/app.js"></script>
+  <!-- Core initialization scripts -->
+  <script src="assets/app/scripts/core/app.js"></script>
   <!-- main.js initializes mathBoard, versionManager etc. -->
-  <script src="assets/app/scripts/main.js"></script>
-  <script src="assets/app/scripts/commandpalette-init.js"></script>
+  <script src="assets/app/scripts/core/main.js"></script>
+  <script src="assets/app/scripts/ui/commandpalette-init.js"></script>
 </body>
 </html>
