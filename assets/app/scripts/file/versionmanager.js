@@ -8,6 +8,8 @@ class VersionManager {
 
   getCurrentState() {
     const groups = [];
+    
+    // Save math groups
     const mathGroupElements = this.fileManager.board.canvas.querySelectorAll('.math-group');
     mathGroupElements.forEach((group) => {
       const left = group.style.left;
@@ -18,8 +20,24 @@ class VersionManager {
           fields.push(container.dataset.latex);
         }
       });
-      groups.push({ left, top, fields });
+      groups.push({ type: 'math', left, top, fields });
     });
+    
+    // Save text groups
+    const textGroupElements = this.fileManager.board.canvas.querySelectorAll('.text-group');
+    textGroupElements.forEach((group) => {
+      const left = group.style.left;
+      const top = group.style.top;
+      const fields = [];
+      group.querySelectorAll('.text-field-container').forEach((container) => {
+        const textField = container.textFieldInstance;
+        if (textField) {
+          fields.push(textField.getContent());
+        }
+      });
+      groups.push({ type: 'text', left, top, fields });
+    });
+    
     return JSON.stringify(groups);
   }
 

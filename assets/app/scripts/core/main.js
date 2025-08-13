@@ -6,16 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create a global VersionManager instance
   window.versionManager = new VersionManager(window.mathBoard.fileManager);
 
-  // Instantiate ExpressionEquivalence after other initializations and DOM ready
-  // Ensure MathGene scripts have had time to load.
+  // Initialize ExpressionEquivalence and related systems
   if (typeof ExpressionEquivalence !== 'undefined') {
     window.expressionEquivalence = new ExpressionEquivalence();
   } else {
     console.error("ExpressionEquivalence class not found. Check script loading order.");
   }
 
+  // Add global function to initialize math support for text fields
+  window.initializeMathSupportForTextFields = function() {
+    document.querySelectorAll('.text-field-container').forEach(container => {
+      const textField = container.textFieldInstance;
+      if (textField && typeof textField.initializeMathSupport === 'function') {
+        textField.initializeMathSupport();
+      }
+    });
+  };
+
   // Example: Save an initial state snapshot.
-  window.versionManager.saveState(); // This will now trigger the equivalence check if expressionEquivalence was created
+  window.versionManager.saveState();
 
   // Detect if user is on a Mac
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;

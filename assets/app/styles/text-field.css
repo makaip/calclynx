@@ -1,0 +1,143 @@
+/* Text group styling similar to math-group */
+.text-group {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px;
+    cursor: grab;
+}
+
+/* Hover state: white outline at 50% opacity */
+.text-group:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+/* Selected state: green outline */
+.text-group.selected {
+    outline: 2px solid #00c59a;
+    border-radius: 5px;
+}
+
+/* Dragging state: green outline with grabbing cursor */
+.text-group.dragging {
+    outline: 2px solid #00c59a !important;
+    cursor: grabbing;
+}
+
+/* Text field container styling similar to math-field-container */
+.text-field-container {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    position: relative;
+    padding: 0 5px 0 5px;
+    pointer-events: none; /* Make container non-interactive */
+}
+
+/* Make the content inside the container interactive */
+.text-field-container > * {
+    pointer-events: auto;
+}
+
+/* Remove gradient border from the container itself */
+.text-field-container:not(:last-child) {
+    margin-bottom: 1px;
+}
+
+/* Add pseudo-element for the gradient border */
+.text-field-container:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 5px;
+    right: 5px;
+    height: 1px;
+    background: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a);
+}
+
+/* Text editor styling */
+.text-editor {
+    min-height: 40px;
+    display: inline-block;
+    padding: 5px;
+    font-size: 18px;
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    cursor: text; /* Add text cursor for the editor */
+}
+
+/* Focused text editor */
+.text-editor:focus {
+    /* outline: 1px solid #00c59a !important; */
+    border-radius: 3px;
+}
+
+/* Text editor caret */
+.text-editor {
+    caret-color: #ffffff;
+}
+
+/* Style for the text field container being dragged */
+.text-field-container.dragging-field {
+    opacity: 0.6;
+    background-color: rgba(50, 50, 50, 0.5);
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    pointer-events: none;
+}
+
+/* Selection styling */
+.text-editor::selection {
+    background-color: rgba(0, 197, 154, 0.3);
+    color: #ffffff;
+}
+
+.text-editor::-moz-selection {
+    background-color: rgba(0, 197, 154, 0.3);
+    color: #ffffff;
+}
+
+/* Math inline support within text fields */
+.text-editor .mq-inline {
+    display: inline-block;
+    margin: 0 2px;
+    vertical-align: baseline;
+    min-width: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
+.text-editor .mq-inline .mq-root-block {
+    white-space: nowrap;
+    color: #ffffff;
+}
+
+.text-editor .mq-inline.mq-focused {
+    border-color: #00c59a;
+    background-color: rgba(0, 197, 154, 0.1);
+}
+
+/* Placeholder text for empty text fields */
+.text-editor:empty::before {
+    content: attr(data-placeholder);
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    pointer-events: none;
+}
+
+/* Hide placeholder when focused or has content */
+.text-editor:focus:empty::before,
+.text-editor:not(:empty)::before {
+    display: none;
+}

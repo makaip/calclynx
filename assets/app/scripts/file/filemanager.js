@@ -56,6 +56,8 @@ class FileManager {
   
     async saveState() {
       const groups = [];
+      
+      // Save math groups
       const mathGroupElements = this.board.canvas.querySelectorAll('.math-group');
       mathGroupElements.forEach((group) => {
         const left = group.style.left;
@@ -66,8 +68,25 @@ class FileManager {
             fields.push(container.dataset.latex);
           }
         });
-        groups.push({ left, top, fields });
+        groups.push({ type: 'math', left, top, fields });
       });
+      
+      // Save text groups
+      const textGroupElements = this.board.canvas.querySelectorAll('.text-group');
+      textGroupElements.forEach((group) => {
+        const left = group.style.left;
+        const top = group.style.top;
+        const fields = [];
+        
+        // Get the single text field content
+        const container = group.querySelector('.text-field-container');
+        if (container && container.textFieldInstance) {
+          fields.push(container.textFieldInstance.getContent());
+        }
+        
+        groups.push({ type: 'text', left, top, fields });
+      });
+      
       const stateString = JSON.stringify(groups);
       
       // Check if we have a fileId to save to the cloud
@@ -242,13 +261,17 @@ class FileManager {
           groups = []; // Default to empty array to prevent errors
         }
 
-        // Clear the current canvas (remove all existing math groups).
+        // Clear the current canvas (remove all existing math and text groups).
         this.board.canvas.innerHTML = '';
-        // Clear instances tracked by MathBoard if necessary (depends on implementation)
-        // e.g., this.board.mathGroupInstances = [];
+        
         groups.forEach((groupData) => {
-           // Ensure MathGroup constructor correctly handles data format
-           new MathGroup(this.board, 0, 0, groupData);
+          // Handle both new format with type and legacy format without type
+          if (groupData.type === 'text') {
+            new TextGroup(this.board, 0, 0, groupData);
+          } else {
+            // Default to math group for backward compatibility
+            new MathGroup(this.board, 0, 0, groupData);
+          }
         });
 
         // Only save state if shouldSave is true (defaults to true)

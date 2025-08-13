@@ -114,8 +114,22 @@ class Navigation {
       canvas.addEventListener('mousedown', (e) => {
         // Only left click and when not panning.
         if (e.button !== 0 || this.board.spaceDown) return;
-        // Only trigger box selection if NOT clicking inside a math group.
-        if (e.target.closest('.math-group')) return;
+        // Don't start box selection if group dragging is already in progress
+        if (this.board.groupDragging) return;
+        
+        // Check if clicking on a group (math or text group)
+        let target = e.target;
+        while (target && target !== canvas) {
+          if (target.classList.contains('math-group') || target.classList.contains('text-group')) {
+            // Clicking on a group, don't start box selection
+            return;
+          }
+          target = target.parentElement;
+        }
+        
+        // Only trigger box selection if NOT clicking inside a text editor
+        if (e.target.closest('.text-editor')) return;
+        
         this.boxSelect.isSelecting = true;
         this.boxSelect.startX = e.clientX;
         this.boxSelect.startY = e.clientY;
@@ -134,6 +148,16 @@ class Navigation {
     
       document.addEventListener('mousemove', (e) => {
         if (!this.boxSelect.isSelecting) return;
+        // Cancel box selection if group dragging starts
+        if (this.board.groupDragging) {
+          this.boxSelect.isSelecting = false;
+          if (this.boxSelect.element) {
+            this.boxSelect.element.remove();
+            this.boxSelect.element = null;
+          }
+          return;
+        }
+        
         const startX = this.boxSelect.startX;
         const startY = this.boxSelect.startY;
         const currentX = e.clientX;
@@ -150,8 +174,8 @@ class Navigation {
         // Get the current selection rectangle's bounds.
         const selectionRect = this.boxSelect.element.getBoundingClientRect();
         
-        // For each math group, check if it overlaps with the selection box.
-        document.querySelectorAll('.math-group').forEach((group) => {
+        // For each math group and text group, check if it overlaps with the selection box.
+        document.querySelectorAll('.math-group, .text-group').forEach((group) => {
           const groupRect = group.getBoundingClientRect();
           // Check for any overlap:
           const isOverlapping =
@@ -189,11 +213,11 @@ class Navigation {
     }
     
     selectGroupsWithinBox(selectionRect) {
-      document.querySelectorAll('.math-group').forEach((group) => {
+      document.querySelectorAll('.math-group, .text-group').forEach((group) => {
         group.classList.remove('selected');
       });
   
-      document.querySelectorAll('.math-group').forEach((group) => {
+      document.querySelectorAll('.math-group, .text-group').forEach((group) => {
       const groupRect = group.getBoundingClientRect();
         
         if (
