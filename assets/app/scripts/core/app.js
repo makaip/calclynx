@@ -1,5 +1,7 @@
 // No imports needed - access the global supabaseClient variable
 
+// Commenting out duplicate file loading - main.js handles this
+/*
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("App page loaded. Checking for fileId...");
 
@@ -13,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("No fileId found in URL parameters.");
     }
 });
+*/
 
 async function loadAndLogFileContent(fileId) {
     try {

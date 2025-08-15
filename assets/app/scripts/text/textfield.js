@@ -79,12 +79,10 @@ class TextField {
 
     this.editorElement.addEventListener('input', () => {
       // Auto-save on input changes
-      if (window.versionManager) {
-        clearTimeout(this.saveTimeout);
-        this.saveTimeout = setTimeout(() => {
-          window.versionManager.saveState();
-        }, 1000); // Debounce saves
-      }
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = setTimeout(() => {
+        this.textGroup.board.fileManager.saveState();
+      }, 500);
     });
 
     // Prevent the editor from losing focus when clicking on math inline elements

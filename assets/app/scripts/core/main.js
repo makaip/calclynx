@@ -3,9 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create and store MathBoard instance globally.
   window.mathBoard = new MathBoard();
 
-  // Create a global VersionManager instance
-  window.versionManager = new VersionManager(window.mathBoard.fileManager);
-
   // Initialize ExpressionEquivalence and related systems
   if (typeof ExpressionEquivalence !== 'undefined') {
     window.expressionEquivalence = new ExpressionEquivalence();
@@ -23,9 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Example: Save an initial state snapshot.
-  window.versionManager.saveState();
-
   // Detect if user is on a Mac
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
@@ -42,8 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const jsonData = e.target.result;
           window.mathBoard.fileManager.importData(jsonData);
-          // Save state after import
-          window.versionManager.saveState();
         } catch (err) {
           console.error("Error reading JSON file:", err);
         }
@@ -80,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize version manager UI (if applicable)
-  // Example: window.versionManager.initializeUI();
 
   // Update user status display
   updateUserStatus();
@@ -131,6 +122,7 @@ async function updateUserStatus() {
       authButton.textContent = "Sign Out";
       authButton.onclick = async (e) => {
         e.preventDefault();
+        
         try {
           authButton.disabled = true;
           authButton.textContent = "Signing Out...";

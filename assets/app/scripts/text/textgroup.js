@@ -21,11 +21,7 @@ class TextGroup {
 
   remove() {
     this.element.remove();
-    // Use version manager if available
-    if (window.versionManager) {
-      window.versionManager.saveState();
-    } else {
-      this.board.fileManager.saveState();
-    }
+    // Save state after removal
+    this.board.fileManager.saveState();
   }
 }

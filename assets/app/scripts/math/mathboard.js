@@ -260,7 +260,7 @@ class MathBoard {
         // Regular double-click creates a math field
         new MathGroup(this, coords.x, coords.y);
       }
-      window.versionManager.saveState();
+      this.fileManager.saveState();
     });
   }
 
@@ -333,7 +333,7 @@ class MathBoard {
     const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected');
     selectedGroups.forEach(group => group.remove());
 
-    window.versionManager.saveState();
+    this.fileManager.saveState();
   }
 
   pasteGroups() {
@@ -367,7 +367,7 @@ class MathBoard {
 
     pastedGroups.forEach(groupEl => groupEl.classList.add('selected'));
 
-    window.versionManager.saveState();
+    this.fileManager.saveState();
   }
 }
 

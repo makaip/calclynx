@@ -72,9 +72,8 @@ class MathGroup {
   remove() {
     // Clean up listeners if necessary (though JS garbage collection should handle it)
     this.element.remove();
-    // Use version manager if available
-    if (window.versionManager) window.versionManager.saveState();
-    else this.board.fileManager.saveState();
+    // Save state after removal
+    this.board.fileManager.saveState();
   }
 
   insertMathFieldAfter(referenceContainer) {
@@ -210,11 +209,7 @@ class MathGroup {
       this.updateInstanceOrder(); 
 
       // Save the new order
-      if (window.versionManager) {
-          window.versionManager.saveState();
-      } else {
-          this.board.fileManager.saveState();
-      }
+      this.board.fileManager.saveState();
   }
 
   updateInstanceOrder() {

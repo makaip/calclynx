@@ -109,8 +109,7 @@ class MathField {
             if (previousContainer && previousContainer.classList.contains('math-field-container')) {
               this.container.remove();
               MathField.edit(previousContainer);
-              if (window.versionManager) window.versionManager.saveState();
-              else this.mathGroup.board.fileManager.saveState();
+              this.mathGroup.board.fileManager.saveState();
             }
             return;
           }
@@ -253,8 +252,9 @@ class MathField {
           const currentLatex = container.dataset.latex;
           container.remove();
           MathField.edit(previousContainer);
-          if (currentLatex && window.versionManager) window.versionManager.saveState();
-          else if (currentLatex && container.parentElement.mathGroup) container.parentElement.mathGroup.board.fileManager.saveState();
+          if (currentLatex && container.parentElement.mathGroup) {
+            container.parentElement.mathGroup.board.fileManager.saveState();
+          }
         } else if (container.parentElement.mathGroup && container.parentElement.children.length === 1) {
           event.preventDefault();
           container.parentElement.mathGroup.remove();

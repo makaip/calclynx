@@ -76,14 +76,14 @@ class ContextMenu {
         label: 'New Math Stack',
         action: () => {
           new MathGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.versionManager.saveState();
+          window.mathBoard.fileManager.saveState();
         }
       },
       {
         label: 'New Text Stack',
         action: () => {
           new TextGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.versionManager.saveState();
+          window.mathBoard.fileManager.saveState();
         }
       },
       { separator: true },
@@ -131,7 +131,7 @@ class ContextMenu {
             const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected');
             selectedGroups.forEach(group => group.remove());
           }
-          window.versionManager.saveState();
+          window.mathBoard.fileManager.saveState();
         }
       }
     ];
