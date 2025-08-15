@@ -2,7 +2,7 @@
 // Paths are relative to the worker script's location
 if (typeof self !== 'undefined' && typeof self.importScripts === 'function') {
     try {
-        self.importScripts('../../../libs/mathgene/mg_translate.js', '../../../libs/mathgene/mg_calculate.js');
+        self.importScripts('../../../../libs/mathgene/mg_translate.js', '../../../../libs/mathgene/mg_calculate.js');
     } catch (e) {
         console.error('mathgene-worker: Failed to import MathGene scripts.', e);
         throw e;

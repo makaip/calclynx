@@ -13,7 +13,7 @@ class ExpressionEquivalence {
 
     try {
         // Path to worker script. Ensure this path is correct relative to the HTML file.
-        this.worker = new Worker('assets/app/scripts/mathgene-worker.js');
+        this.worker = new Worker('assets/app/scripts/utils/mathgene-worker.js');
         this.workerAvailable = true; // Assume available until an error occurs
 
         this.worker.onmessage = (event) => {
