@@ -9,9 +9,11 @@ class TextField {
     if (window.MathQuill) {
       setTimeout(() => {
         this.initializeMathSupport();
-        // Reinitialize any MathQuill fields that were restored from saved content
-        if (content) {
-          this.reinitializeMathFields();
+        // If content was loaded, reinitialize MathQuill fields after support is ready
+        if (content && content.includes('mq-inline')) {
+          setTimeout(() => {
+            this.reinitializeMathFields();
+          }, 10);
         }
       }, 100);
     }
@@ -167,19 +169,39 @@ class TextField {
 
   // Method to reinitialize MathQuill fields after content is restored
   reinitializeMathFields() {
-    if (!this.mathSupportInitialized || !window.MathQuill) return;
+    if (!this.mathSupportInitialized || !window.MathQuill || !this.initializeMathField) return;
+    
+    const MQ = window.MathQuill.getInterface(2);
+    if (!MQ) return;
     
     const mathSpans = this.editorElement.querySelectorAll('.mq-inline');
     mathSpans.forEach(span => {
-      // Only reinitialize if not already initialized
+      // For loaded content, convert to static math first (like mathfield.js does)
       try {
-        const MQ = window.MathQuill.getInterface(2);
+        // Remove any existing MathQuill content
         const existingMQ = MQ.MathField(span);
-        if (!existingMQ || !existingMQ.el()) {
-          this.initializeMathField(span, false);
+        if (existingMQ && existingMQ.el()) {
+          // Don't reinitialize if already active
+          return;
         }
       } catch (e) {
-        // Not initialized yet, initialize it
+        // Not initialized, continue
+      }
+      
+      // Get the latex from data attribute if it exists
+      const latex = span.dataset.latex || '';
+      if (latex) {
+        // Clear the span and render as static math (similar to mathfield.js approach)
+        span.innerHTML = '';
+        try {
+          MQ.StaticMath(span).latex(latex);
+        } catch (e) {
+          console.warn('Failed to render static math for:', latex, e);
+          // Fallback: try to initialize as editable field
+          this.initializeMathField(span, false);
+        }
+      } else {
+        // No latex data, try to initialize as new field
         this.initializeMathField(span, false);
       }
     });
