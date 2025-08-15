@@ -7,7 +7,13 @@ class TextField {
     
     // Initialize math support if MathQuill is available
     if (window.MathQuill) {
-      setTimeout(() => this.initializeMathSupport(), 100);
+      setTimeout(() => {
+        this.initializeMathSupport();
+        // Reinitialize any MathQuill fields that were restored from saved content
+        if (content) {
+          this.reinitializeMathFields();
+        }
+      }, 100);
     }
     
     if (isNewField) {
@@ -39,7 +45,13 @@ class TextField {
     
     // Set initial content
     if (content) {
-      this.editorElement.textContent = content;
+      // If content contains HTML (like MathQuill spans), use innerHTML
+      if (content.includes('<') && content.includes('>')) {
+        this.editorElement.innerHTML = content;
+      } else {
+        // Plain text content
+        this.editorElement.textContent = content;
+      }
     } else {
       // Ensure there's always a text node for cursor placement
       this.editorElement.appendChild(document.createTextNode(''));
@@ -131,13 +143,46 @@ class TextField {
   }
 
   getContent() {
-    return this.editorElement ? this.editorElement.textContent : '';
+    if (!this.editorElement) return '';
+    
+    // Return HTML content to preserve MathQuill fields
+    return this.editorElement.innerHTML;
   }
 
   setContent(content) {
     if (this.editorElement) {
-      this.editorElement.textContent = content;
+      if (content) {
+        // Set HTML content to preserve MathQuill fields
+        this.editorElement.innerHTML = content;
+        
+        // Reinitialize any MathQuill fields that were restored
+        this.reinitializeMathFields();
+      } else {
+        // Ensure there's always a text node for cursor placement
+        this.editorElement.innerHTML = '';
+        this.editorElement.appendChild(document.createTextNode(''));
+      }
     }
+  }
+
+  // Method to reinitialize MathQuill fields after content is restored
+  reinitializeMathFields() {
+    if (!this.mathSupportInitialized || !window.MathQuill) return;
+    
+    const mathSpans = this.editorElement.querySelectorAll('.mq-inline');
+    mathSpans.forEach(span => {
+      // Only reinitialize if not already initialized
+      try {
+        const MQ = window.MathQuill.getInterface(2);
+        const existingMQ = MQ.MathField(span);
+        if (!existingMQ || !existingMQ.el()) {
+          this.initializeMathField(span, false);
+        }
+      } catch (e) {
+        // Not initialized yet, initialize it
+        this.initializeMathField(span, false);
+      }
+    });
   }
 
   // Support for math inline functionality similar to test.html
@@ -453,6 +498,11 @@ class TextField {
           span.dataset.latex = latex;
         }
       });
+
+      // Restore latex content if it exists in the dataset (from saved content)
+      if (span.dataset.latex) {
+        mq.latex(span.dataset.latex);
+      }
 
       if (shouldFocus) {
         mq.focus();
