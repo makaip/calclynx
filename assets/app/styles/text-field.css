@@ -71,7 +71,6 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     line-height: 1.4;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     cursor: text; /* Add text cursor for the editor */
 }
 

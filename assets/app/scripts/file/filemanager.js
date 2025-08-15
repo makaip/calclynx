@@ -16,16 +16,14 @@ class FileManager {
       const fileTitleElement = document.getElementById('file-title');
       if (!fileTitleElement) return;
 
-      // Hide title by default
-      fileTitleElement.style.display = 'none';
-      fileTitleElement.textContent = ''; // Clear previous title
-
       const currentPath = window.location.pathname;
       const urlParams = new URLSearchParams(window.location.search);
       const fileIdFromUrl = urlParams.get('fileId');
 
-      // If on app.html without a fileId, or if this.fileId is not set, keep hidden
+      // If on app.html without a fileId, or if this.fileId is not set, show "Untitled"
       if (!this.fileId || (currentPath.endsWith('/app.html') && !fileIdFromUrl)) {
+        fileTitleElement.textContent = 'Untitled';
+        fileTitleElement.style.display = ''; // Show the element
         return;
       }
       
@@ -38,19 +36,25 @@ class FileManager {
           
         if (error) {
           console.error('Error fetching file title:', error);
-          // Keep hidden if error
+          // Show "Untitled" if error
+          fileTitleElement.textContent = 'Untitled';
+          fileTitleElement.style.display = '';
           return;
         }
 
-        if (data && data.file_name && data.file_name !== 'Untitled') {
+        if (data && data.file_name) {
           fileTitleElement.textContent = data.file_name;
           fileTitleElement.style.display = ''; // Show the element (reverts to CSS default display)
         } else {
-          // Keep hidden if file_name is null, empty, or "Untitled"
+          // Show "Untitled" if file_name is null or empty
+          fileTitleElement.textContent = 'Untitled';
+          fileTitleElement.style.display = '';
         }
       } catch (err) {
         console.error('Exception fetching file title:', err);
-        // Keep hidden if exception
+        // Show "Untitled" if exception
+        fileTitleElement.textContent = 'Untitled';
+        fileTitleElement.style.display = '';
       }
     }
   
