@@ -36,7 +36,6 @@ class TextField {
     this.editorElement.className = 'text-editor';
     this.editorElement.contentEditable = true;
     this.editorElement.spellcheck = false;
-    this.editorElement.setAttribute('data-placeholder', 'Type text here... (Press $ for math)');
     
     // Set initial content
     if (content) {
@@ -119,6 +118,16 @@ class TextField {
       clearTimeout(this.saveTimeout);
     }
     
+    // Clean up math field check timeout
+    if (this.mathFieldCheckTimeout) {
+      clearTimeout(this.mathFieldCheckTimeout);
+    }
+    
+    // Clean up selection change handler
+    if (this.selectionChangeHandler) {
+      document.removeEventListener('selectionchange', this.selectionChangeHandler);
+    }
+    
     // Remove the entire text group since there's only one field per group
     this.textGroup.remove();
   }
@@ -194,6 +203,59 @@ class TextField {
       editor.focus();
     };
 
+    // Check if cursor is at the beginning of a MathQuill field
+    const isCursorAtBeginningOfMath = () => {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return null;
+      
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer;
+      
+      let mathSpan = null;
+      if (node.nodeType === Node.TEXT_NODE) {
+        mathSpan = node.parentNode.closest('.mq-inline');
+      } else {
+        mathSpan = node.closest('.mq-inline');
+      }
+      
+      if (mathSpan) {
+        try {
+          const mq = MQ.MathField(mathSpan);
+          const latex = mq.latex().trim();
+          return { mathSpan, mq, atStart: latex === '' };
+        } catch (e) {
+          return null;
+        }
+      }
+      
+      return null;
+    };
+
+    // Detect if cursor has entered a math field and activate it
+    const checkAndActivateMathField = () => {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return false;
+      
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer;
+      
+      let mathSpan = null;
+      if (node.nodeType === Node.TEXT_NODE) {
+        mathSpan = node.parentNode.closest('.mq-inline');
+      } else {
+        mathSpan = node.closest('.mq-inline');
+      }
+      
+      if (mathSpan) {
+        // Activate the math field if cursor is inside it
+        console.log('Cursor detected inside math field, activating...');
+        this.initializeMathField(mathSpan, true);
+        return true;
+      }
+      
+      return false;
+    };
+
     const insertMathAtCaret = () => {
       const sel = window.getSelection();
       if (!sel.rangeCount) return;
@@ -212,41 +274,185 @@ class TextField {
       this.initializeMathField(span, true);
     };
 
-    // Add math field initialization (simplified version from test.html)
+    // Add math field initialization with enhanced boundary detection from test.html
     this.initializeMathField = (span, shouldFocus = true) => {
+      try {
+        const existingMQ = MQ.MathField(span);
+        if (existingMQ && existingMQ.el()) {
+          existingMQ.el().removeEventListener('keydown', existingMQ._keydownHandler);
+        }
+      } catch (e) {
+        // No existing instance
+      }
+
+      // Improved MathQuill configuration to fix left arrow and boundary issues
       const mq = MQ.MathField(span, {
-        spaceBehavesLikeTab: false,
+        spaceBehavesLikeTab: true,
+        // Remove leftRightIntoCmdGoes to fix left arrow issues
         restrictMismatchedBrackets: true,
         sumStartsWithNEquals: true,
-        autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
-        autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
+        supSubsRequireOperand: true,
+        charsThatBreakOutOfSupSub: '+-=<>',
+        autoSubscriptNumerals: true,
+        autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
+        autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim',
         
         handlers: {
           edit: () => { 
             span.dataset.latex = mq.latex(); 
           },
-          moveOutOf: (dir) => {
-            mq.blur();
+
+          moveOutOf: (dir, mathField) => {
+            console.log('moveOutOf triggered with direction:', dir);
+            mathField.blur();
+            
             if (dir === MQ.L) {
               setCaretBefore(span);
             } else if (dir === MQ.R) {
-              setCaretAfter(span);
+              // Ensure there's always a place to go when moving right
+              let marker = span.nextSibling;
+              if (!marker || marker.nodeType !== Node.TEXT_NODE) {
+                // Create a new text node if none exists
+                marker = document.createTextNode('');
+                span.parentNode.insertBefore(marker, span.nextSibling);
+              }
+              setCaretAfter(marker);
             }
           },
-          deleteOutOf: (dir) => {
-            const latex = mq.latex().trim();
+
+          deleteOutOf: (dir, mathField) => {
+            const latex = mathField.latex().trim();
+            
             if (latex === '') {
-              mq.blur();
+              mathField.blur();
               const marker = span.nextSibling;
+              
               if (dir === MQ.L) {
                 setCaretBefore(span);
               }
+              
               span.remove();
               if (marker && marker.nodeType === Node.TEXT_NODE && marker.nodeValue === '\u200B') {
                 marker.remove();
               }
             }
+          },
+        }
+      });
+
+      // Enhanced key handling to fix left arrow boundary issues
+      function onKeyDownInMQ(ev) {
+        console.log('Key in MQ:', ev.key, 'Field active:', mq.el().classList.contains('mq-focused'));
+        
+        if (ev.key === '$') {
+          ev.preventDefault();
+          span.dataset.latex = mq.latex();
+          mq.blur();
+          // Ensure there's a place to go after exiting with $
+          let afterMarker = span.nextSibling;
+          if (!afterMarker || afterMarker.nodeType !== Node.TEXT_NODE) {
+            afterMarker = document.createTextNode('');
+            span.parentNode.insertBefore(afterMarker, span.nextSibling);
           }
+          setCaretAfter(afterMarker);
+          return;
+        }
+        
+        // Enhanced left arrow handling - force immediate boundary check
+        if (ev.key === 'ArrowLeft') {
+          const latex = mq.latex().trim();
+          console.log('Left arrow in math, latex:', latex);
+          
+          // If field is empty, immediately exit
+          if (latex === '') {
+            ev.preventDefault();
+            ev.stopPropagation();
+            mq.blur();
+            setCaretBefore(span);
+            return;
+          }
+          
+          // Check if we're at the beginning using MathQuill's internal state
+          setTimeout(() => {
+            try {
+              // Force check if we should move out
+              const mqEl = mq.el();
+              const cursor = mqEl.querySelector('.mq-cursor');
+              const rootBlock = mqEl.querySelector('.mq-root-block');
+              
+              if (cursor && rootBlock) {
+                // Check if cursor is at the very beginning
+                const firstChild = rootBlock.firstChild;
+                if (cursor === firstChild || (firstChild && cursor.previousSibling === null)) {
+                  console.log('Detected at beginning, forcing exit');
+                  mq.blur();
+                  setCaretBefore(span);
+                  return;
+                }
+              }
+              
+              // Fallback: try to use MathQuill's internal cursor API
+              if (mq.__controller && mq.__controller.cursor) {
+                const controller = mq.__controller;
+                if (!controller.cursor[MQ.L] || controller.cursor[MQ.L] === controller.root) {
+                  console.log('Using fallback cursor detection');
+                  mq.blur();
+                  setCaretBefore(span);
+                }
+              }
+            } catch (e) {
+              console.log('Error in cursor detection:', e);
+            }
+          }, 0);
+        }
+        
+        // Enhanced right arrow handling for consistency
+        if (ev.key === 'ArrowRight') {
+          setTimeout(() => {
+            const latex = mq.latex().trim();
+            if (latex === '') {
+              mq.blur();
+              // Ensure there's a place to go
+              let marker = span.nextSibling;
+              if (!marker || marker.nodeType !== Node.TEXT_NODE) {
+                marker = document.createTextNode('');
+                span.parentNode.insertBefore(marker, span.nextSibling);
+              }
+              setCaretAfter(marker);
+              return;
+            }
+            
+            const mqEl = mq.el();
+            const cursor = mqEl.querySelector('.mq-cursor');
+            const rootBlock = mqEl.querySelector('.mq-root-block');
+            
+            if (cursor && rootBlock && cursor.nextSibling === null) {
+              const lastChild = rootBlock.lastChild;
+              if (cursor === lastChild || cursor.previousSibling === lastChild) {
+                mq.blur();
+                // Ensure there's a place to go
+                let marker = span.nextSibling;
+                if (!marker || marker.nodeType !== Node.TEXT_NODE) {
+                  marker = document.createTextNode('');
+                  span.parentNode.insertBefore(marker, span.nextSibling);
+                }
+                setCaretAfter(marker);
+              }
+            }
+          }, 0);
+        }
+      }
+
+      const mqEl = mq.el();
+      mq._keydownHandler = onKeyDownInMQ;
+      mqEl.addEventListener('keydown', onKeyDownInMQ);
+
+      // Additional event listener to prevent unwanted text input in boundary zones
+      mqEl.addEventListener('input', (ev) => {
+        // Ensure we stay in proper math mode
+        const latex = mq.latex();
+        if (latex !== span.dataset.latex) {
+          span.dataset.latex = latex;
         }
       });
 
@@ -257,10 +463,44 @@ class TextField {
       return mq;
     };
 
-    // Add keyboard handler for math insertion
+    // Add enhanced keyboard handler for math insertion and boundary detection
     editor.addEventListener('keydown', (ev) => {
-      // Don't interfere with existing text field navigation
-      if (['ArrowUp', 'ArrowDown', 'Enter', 'Backspace'].includes(ev.key)) {
+      // Check if we need to activate a math field first
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') {
+        // Small delay to let the cursor move, then check if we're in a math field
+        setTimeout(() => {
+          checkAndActivateMathField();
+        }, 0);
+      }
+      
+      if (ev.key === 'Backspace') {
+        const mathInfo = isCursorAtBeginningOfMath();
+        if (mathInfo && mathInfo.atStart) {
+          ev.preventDefault();
+          const { mathSpan } = mathInfo;
+          
+          setCaretBefore(mathSpan);
+          
+          const marker = mathSpan.nextSibling;
+          mathSpan.remove();
+          if (marker && marker.nodeType === Node.TEXT_NODE && marker.nodeValue === '\u200B') {
+            marker.remove();
+          }
+          return;
+        }
+      }
+
+      const sel = window.getSelection();
+      const anchor = sel && sel.anchorNode;
+      if (anchor) {
+        let node = anchor.nodeType === Node.TEXT_NODE ? anchor.parentNode : anchor;
+        if (node && node.closest && node.closest('.mq-inline')) {
+          return;
+        }
+      }
+
+      // Don't interfere with existing text field navigation for Enter, ArrowUp, ArrowDown
+      if (['ArrowUp', 'ArrowDown', 'Enter'].includes(ev.key)) {
         return;
       }
 
@@ -270,15 +510,39 @@ class TextField {
       }
     });
 
-    // Add click handler for math fields
+    // Add enhanced click handler for math fields
     editor.addEventListener('click', (ev) => {
       const clicked = ev.target;
       const mqParent = clicked.closest && clicked.closest('.mq-inline');
       if (mqParent) {
+        console.log('Clicked on math field');
         setTimeout(() => {
           this.initializeMathField(mqParent, true);
         }, 10);
       }
     });
+
+    // Additional selection change listener to catch cursor movements into math fields
+    const selectionChangeHandler = () => {
+      // Debounce to avoid excessive calls
+      clearTimeout(this.mathFieldCheckTimeout);
+      this.mathFieldCheckTimeout = setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel.rangeCount && sel.anchorNode) {
+          const node = sel.anchorNode;
+          const mathSpan = (node.nodeType === Node.TEXT_NODE ? node.parentNode : node).closest('.mq-inline');
+          
+          if (mathSpan && !mathSpan.classList.contains('mq-focused')) {
+            console.log('Selection moved into unfocused math field, activating...');
+            this.initializeMathField(mathSpan, true);
+          }
+        }
+      }, 50);
+    };
+    
+    document.addEventListener('selectionchange', selectionChangeHandler);
+    
+    // Store reference for cleanup
+    this.selectionChangeHandler = selectionChangeHandler;
   }
 }
