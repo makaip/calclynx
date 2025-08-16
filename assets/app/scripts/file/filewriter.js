@@ -7,7 +7,10 @@ class FileWriter {
     }
 
     async saveState() {
-        const groups = [];
+        const saveData = {
+            version: "2.0", // Add version for future compatibility
+            groups: []
+        };
         
         // Save math groups
         const mathGroupElements = this.board.canvas.querySelectorAll('.math-group');
@@ -20,26 +23,33 @@ class FileWriter {
                     fields.push(container.dataset.latex);
                 }
             });
-            groups.push({ type: 'math', left, top, fields });
+            saveData.groups.push({ type: 'math', left, top, fields });
         });
         
-        // Save text groups
+        // Save text groups with optimized format
         const textGroupElements = this.board.canvas.querySelectorAll('.text-group');
         textGroupElements.forEach((group) => {
             const left = group.style.left;
             const top = group.style.top;
             const fields = [];
             
-            // Get the single text field content
+            // Get the single text field content in optimized format
             const container = group.querySelector('.text-field-container');
             if (container && container.textFieldInstance) {
-                fields.push(container.textFieldInstance.getContent());
+                const optimizedContent = container.textFieldInstance.getOptimizedContent();
+                fields.push(optimizedContent);
             }
             
-            groups.push({ type: 'text', left, top, fields });
+            saveData.groups.push({ type: 'text', left, top, fields });
         });
         
-        const stateString = JSON.stringify(groups);
+        const stateString = JSON.stringify(saveData);
+        
+        // Log storage efficiency if there are text groups
+        const textGroupCount = saveData.groups.filter(g => g.type === 'text').length;
+        if (textGroupCount > 0) {
+            console.log(`Saving ${textGroupCount} text groups with optimized format (v2.0)`);
+        }
         
         // Check if we have a fileId to save to the cloud
         if (!this.fileManager.fileId) {
@@ -104,7 +114,12 @@ class FileWriter {
     }
 
     exportData() {
-        const groups = [];
+        const exportData = {
+            version: "2.0",
+            groups: []
+        };
+        
+        // Export math groups
         const mathGroupElements = this.board.canvas.querySelectorAll('.math-group');
         mathGroupElements.forEach((group) => {
             const left = group.style.left;
@@ -115,10 +130,27 @@ class FileWriter {
                     fields.push(container.dataset.latex);
                 }
             });
-            groups.push({ left, top, fields });
+            exportData.groups.push({ type: 'math', left, top, fields });
         });
         
-        const dataStr = JSON.stringify(groups, null, 2);
+        // Export text groups with optimized format
+        const textGroupElements = this.board.canvas.querySelectorAll('.text-group');
+        textGroupElements.forEach((group) => {
+            const left = group.style.left;
+            const top = group.style.top;
+            const fields = [];
+            
+            // Get the single text field content in optimized format
+            const container = group.querySelector('.text-field-container');
+            if (container && container.textFieldInstance) {
+                const optimizedContent = container.textFieldInstance.getOptimizedContent();
+                fields.push(optimizedContent);
+            }
+            
+            exportData.groups.push({ type: 'text', left, top, fields });
+        });
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

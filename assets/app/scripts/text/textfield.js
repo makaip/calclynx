@@ -10,10 +10,10 @@ class TextField {
       setTimeout(() => {
         this.initializeMathSupport();
         // If content was loaded, reinitialize MathQuill fields after support is ready
-        if (content && content.includes('mq-inline')) {
+        if (content && (content.includes('mq-inline') || (typeof content === 'object' && content.mathFields && content.mathFields.length > 0))) {
           setTimeout(() => {
             this.reinitializeMathFields();
-          }, 10);
+          }, 50); // Increased delay to ensure proper initialization
         }
       }, 100);
     }
@@ -147,6 +147,65 @@ class TextField {
   getContent() {
     if (!this.editorElement) return '';
     
+    // Return optimized content structure instead of full HTML
+    return this.getOptimizedContent();
+  }
+
+  // New method to extract optimized content structure
+  getOptimizedContent() {
+    if (!this.editorElement) return { text: '', mathFields: [] };
+    
+    const content = { text: '', mathFields: [] };
+    let textIndex = 0;
+    
+    // Walk through all child nodes to build optimized structure
+    const walkNodes = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        content.text += node.textContent;
+        textIndex += node.textContent.length;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (node.classList.contains('mq-inline')) {
+          // This is a math field - store its position and LaTeX
+          const latex = node.dataset.latex || '';
+          content.mathFields.push({
+            position: textIndex,
+            latex: latex
+          });
+          // Add a placeholder character in text to maintain positions
+          content.text += '\uE000'; // Private use character as placeholder
+          textIndex += 1;
+        } else {
+          // Regular element, process its children
+          Array.from(node.childNodes).forEach(walkNodes);
+        }
+      }
+    };
+    
+    Array.from(this.editorElement.childNodes).forEach(walkNodes);
+    
+    return content;
+  }
+
+  // Utility method to compare storage efficiency
+  getStorageComparison() {
+    const htmlContent = this.getHTMLContent();
+    const optimizedContent = this.getOptimizedContent();
+    
+    const htmlSize = new Blob([JSON.stringify(htmlContent)]).size;
+    const optimizedSize = new Blob([JSON.stringify(optimizedContent)]).size;
+    
+    return {
+      htmlSize,
+      optimizedSize,
+      reduction: ((htmlSize - optimizedSize) / htmlSize * 100).toFixed(1) + '%',
+      ratio: (htmlSize / optimizedSize).toFixed(1) + 'x'
+    };
+  }
+
+  // Legacy method to maintain backwards compatibility
+  getHTMLContent() {
+    if (!this.editorElement) return '';
+    
     // Return HTML content to preserve MathQuill fields
     return this.editorElement.innerHTML;
   }
@@ -154,17 +213,95 @@ class TextField {
   setContent(content) {
     if (this.editorElement) {
       if (content) {
-        // Set HTML content to preserve MathQuill fields
-        this.editorElement.innerHTML = content;
-        
-        // Reinitialize any MathQuill fields that were restored
-        this.reinitializeMathFields();
+        // Check if content is the new optimized format
+        if (typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
+          this.setOptimizedContent(content);
+        } else if (typeof content === 'string') {
+          // Detect if it's legacy HTML format or plain text
+          if (content.includes('<') && content.includes('>')) {
+            // Legacy HTML content format - convert to optimized format
+            this.setLegacyHTMLContent(content);
+          } else {
+            // Plain text content
+            this.editorElement.textContent = content;
+          }
+        } else {
+          // Fallback for unknown format
+          this.editorElement.innerHTML = '';
+          this.editorElement.appendChild(document.createTextNode(''));
+        }
       } else {
         // Ensure there's always a text node for cursor placement
         this.editorElement.innerHTML = '';
         this.editorElement.appendChild(document.createTextNode(''));
       }
     }
+  }
+
+  // Method to handle legacy HTML content and convert it
+  setLegacyHTMLContent(htmlContent) {
+    if (!this.editorElement) return;
+    
+    // Temporarily set HTML content to parse it
+    this.editorElement.innerHTML = htmlContent;
+    
+    // Extract optimized format from the HTML
+    const optimizedContent = this.getOptimizedContent();
+    
+    // Clear and rebuild with optimized format
+    this.setOptimizedContent(optimizedContent);
+  }
+
+  // New method to set content from optimized format
+  setOptimizedContent(content) {
+    if (!this.editorElement) return;
+    
+    // Clear existing content
+    this.editorElement.innerHTML = '';
+    
+    const { text, mathFields } = content;
+    let currentPos = 0;
+    
+    // Sort math fields by position to process them in order
+    const sortedMathFields = [...mathFields].sort((a, b) => a.position - b.position);
+    
+    for (const mathField of sortedMathFields) {
+      // Add text before this math field
+      if (mathField.position > currentPos) {
+        const textBefore = text.substring(currentPos, mathField.position);
+        if (textBefore) {
+          this.editorElement.appendChild(document.createTextNode(textBefore));
+        }
+      }
+      
+      // Create math field span
+      const span = document.createElement('span');
+      span.className = 'mq-inline';
+      span.dataset.latex = mathField.latex;
+      console.log('Creating math span with LaTeX:', mathField.latex);
+      this.editorElement.appendChild(span);
+      
+      // Skip the placeholder character in text
+      currentPos = mathField.position + 1;
+    }
+    
+    // Add remaining text after last math field
+    if (currentPos < text.length) {
+      const remainingText = text.substring(currentPos);
+      if (remainingText) {
+        this.editorElement.appendChild(document.createTextNode(remainingText));
+      }
+    }
+    
+    // Ensure there's always a text node if editor is empty
+    if (this.editorElement.childNodes.length === 0) {
+      this.editorElement.appendChild(document.createTextNode(''));
+    }
+    
+    // Reinitialize MathQuill fields
+    setTimeout(() => {
+      this.reinitializeMathFields();
+    }, 10);
   }
 
   // Method to reinitialize MathQuill fields after content is restored
@@ -191,8 +328,11 @@ class TextField {
       // Get the latex from data attribute if it exists
       const latex = span.dataset.latex || '';
       if (latex) {
-        // Clear the span and render as static math (similar to mathfield.js approach)
+        // Clear the span completely and render as static math
         span.innerHTML = '';
+        // Ensure the latex data attribute is preserved for later conversion to editable
+        span.dataset.latex = latex;
+        console.log('Rendering static math with LaTeX:', latex);
         try {
           MQ.StaticMath(span).latex(latex);
         } catch (e) {
@@ -341,14 +481,23 @@ class TextField {
 
     // Add math field initialization with enhanced boundary detection from test.html
     this.initializeMathField = (span, shouldFocus = true) => {
+      // First, preserve the original LaTeX content before any modifications
+      const originalLatex = span.dataset.latex || '';
+      console.log('Initializing math field with LaTeX:', originalLatex);
+      
       try {
         const existingMQ = MQ.MathField(span);
         if (existingMQ && existingMQ.el()) {
           existingMQ.el().removeEventListener('keydown', existingMQ._keydownHandler);
         }
       } catch (e) {
-        // No existing instance
+        // No existing instance - might be static math, need to clear it properly
       }
+      
+      // Clear any existing MathQuill content (static or editable) to prevent corruption
+      span.innerHTML = '';
+      // Ensure the dataset is preserved
+      span.dataset.latex = originalLatex;
 
       // Improved MathQuill configuration to fix left arrow and boundary issues
       const mq = MQ.MathField(span, {
@@ -364,7 +513,9 @@ class TextField {
         
         handlers: {
           edit: () => { 
-            span.dataset.latex = mq.latex(); 
+            const newLatex = mq.latex();
+            console.log('Math field edited, new LaTeX:', newLatex);
+            span.dataset.latex = newLatex; 
           },
 
           moveOutOf: (dir, mathField) => {
@@ -523,6 +674,7 @@ class TextField {
 
       // Restore latex content if it exists in the dataset (from saved content)
       if (span.dataset.latex) {
+        console.log('Restoring LaTeX to editable field:', span.dataset.latex);
         mq.latex(span.dataset.latex);
       }
 

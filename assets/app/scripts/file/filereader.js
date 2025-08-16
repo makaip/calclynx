@@ -70,11 +70,19 @@ class FileReader {
     // Modified importData to accept an optional flag to prevent immediate saving
     importData(jsonData, shouldSave = true) {
         try {
-            let groups = JSON.parse(jsonData);
+            let parsedData = JSON.parse(jsonData);
+            let groups = [];
 
-            // Ensure groups is an array before proceeding
-            if (!Array.isArray(groups)) {
-                console.warn("Imported data is not an array. Initializing with empty board.", groups);
+            // Handle versioned format
+            if (parsedData.version && parsedData.groups) {
+                groups = parsedData.groups;
+                console.log(`Loading data format version: ${parsedData.version}`);
+            } else if (Array.isArray(parsedData)) {
+                // Legacy format (version 1.0) - direct array of groups
+                groups = parsedData;
+                console.log("Loading legacy data format (version 1.0)");
+            } else {
+                console.warn("Imported data is not in a recognized format. Initializing with empty board.", parsedData);
                 groups = []; // Default to empty array to prevent errors
             }
 
