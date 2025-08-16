@@ -80,13 +80,6 @@ class MathBoard {
           this.pasteGroups();
         }
       }
-      
-      if (e.shiftKey && e.key === 'A' && !document.querySelector('.mq-focused')) {
-        e.preventDefault();
-        const coords = this.screenToCanvas(this.mouseX, this.mouseY);
-        new MathGroup(this, coords.x, coords.y);
-        this.fileManager.saveState();
-      }
     });
 
     document.addEventListener('keyup', (e) => {
