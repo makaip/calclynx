@@ -15,7 +15,15 @@ class TextGroup {
     board.canvas.appendChild(this.element);
     
     // Create single text field
-    const content = (data && data.fields && data.fields.length > 0) ? data.fields[0] : '';
+    let content = '';
+    if (data && data.fields && data.fields.length > 0) {
+      content = data.fields[0];
+      // Handle different content formats - ensure content is in expected format
+      if (typeof content !== 'string' && typeof content !== 'object') {
+        console.warn('Unexpected content format in TextGroup:', content);
+        content = '';
+      }
+    }
     this.textField = new TextField(this, !data, content);
   }
 

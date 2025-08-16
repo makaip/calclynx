@@ -10,7 +10,10 @@ class TextField {
       setTimeout(() => {
         this.initializeMathSupport();
         // If content was loaded, reinitialize MathQuill fields after support is ready
-        if (content && (content.includes('mq-inline') || (typeof content === 'object' && content.mathFields && content.mathFields.length > 0))) {
+        if (content && (
+          (typeof content === 'string' && content.includes('mq-inline')) || 
+          (typeof content === 'object' && content.mathFields && content.mathFields.length > 0)
+        )) {
           setTimeout(() => {
             this.reinitializeMathFields();
           }, 50); // Increased delay to ensure proper initialization
@@ -47,12 +50,16 @@ class TextField {
     
     // Set initial content
     if (content) {
-      // If content contains HTML (like MathQuill spans), use innerHTML
-      if (content.includes('<') && content.includes('>')) {
-        this.editorElement.innerHTML = content;
+      // Expect modern optimized format (object with text and mathFields)
+      if (typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
+        // Use setOptimizedContent for the new format
+        setTimeout(() => {
+          this.setOptimizedContent(content);
+        }, 10);
       } else {
-        // Plain text content
-        this.editorElement.textContent = content;
+        // Fallback for unexpected content types
+        console.warn('Unexpected content type in TextField. Expected optimized format with {text, mathFields}:', typeof content, content);
+        this.editorElement.appendChild(document.createTextNode(''));
       }
     } else {
       // Ensure there's always a text node for cursor placement
@@ -147,11 +154,11 @@ class TextField {
   getContent() {
     if (!this.editorElement) return '';
     
-    // Return optimized content structure instead of full HTML
+    // Return optimized content structure
     return this.getOptimizedContent();
   }
 
-  // New method to extract optimized content structure
+  // Method to extract optimized content structure
   getOptimizedContent() {
     if (!this.editorElement) return { text: '', mathFields: [] };
     
@@ -186,47 +193,15 @@ class TextField {
     return content;
   }
 
-  // Utility method to compare storage efficiency
-  getStorageComparison() {
-    const htmlContent = this.getHTMLContent();
-    const optimizedContent = this.getOptimizedContent();
-    
-    const htmlSize = new Blob([JSON.stringify(htmlContent)]).size;
-    const optimizedSize = new Blob([JSON.stringify(optimizedContent)]).size;
-    
-    return {
-      htmlSize,
-      optimizedSize,
-      reduction: ((htmlSize - optimizedSize) / htmlSize * 100).toFixed(1) + '%',
-      ratio: (htmlSize / optimizedSize).toFixed(1) + 'x'
-    };
-  }
-
-  // Legacy method to maintain backwards compatibility
-  getHTMLContent() {
-    if (!this.editorElement) return '';
-    
-    // Return HTML content to preserve MathQuill fields
-    return this.editorElement.innerHTML;
-  }
-
   setContent(content) {
     if (this.editorElement) {
       if (content) {
-        // Check if content is the new optimized format
+        // Expect modern optimized format only
         if (typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
           this.setOptimizedContent(content);
-        } else if (typeof content === 'string') {
-          // Detect if it's legacy HTML format or plain text
-          if (content.includes('<') && content.includes('>')) {
-            // Legacy HTML content format - convert to optimized format
-            this.setLegacyHTMLContent(content);
-          } else {
-            // Plain text content
-            this.editorElement.textContent = content;
-          }
         } else {
           // Fallback for unknown format
+          console.warn('Unexpected content format in setContent. Expected optimized format with {text, mathFields}:', typeof content, content);
           this.editorElement.innerHTML = '';
           this.editorElement.appendChild(document.createTextNode(''));
         }
@@ -238,21 +213,7 @@ class TextField {
     }
   }
 
-  // Method to handle legacy HTML content and convert it
-  setLegacyHTMLContent(htmlContent) {
-    if (!this.editorElement) return;
-    
-    // Temporarily set HTML content to parse it
-    this.editorElement.innerHTML = htmlContent;
-    
-    // Extract optimized format from the HTML
-    const optimizedContent = this.getOptimizedContent();
-    
-    // Clear and rebuild with optimized format
-    this.setOptimizedContent(optimizedContent);
-  }
-
-  // New method to set content from optimized format
+  // Method to set content from optimized format
   setOptimizedContent(content) {
     if (!this.editorElement) return;
     
@@ -313,16 +274,9 @@ class TextField {
     
     const mathSpans = this.editorElement.querySelectorAll('.mq-inline');
     mathSpans.forEach(span => {
-      // For loaded content, convert to static math first (like mathfield.js does)
-      try {
-        // Remove any existing MathQuill content
-        const existingMQ = MQ.MathField(span);
-        if (existingMQ && existingMQ.el()) {
-          // Don't reinitialize if already active
-          return;
-        }
-      } catch (e) {
-        // Not initialized, continue
+      // Check if already initialized to prevent double initialization
+      if (span.dataset.mqInitialized === 'true') {
+        return;
       }
       
       // Get the latex from data attribute if it exists
@@ -332,17 +286,18 @@ class TextField {
         span.innerHTML = '';
         // Ensure the latex data attribute is preserved for later conversion to editable
         span.dataset.latex = latex;
+        span.dataset.mqInitialized = 'true';
         console.log('Rendering static math with LaTeX:', latex);
         try {
           MQ.StaticMath(span).latex(latex);
         } catch (e) {
           console.warn('Failed to render static math for:', latex, e);
-          // Fallback: try to initialize as editable field
-          this.initializeMathField(span, false);
+          // Fallback: show latex as text
+          span.textContent = latex;
         }
       } else {
-        // No latex data, try to initialize as new field
-        this.initializeMathField(span, false);
+        // No latex data, mark as initialized but empty
+        span.dataset.mqInitialized = 'true';
       }
     });
   }
@@ -481,6 +436,22 @@ class TextField {
 
     // Add math field initialization with enhanced boundary detection from test.html
     this.initializeMathField = (span, shouldFocus = true) => {
+      // Check if already initialized as editable to prevent double initialization
+      if (span.dataset.mqEditable === 'true') {
+        console.log('Math field already initialized as editable, skipping...');
+        if (shouldFocus) {
+          try {
+            const existingMQ = MQ.MathField(span);
+            if (existingMQ && existingMQ.focus) {
+              existingMQ.focus();
+            }
+          } catch (e) {
+            console.warn('Could not focus existing math field:', e);
+          }
+        }
+        return;
+      }
+      
       // First, preserve the original LaTeX content before any modifications
       const originalLatex = span.dataset.latex || '';
       console.log('Initializing math field with LaTeX:', originalLatex);
@@ -496,8 +467,10 @@ class TextField {
       
       // Clear any existing MathQuill content (static or editable) to prevent corruption
       span.innerHTML = '';
-      // Ensure the dataset is preserved
+      // Ensure the dataset is preserved and mark as editable
       span.dataset.latex = originalLatex;
+      span.dataset.mqEditable = 'true';
+      span.dataset.mqInitialized = 'true';
 
       // Improved MathQuill configuration to fix left arrow and boundary issues
       const mq = MQ.MathField(span, {
@@ -736,7 +709,7 @@ class TextField {
     editor.addEventListener('click', (ev) => {
       const clicked = ev.target;
       const mqParent = clicked.closest && clicked.closest('.mq-inline');
-      if (mqParent) {
+      if (mqParent && mqParent.dataset.mqEditable !== 'true') {
         console.log('Clicked on math field');
         setTimeout(() => {
           this.initializeMathField(mqParent, true);
@@ -754,7 +727,7 @@ class TextField {
           const node = sel.anchorNode;
           const mathSpan = (node.nodeType === Node.TEXT_NODE ? node.parentNode : node).closest('.mq-inline');
           
-          if (mathSpan && !mathSpan.classList.contains('mq-focused')) {
+          if (mathSpan && !mathSpan.classList.contains('mq-focused') && mathSpan.dataset.mqEditable !== 'true') {
             console.log('Selection moved into unfocused math field, activating...');
             this.initializeMathField(mathSpan, true);
           }

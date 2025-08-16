@@ -71,31 +71,26 @@ class FileReader {
     importData(jsonData, shouldSave = true) {
         try {
             let parsedData = JSON.parse(jsonData);
-            let groups = [];
 
-            // Handle versioned format
-            if (parsedData.version && parsedData.groups) {
-                groups = parsedData.groups;
-                console.log(`Loading data format version: ${parsedData.version}`);
-            } else if (Array.isArray(parsedData)) {
-                // Legacy format (version 1.0) - direct array of groups
-                groups = parsedData;
-                console.log("Loading legacy data format (version 1.0)");
-            } else {
-                console.warn("Imported data is not in a recognized format. Initializing with empty board.", parsedData);
-                groups = []; // Default to empty array to prevent errors
+            // Expect modern versioned format only
+            if (!parsedData.version || !parsedData.groups) {
+                console.error("Invalid data format. Expected versioned format with groups array.");
+                this.board.canvas.innerHTML = '';
+                return;
             }
+
+            console.log(`Loading data format version: ${parsedData.version}`);
 
             // Clear the current canvas (remove all existing math and text groups).
             this.board.canvas.innerHTML = '';
             
-            groups.forEach((groupData) => {
-                // Handle both new format with type and legacy format without type
+            parsedData.groups.forEach((groupData) => {
                 if (groupData.type === 'text') {
                     new TextGroup(this.board, 0, 0, groupData);
-                } else {
-                    // Default to math group for backward compatibility
+                } else if (groupData.type === 'math') {
                     new MathGroup(this.board, 0, 0, groupData);
+                } else {
+                    console.warn("Unknown group type:", groupData.type);
                 }
             });
 

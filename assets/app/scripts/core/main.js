@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // The call to loadUserFiles() is now handled within updateUserStatus()
   });
 
-  // Load file data if fileId is present in URL using the correct method
-  window.mathBoard.fileManager.loadState(); // Corrected function call
+  // File loading is handled in the MathBoard constructor
+  // No need to call loadState() again here
 
 }); // End DOMContentLoaded
 

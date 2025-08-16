@@ -358,9 +358,11 @@ class MathBoard {
       let newGroupInstance;
       if (groupData.type === 'text') {
         newGroupInstance = new TextGroup(this, 0, 0, data);
-      } else {
-        // Default to math group for backward compatibility
+      } else if (groupData.type === 'math') {
         newGroupInstance = new MathGroup(this, 0, 0, data);
+      } else {
+        console.warn('Unknown group type:', groupData.type);
+        return; // Skip unknown group types
       }
       pastedGroups.push(newGroupInstance.element);
     });
