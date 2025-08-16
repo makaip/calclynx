@@ -79,7 +79,11 @@ class MathField {
 
     this.mathField = MQ.MathField(this.mathFieldElement, {
       spaceBehavesLikeTab: false,
+      restrictMismatchedBrackets: false,
       sumStartsWithNEquals: true,
+      supSubsRequireOperand: true,
+      charsThatBreakOutOfSupSub: '+-=<>',
+      autoSubscriptNumerals: true,
       autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
       autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
       handlers: {

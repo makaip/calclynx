@@ -474,15 +474,14 @@ class TextField {
 
       // Improved MathQuill configuration to fix left arrow and boundary issues
       const mq = MQ.MathField(span, {
-        spaceBehavesLikeTab: true,
-        // Remove leftRightIntoCmdGoes to fix left arrow issues
-        restrictMismatchedBrackets: true,
+        spaceBehavesLikeTab: false,
+        restrictMismatchedBrackets: false,
         sumStartsWithNEquals: true,
         supSubsRequireOperand: true,
         charsThatBreakOutOfSupSub: '+-=<>',
         autoSubscriptNumerals: true,
-        autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
-        autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim',
+        autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
+        autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr',
         
         handlers: {
           edit: () => { 
