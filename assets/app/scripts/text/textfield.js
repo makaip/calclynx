@@ -142,6 +142,17 @@ class TextField {
       clearTimeout(this.mathFieldCheckTimeout);
     }
     
+    // Clean up mutation check timeout
+    if (this.mutationCheckTimeout) {
+      clearTimeout(this.mutationCheckTimeout);
+    }
+    
+    // Clean up mutation observer
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+      this.mutationObserver = null;
+    }
+    
     // Clean up selection change handler
     if (this.selectionChangeHandler) {
       document.removeEventListener('selectionchange', this.selectionChangeHandler);
@@ -180,6 +191,27 @@ class TextField {
           });
           // Add a placeholder character in text to maintain positions
           content.text += '\uE000'; // Private use character as placeholder
+          textIndex += 1;
+        } else if (node.tagName === 'DIV') {
+          // Handle line breaks - only add newline if this DIV represents a real line break
+          // Check if this DIV is being used for line structure or just content organization
+          const hasTextContent = Array.from(node.childNodes).some(child => 
+            child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== ''
+          );
+          const hasMathContent = node.querySelector('.mq-inline');
+          
+          if (hasTextContent || hasMathContent) {
+            // This DIV contains actual content, so it's a line break
+            if (content.text.length > 0 && !content.text.endsWith('\n')) {
+              content.text += '\n';
+              textIndex += 1;
+            }
+            // Process the content inside the DIV
+            Array.from(node.childNodes).forEach(walkNodes);
+          }
+        } else if (node.tagName === 'BR') {
+          // Explicit line break
+          content.text += '\n';
           textIndex += 1;
         } else {
           // Regular element, process its children
@@ -231,7 +263,7 @@ class TextField {
       if (mathField.position > currentPos) {
         const textBefore = text.substring(currentPos, mathField.position);
         if (textBefore) {
-          this.editorElement.appendChild(document.createTextNode(textBefore));
+          this.addTextWithLineBreaks(textBefore);
         }
       }
       
@@ -250,7 +282,7 @@ class TextField {
     if (currentPos < text.length) {
       const remainingText = text.substring(currentPos);
       if (remainingText) {
-        this.editorElement.appendChild(document.createTextNode(remainingText));
+        this.addTextWithLineBreaks(remainingText);
       }
     }
     
@@ -263,6 +295,32 @@ class TextField {
     setTimeout(() => {
       this.reinitializeMathFields();
     }, 10);
+  }
+  
+  // Helper method to add text content with proper line break handling
+  addTextWithLineBreaks(text) {
+    const lines = text.split('\n');
+    
+    for (let i = 0; i < lines.length; i++) {
+      if (i > 0) {
+        // Add a div for line break (contentEditable standard)
+        const div = document.createElement('div');
+        this.editorElement.appendChild(div);
+        
+        // Add the text content to the div
+        if (lines[i]) {
+          div.appendChild(document.createTextNode(lines[i]));
+        } else {
+          // For empty lines, ensure there's a placeholder
+          div.appendChild(document.createTextNode(''));
+        }
+      } else {
+        // First line - add directly as text node
+        if (lines[i]) {
+          this.editorElement.appendChild(document.createTextNode(lines[i]));
+        }
+      }
+    }
   }
 
   // Method to reinitialize MathQuill fields after content is restored
@@ -477,7 +535,6 @@ class TextField {
         spaceBehavesLikeTab: false,
         restrictMismatchedBrackets: false,
         sumStartsWithNEquals: true,
-        supSubsRequireOperand: true,
         charsThatBreakOutOfSupSub: '+-=<>',
         autoSubscriptNumerals: true,
         autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
@@ -657,6 +714,185 @@ class TextField {
       return mq;
     };
 
+    // Helper function to detect and fix actual line merge issues with math fields
+    const ensureMathFieldFlow = () => {
+      // This function only fixes actual problems from line merging, not normal editing
+      
+      const mathFields = this.editorElement.querySelectorAll('.mq-inline');
+      if (mathFields.length === 0) return;
+      
+      let hasActualProblem = false;
+      
+      // Only check for very specific problematic patterns that indicate line merge issues
+      mathFields.forEach(field => {
+        const parent = field.parentNode;
+        
+        // Check for the specific problem: math field stuck in wrong position after line merge
+        // This happens when there are multiple consecutive text nodes around a math field
+        // which indicates incomplete DOM merging
+        const nextSibling = field.nextSibling;
+        const prevSibling = field.previousSibling;
+        
+        // Problem pattern: text node -> math field -> empty/whitespace text node -> text node
+        // This suggests text was merged but the math field didn't flow correctly
+        if (nextSibling && nextSibling.nodeType === Node.TEXT_NODE && 
+            nextSibling.textContent === '' && 
+            nextSibling.nextSibling && nextSibling.nextSibling.nodeType === Node.TEXT_NODE) {
+          hasActualProblem = true;
+        }
+        
+        // Another problem pattern: math field isolated with only whitespace around it
+        // after what should have been a line merge
+        if (prevSibling && prevSibling.nodeType === Node.TEXT_NODE && 
+            prevSibling.textContent.trim() === '' &&
+            nextSibling && nextSibling.nodeType === Node.TEXT_NODE &&
+            nextSibling.textContent.trim() === '') {
+          hasActualProblem = true;
+        }
+      });
+      
+      // Only intervene if there's an actual problem, not for normal DIV-contained math fields
+      if (hasActualProblem) {
+        console.log('Detected actual math field flow problem, fixing...');
+        
+        // Save cursor position
+        let cursorInfo = null;
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          const range = sel.getRangeAt(0);
+          cursorInfo = {
+            textOffset: this.getTextOffsetFromDOMRange(range),
+            container: range.startContainer,
+            offset: range.startOffset
+          };
+        }
+        
+        // Get current content and reconstruct it properly
+        const currentContent = this.getOptimizedContent();
+        
+        // Don't normalize newlines unless they're clearly from a problematic merge
+        // Only clean up excessive whitespace but preserve intentional line breaks
+        let cleanedText = currentContent.text;
+        
+        // Only normalize if we detect merge artifacts (multiple spaces, weird characters)
+        if (cleanedText.includes('\uE000\uE000') || cleanedText.includes('  ')) {
+          cleanedText = cleanedText.replace(/\s+/g, ' ');
+        }
+        
+        const cleanedContent = {
+          text: cleanedText,
+          mathFields: currentContent.mathFields.map(field => ({
+            ...field,
+            position: Math.min(field.position, cleanedText.length)
+          }))
+        };
+        
+        this.setOptimizedContent(cleanedContent);
+        
+        // Restore cursor position
+        if (cursorInfo) {
+          setTimeout(() => {
+            this.restoreCursorPosition(cursorInfo, cleanedContent);
+          }, 10);
+        }
+      }
+    };
+    
+    // Helper to get text offset from DOM range
+    this.getTextOffsetFromDOMRange = (range) => {
+      let offset = 0;
+      const walker = document.createTreeWalker(
+        this.editorElement,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+      
+      let node;
+      while (node = walker.nextNode()) {
+        if (node === range.startContainer) {
+          return offset + range.startOffset;
+        }
+        offset += node.textContent.length;
+      }
+      
+      return offset;
+    };
+    
+    // Helper to restore cursor position
+    this.restoreCursorPosition = (cursorInfo, content = null) => {
+      try {
+        // Try to restore to the same DOM node first if it still exists and is valid
+        if (cursorInfo.container && cursorInfo.container.parentNode && 
+            this.editorElement.contains(cursorInfo.container) &&
+            cursorInfo.container.nodeType === Node.TEXT_NODE) {
+          
+          const maxOffset = cursorInfo.container.textContent.length;
+          if (cursorInfo.offset <= maxOffset) {
+            const range = document.createRange();
+            const sel = window.getSelection();
+            
+            range.setStart(cursorInfo.container, cursorInfo.offset);
+            range.collapse(true);
+            
+            sel.removeAllRanges();
+            sel.addRange(range);
+            return;
+          }
+        }
+      } catch (e) {
+        // Fall back to text offset approach
+      }
+      
+      // Fallback: use text offset
+      if (cursorInfo.textOffset !== undefined) {
+        this.setCursorAtTextOffset(cursorInfo.textOffset);
+      }
+    };
+    
+    // Helper to set cursor at text offset
+    this.setCursorAtTextOffset = (textOffset) => {
+      const walker = document.createTreeWalker(
+        this.editorElement,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+      
+      let currentOffset = 0;
+      let node;
+      
+      while (node = walker.nextNode()) {
+        const nodeLength = node.textContent.length;
+        if (currentOffset + nodeLength >= textOffset) {
+          const range = document.createRange();
+          const sel = window.getSelection();
+          const offsetInNode = Math.max(0, Math.min(textOffset - currentOffset, nodeLength));
+          
+          range.setStart(node, offsetInNode);
+          range.collapse(true);
+          
+          sel.removeAllRanges();
+          sel.addRange(range);
+          return;
+        }
+        currentOffset += nodeLength;
+      }
+      
+      // If we couldn't find the exact position, place cursor at the end
+      const lastTextNode = this.editorElement.lastChild;
+      if (lastTextNode && lastTextNode.nodeType === Node.TEXT_NODE) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        
+        range.setStart(lastTextNode, lastTextNode.textContent.length);
+        range.collapse(true);
+        
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    };
+
     // Add enhanced keyboard handler for math insertion and boundary detection
     editor.addEventListener('keydown', (ev) => {
       // Check if we need to activate a math field first
@@ -668,6 +904,7 @@ class TextField {
       }
       
       if (ev.key === 'Backspace') {
+        // First check if we're deleting an empty math field
         const mathInfo = isCursorAtBeginningOfMath();
         if (mathInfo && mathInfo.atStart) {
           ev.preventDefault();
@@ -681,6 +918,30 @@ class TextField {
             marker.remove();
           }
           return;
+        }
+        
+        // Only check for flow issues if this backspace might merge lines with math fields
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          const range = sel.getRangeAt(0);
+          const node = range.startContainer;
+          const offset = range.startOffset;
+          
+          // Check if cursor is at the beginning of a line (potential line merge scenario)
+          const atLineStart = (node.nodeType === Node.TEXT_NODE && offset === 0) ||
+                             (node.nodeType === Node.ELEMENT_NODE && offset === 0);
+          
+          if (atLineStart) {
+            // Check if there are math fields that might be affected by a line merge
+            const hasMathFields = this.editorElement.querySelectorAll('.mq-inline').length > 0;
+            
+            if (hasMathFields) {
+              // Only then check for flow issues after the operation
+              setTimeout(() => {
+                ensureMathFieldFlow();
+              }, 50); // Slightly longer delay to let DOM settle
+            }
+          }
         }
       }
 
@@ -715,6 +976,53 @@ class TextField {
         }, 10);
       }
     });
+
+    // Add a targeted MutationObserver only for line merge scenarios
+    this.setupMutationObserver = () => {
+      if (this.mutationObserver) {
+        return; // Already set up
+      }
+      
+      this.mutationObserver = new MutationObserver((mutations) => {
+        let needsCheck = false;
+        
+        mutations.forEach(mutation => {
+          // Only check for specific changes that indicate line merging problems
+          if (mutation.type === 'childList') {
+            // Only check if DIV elements were removed (indicating line merges)
+            // and there are math fields present
+            if (mutation.removedNodes.length > 0) {
+              for (const removedNode of mutation.removedNodes) {
+                if (removedNode.nodeType === Node.ELEMENT_NODE && removedNode.tagName === 'DIV') {
+                  // A DIV was removed - this might be a line merge
+                  const mathFields = this.editorElement.querySelectorAll('.mq-inline');
+                  if (mathFields.length > 0) {
+                    needsCheck = true;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        });
+        
+        if (needsCheck) {
+          // Only check after a brief delay to let the DOM settle
+          clearTimeout(this.mutationCheckTimeout);
+          this.mutationCheckTimeout = setTimeout(() => {
+            ensureMathFieldFlow();
+          }, 200); // Longer delay to avoid interfering with normal editing
+        }
+      });
+      
+      this.mutationObserver.observe(this.editorElement, {
+        childList: true,
+        subtree: false // Only watch direct children, not all descendants
+      });
+    };
+    
+    // Set up the mutation observer
+    this.setupMutationObserver();
 
     // Additional selection change listener to catch cursor movements into math fields
     const selectionChangeHandler = () => {

@@ -81,7 +81,6 @@ class MathField {
       spaceBehavesLikeTab: false,
       restrictMismatchedBrackets: false,
       sumStartsWithNEquals: true,
-      supSubsRequireOperand: true,
       charsThatBreakOutOfSupSub: '+-=<>',
       autoSubscriptNumerals: true,
       autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
