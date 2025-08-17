@@ -1,0 +1,128 @@
+/* Zoom Controls Styling */
+.zoom-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.zoom-controls.visible {
+    opacity: 1;
+}
+
+.zoom-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zoom-btn {
+    background-color: #1e1e1e;
+    border: 1px solid #666;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.zoom-btn:hover {
+    border-color: #00c59a;
+    background-color: #2a2a2a;
+}
+
+.zoom-btn:active {
+    background-color: #00c59a;
+    color: #000;
+}
+
+.zoom-slider {
+    width: 120px;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zoom-slider::-webkit-slider-thumb:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.zoom-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.zoom-slider::-moz-range-thumb:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.zoom-slider::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    border: none;
+}
+
+.reset-zoom-btn {
+    background-color: #1e1e1e;
+    border: 1px solid #666;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.reset-zoom-btn:hover {
+    border-color: #00c59a;
+    background-color: #2a2a2a;
+}
+
+.reset-zoom-btn:active {
+    background-color: #00c59a;
+    color: #000;
+}
+
+/* Hide zoom controls when scale is exactly 1 (100%) */
+.zoom-controls.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

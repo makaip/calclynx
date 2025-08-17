@@ -11,17 +11,16 @@ class Navigation {
       };
     }
 
-    init() {
-      this.initCanvasPanning();
-      this.initTrackpadNavigation();
-      this.initBoxSelection();
-      this.initZoom();                 // ← add this line
-      window.addEventListener('resize', () => {
-        this.updateTransform();
-      });
-    }
-
-    initZoom() {
+  init() {
+    this.initCanvasPanning();
+    this.initTrackpadNavigation();
+    this.initBoxSelection();
+    this.initZoom();
+    this.initZoomControls();
+    window.addEventListener('resize', () => {
+      this.updateTransform();
+    });
+  }    initZoom() {
       const canvas = this.board.canvas;
       const zoomFactor = 1.08;
       const minScale   = 0.3;
@@ -36,7 +35,16 @@ class Navigation {
           const logical = this.screenToCanvas(e.clientX, e.clientY);
 
           // 2. compute new scale
-          const factor    = Math.pow(zoomFactor, -e.deltaY / 3);
+          // Normalize deltaY for different input types
+          // Mouse wheel typically gives larger values (±100), trackpad gives smaller values
+          let normalizedDelta = e.deltaY;
+          
+          // For mouse wheel (deltaMode 1 or larger deltaY values), normalize to smaller increments
+          if (e.deltaMode === 1 || Math.abs(e.deltaY) > 50) {
+            normalizedDelta = Math.sign(e.deltaY) * Math.min(Math.abs(e.deltaY) / 10, 10);
+          }
+          
+          const factor    = Math.pow(zoomFactor, -normalizedDelta / 3);
           const newScale  = Math.min(maxScale, Math.max(minScale, this.board.scale * factor));
 
           // 3. update scale
@@ -52,8 +60,85 @@ class Navigation {
 
           // 5. redraw
           this.updateTransform();
+          this.updateZoomControls();
         }
       }, { passive: false });
+    }
+
+    initZoomControls() {
+      const zoomControls = document.getElementById('zoom-controls');
+      const zoomSlider = document.getElementById('zoom-slider');
+      const zoomInBtn = document.getElementById('zoom-in-btn');
+      const zoomOutBtn = document.getElementById('zoom-out-btn');
+      const resetZoomBtn = document.getElementById('reset-zoom-btn');
+
+      // Update zoom controls visibility and values
+      this.updateZoomControls();
+
+      // Slider input handler
+      zoomSlider.addEventListener('input', (e) => {
+        const newScale = parseFloat(e.target.value) / 100;
+        this.setZoomLevel(newScale);
+      });
+
+      // Zoom in button
+      zoomInBtn.addEventListener('click', () => {
+        const newScale = Math.min(3.33333, this.board.scale * 1.08);
+        this.setZoomLevel(newScale);
+      });
+
+      // Zoom out button
+      zoomOutBtn.addEventListener('click', () => {
+        const newScale = Math.max(0.3, this.board.scale / 1.08);
+        this.setZoomLevel(newScale);
+      });
+
+      // Reset zoom button
+      resetZoomBtn.addEventListener('click', () => {
+        this.setZoomLevel(1);
+      });
+    }
+
+    setZoomLevel(newScale) {
+      // Get center of viewport for zoom anchor point
+      const viewportCenterX = window.innerWidth / 2;
+      const viewportCenterY = window.innerHeight / 2;
+      
+      // Get logical coordinates under center before scaling
+      const logical = this.screenToCanvas(viewportCenterX, viewportCenterY);
+      
+      // Update scale
+      this.board.scale = newScale;
+      
+      // Adjust pan offsets so center point remains in center
+      this.board.canvasOffset.x = viewportCenterX
+          - (this.board.canvasInitialOffset.x + logical.x * newScale);
+      this.board.canvasOffset.y = viewportCenterY
+          - (this.board.canvasInitialOffset.y + logical.y * newScale);
+      
+      // Update transform and controls
+      this.updateTransform();
+      this.updateZoomControls();
+    }
+
+    updateZoomControls() {
+      const zoomControls = document.getElementById('zoom-controls');
+      const zoomSlider = document.getElementById('zoom-slider');
+      
+      if (!zoomControls || !zoomSlider) return;
+      
+      // Update slider value
+      zoomSlider.value = Math.round(this.board.scale * 100);
+      
+      // Show/hide controls based on zoom level
+      const isDefaultZoom = Math.abs(this.board.scale - 1) < 0.01;
+      if (isDefaultZoom) {
+        zoomControls.classList.remove('visible');
+        zoomControls.classList.add('hidden');
+      } else {
+        zoomControls.classList.remove('hidden');
+        zoomControls.classList.add('visible');
+      }
     }
   
     initCanvasPanning() {
@@ -94,6 +179,7 @@ class Navigation {
       const s        = this.board.scale;
       this.board.canvas.style.transform =
           `translate(${x}px, ${y}px) scale(${s})`;
+      this.updateZoomControls();
     }
   
     initTrackpadNavigation() {
