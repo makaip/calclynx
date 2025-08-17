@@ -14,53 +14,36 @@ class TextFieldContent {
     if (!this.textField.editorElement) return { text: '', mathFields: [] };
     
     const content = { text: '', mathFields: [] };
-    let textIndex = 0;
     
-    // Walk through all child nodes to build optimized structure
-    const walkNodes = (node) => {
+    // Simple recursive walk through all nodes to extract content
+    const walkAllNodes = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         content.text += node.textContent;
-        textIndex += node.textContent.length;
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         if (node.classList.contains('mq-inline')) {
-          // This is a math field - store its position and LaTeX
+          // Math field - record position and add placeholder
           const latex = node.dataset.latex || '';
           content.mathFields.push({
-            position: textIndex,
+            position: content.text.length,
             latex: latex
           });
-          // Add a placeholder character in text to maintain positions
-          content.text += '\uE000'; // Private use character as placeholder
-          textIndex += 1;
+          content.text += '\uE000'; // Placeholder character
         } else if (node.tagName === 'DIV') {
-          // Handle line breaks - only add newline if this DIV represents a real line break
-          // Check if this DIV is being used for line structure or just content organization
-          const hasTextContent = Array.from(node.childNodes).some(child => 
-            child.nodeType === Node.TEXT_NODE && child.textContent.trim() !== ''
-          );
-          const hasMathContent = node.querySelector('.mq-inline');
-          
-          if (hasTextContent || hasMathContent) {
-            // This DIV contains actual content, so it's a line break
-            if (content.text.length > 0 && !content.text.endsWith('\n')) {
-              content.text += '\n';
-              textIndex += 1;
-            }
-            // Process the content inside the DIV
-            Array.from(node.childNodes).forEach(walkNodes);
-          }
+          // DIV represents a line break
+          content.text += '\n';
+          // Process children of this DIV
+          Array.from(node.childNodes).forEach(walkAllNodes);
         } else if (node.tagName === 'BR') {
           // Explicit line break
           content.text += '\n';
-          textIndex += 1;
         } else {
-          // Regular element, process its children
-          Array.from(node.childNodes).forEach(walkNodes);
+          // Other elements, process their children
+          Array.from(node.childNodes).forEach(walkAllNodes);
         }
       }
     };
     
-    Array.from(this.textField.editorElement.childNodes).forEach(walkNodes);
+    Array.from(this.textField.editorElement.childNodes).forEach(walkAllNodes);
     
     return content;
   }
@@ -75,40 +58,60 @@ class TextFieldContent {
     this.textField.editorElement.innerHTML = '';
     
     const { text, mathFields } = content;
-    let currentPos = 0;
     
-    // Sort math fields by position to process them in order
-    const sortedMathFields = [...mathFields].sort((a, b) => a.position - b.position);
+    // Create a map of math field positions for quick lookup
+    const mathFieldMap = new Map();
+    mathFields.forEach(field => {
+      mathFieldMap.set(field.position, field.latex);
+    });
     
-    for (const mathField of sortedMathFields) {
-      // Add text before this math field
-      if (mathField.position > currentPos) {
-        const textBefore = text.substring(currentPos, mathField.position);
-        if (textBefore) {
-          this.addTextWithLineBreaks(textBefore);
+    // Build content character by character
+    let currentContainer = this.textField.editorElement; // Start at root
+    let textBuffer = '';
+    
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      
+      if (char === '\uE000') {
+        // Math field placeholder
+        // First, add any buffered text
+        if (textBuffer) {
+          currentContainer.appendChild(document.createTextNode(textBuffer));
+          textBuffer = '';
         }
+        
+        // Create math field
+        const mathLatex = mathFieldMap.get(i) || '';
+        const span = document.createElement('span');
+        span.className = 'mq-inline';
+        span.dataset.latex = mathLatex;
+        currentContainer.appendChild(span);
+        
+      } else if (char === '\n') {
+        // Line break
+        // First, add any buffered text to current container
+        if (textBuffer) {
+          currentContainer.appendChild(document.createTextNode(textBuffer));
+          textBuffer = '';
+        }
+        
+        // Create new line (DIV) and switch to it
+        const div = document.createElement('div');
+        this.textField.editorElement.appendChild(div);
+        currentContainer = div;
+        
+      } else {
+        // Regular character
+        textBuffer += char;
       }
-      
-      // Create math field span
-      const span = document.createElement('span');
-      span.className = 'mq-inline';
-      span.dataset.latex = mathField.latex;
-      console.log('Creating math span with LaTeX:', mathField.latex);
-      this.textField.editorElement.appendChild(span);
-      
-      // Skip the placeholder character in text
-      currentPos = mathField.position + 1;
     }
     
-    // Add remaining text after last math field
-    if (currentPos < text.length) {
-      const remainingText = text.substring(currentPos);
-      if (remainingText) {
-        this.addTextWithLineBreaks(remainingText);
-      }
+    // Add any remaining buffered text
+    if (textBuffer) {
+      currentContainer.appendChild(document.createTextNode(textBuffer));
     }
     
-    // Ensure there's always a text node if editor is empty
+    // Ensure there's always at least one text node if editor is empty
     if (this.textField.editorElement.childNodes.length === 0) {
       this.textField.editorElement.appendChild(document.createTextNode(''));
     }
@@ -120,35 +123,6 @@ class TextFieldContent {
       }, 10);
     }
   }
-  
-  /**
-   * Helper method to add text content with proper line break handling
-   */
-  addTextWithLineBreaks(text) {
-    const lines = text.split('\n');
-    
-    for (let i = 0; i < lines.length; i++) {
-      if (i > 0) {
-        // Add a div for line break (contentEditable standard)
-        const div = document.createElement('div');
-        this.textField.editorElement.appendChild(div);
-        
-        // Add the text content to the div
-        if (lines[i]) {
-          div.appendChild(document.createTextNode(lines[i]));
-        } else {
-          // For empty lines, ensure there's a placeholder
-          div.appendChild(document.createTextNode(''));
-        }
-      } else {
-        // First line - add directly as text node
-        if (lines[i]) {
-          this.textField.editorElement.appendChild(document.createTextNode(lines[i]));
-        }
-      }
-    }
-  }
-
   /**
    * Set content with format validation
    */
