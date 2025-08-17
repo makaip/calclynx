@@ -72,12 +72,25 @@ class MathBoard {
 
       
       if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'c') {
-          this.copySelectedGroups();
-        } else if (e.key === 'x') {
-          this.cutSelectedGroups();
-        } else if (e.key === 'v') {
-          this.pasteGroups();
+        // Check if a text editor is currently focused - if so, don't handle group copy/paste
+        const isTextEditorFocused = document.activeElement && 
+          (document.activeElement.closest('.text-editor') || 
+           document.activeElement.classList.contains('text-editor'));
+        
+        // Also check if MathQuill field is focused (allow normal copy/paste there too)
+        const isMathFieldFocused = document.querySelector('.mq-focused');
+        
+        if (!isTextEditorFocused && !isMathFieldFocused) {
+          if (e.key === 'c') {
+            e.preventDefault(); // Prevent default browser copy
+            this.copySelectedGroups();
+          } else if (e.key === 'x') {
+            e.preventDefault(); // Prevent default browser cut
+            this.cutSelectedGroups();
+          } else if (e.key === 'v') {
+            e.preventDefault(); // Prevent default browser paste
+            this.pasteGroups();
+          }
         }
       }
     });

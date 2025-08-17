@@ -158,6 +158,18 @@ class Navigation {
           return;
         }
         
+        // Prevent text selection when mouse moves over text editors during box selection
+        if (e.target.closest('.text-editor')) {
+          e.preventDefault();
+          // Clear any text selection that might have occurred
+          if (window.getSelection) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+              selection.removeAllRanges();
+            }
+          }
+        }
+        
         const startX = this.boxSelect.startX;
         const startY = this.boxSelect.startY;
         const currentX = e.clientX;
