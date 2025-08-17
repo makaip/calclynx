@@ -116,7 +116,7 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
+    padding: 18px 0;
 }
 
 .logo {
@@ -137,13 +137,15 @@ header .logo span {
 
 .nav-links {
     display: flex;
-    gap: 30px;
+    gap: 25px;
+    align-items: center;
 }
 
 .nav-links a {
     color: var(--text-color);
     font-weight: 500;
     font-size: 0.95rem;
+    padding: 8px 0;
 }
 
 .nav-links a:hover {
@@ -173,26 +175,7 @@ header .logo span {
     transform: translateY(-2px);
 }
 
-/* Auth Buttons */
-.auth-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.login-btn {
-    background-color: transparent;
-    color: var(--text-color);
-    padding: 8px 16px;
-    border-radius: var(--button-radius);
-    font-weight: 500;
-    font-size: 0.95rem;
-    border: 1px solid var(--border-color);
-}
-
-.login-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
+/* Remove auth button styles - no longer needed */
 
 .signup-btn, .signup-btn-alt {
     background-color: var(--primary-color);
@@ -711,15 +694,26 @@ footer {
     
     .hero .container {
         flex-direction: column;
+        gap: 40px;
     }
     
     .hero-content {
         text-align: center;
-        margin-bottom: 40px;
+        max-width: 100%;
+    }
+    
+    .hero-image {
+        justify-content: center;
+        padding: 0 20px;
+    }
+    
+    .hero-image img {
+        max-width: 100%;
     }
     
     .cta-buttons {
         justify-content: center;
+        flex-wrap: wrap;
     }
     
     .showcase-wrapper {
@@ -736,22 +730,59 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    /* Improved navbar for mobile */
     nav {
-        flex-direction: column;
-        gap: 20px;
+        padding: 15px 0;
+        gap: 15px;
     }
     
     .nav-links {
-        width: 100%;
+        gap: 20px;
+        flex-wrap: wrap;
         justify-content: center;
     }
     
-    .download-btn {
-        width: 100%;
+    .nav-links a {
+        font-size: 0.9rem;
+    }
+    
+    /* Hero section improvements */
+    .hero {
+        padding: 60px 0;
+    }
+    
+    h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+    
+    .cta-buttons {
+        flex-direction: row; /* Place buttons next to each other */
+        justify-content: center;
+        gap: 10px; /* Adjust spacing between buttons */
+    }
+    
+    .primary-btn, .secondary-btn {
+        width: auto; /* Allow buttons to size naturally */
+        max-width: none; /* Remove max-width constraint */
     }
     
     .features-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .feature-card {
+        padding: 25px 20px;
     }
     
     .footer-bottom {
@@ -764,20 +795,73 @@ footer {
         justify-content: center;
     }
     
-    .auth-buttons {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .login-btn, .signup-btn {
-        flex: 1;
-    }
-    
     .cta .cta-buttons {
-        flex-direction: row;
-        max-width: 100%;
-        margin-left: auto;
-        margin-right: auto;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .cta .primary-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    /* Even more compact for very small screens */
+    nav {
+        padding: 12px 0;
+    }
+    
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    .nav-links {
+        gap: 15px;
+    }
+    
+    .nav-links a {
+        font-size: 0.85rem;
+    }
+    
+    .hero {
+        padding: 40px 0;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.6rem;
+    }
+    
+    .hero-content p {
+        font-size: 0.95rem;
+    }
+    
+    .hero-image {
+        padding: 0 10px;
+    }
+    
+    .feature-card {
+        padding: 20px 15px;
+    }
+    
+    .showcase-item {
+        flex-direction: column;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .number {
+        margin-right: 0;
+        margin-bottom: 10px;
     }
 }
 
