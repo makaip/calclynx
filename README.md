@@ -6,7 +6,9 @@
 
 CalcLynx is a web-based interactive math board that lets you create, edit, and manage mathematical expressions using a graphical interface. Built using HTML, CSS, JavaScript, and MathQuill, it offers a versatile canvas for creating math groups, editing formulas, and organizing your work with intuitive navigation and file management features.
 
-![A picture of CalcLynx](assets\landing\images\img1.png)
+<p align="center">
+  <img src="assets/landing/images/img1.png" alt="A picture of CalcLynx" />
+</p>
 
 ## Core interactions
 
