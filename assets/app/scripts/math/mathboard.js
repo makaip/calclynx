@@ -148,7 +148,16 @@ class MathBoard {
       // If clicking on an image-container:
       const imageContainer = event.target.closest('.image-container');
       if (imageContainer) {
-        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        // Find the parent image-group and select it
+        const imageGroup = imageContainer.closest('.image-group');
+        if (imageGroup) {
+          if (!event.shiftKey) {
+            document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+            imageGroup.classList.add('selected');
+          } else {
+            imageGroup.classList.toggle('selected');
+          }
+        }
         event.stopPropagation();
         return;
       }
