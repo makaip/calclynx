@@ -59,7 +59,7 @@ class MathBoard {
         !document.querySelector('.mq-focused') &&
         !document.activeElement.closest('.text-editor')
       ) {
-        const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected');
+        const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
         if (selectedGroups.length > 0) {
           e.preventDefault();
           selectedGroups.forEach((group) => {
@@ -80,7 +80,11 @@ class MathBoard {
         // Also check if MathQuill field is focused (allow normal copy/paste there too)
         const isMathFieldFocused = document.querySelector('.mq-focused');
         
-        if (!isTextEditorFocused && !isMathFieldFocused) {
+        // Check if image URL input is focused (allow normal copy/paste there too)
+        const isImageUrlInputFocused = document.activeElement && 
+          document.activeElement.closest('.image-url-input');
+        
+        if (!isTextEditorFocused && !isMathFieldFocused && !isImageUrlInputFocused) {
           if (e.key === 'c') {
             e.preventDefault(); // Prevent default browser copy
             this.copySelectedGroups();
@@ -123,7 +127,7 @@ class MathBoard {
       // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer) {
-        document.querySelectorAll('.math-group, .text-group').forEach((group) => group.classList.remove('selected'));
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
         event.stopPropagation();
         MathField.edit(mathContainer);
         return;
@@ -132,7 +136,7 @@ class MathBoard {
       // If clicking on a text-field container:
       const textContainer = event.target.closest('.text-field-container');
       if (textContainer) {
-        document.querySelectorAll('.math-group, .text-group').forEach((group) => group.classList.remove('selected'));
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
         event.stopPropagation();
         const textField = textContainer.textFieldInstance;
         if (textField) {
@@ -141,26 +145,35 @@ class MathBoard {
         return;
       }
 
+      // If clicking on an image-container:
+      const imageContainer = event.target.closest('.image-container');
+      if (imageContainer) {
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        event.stopPropagation();
+        return;
+      }
+
       // Remove container selection if clicking outside
-      if (!event.target.closest('.math-field-container') && !event.target.closest('.text-field-container')) {
+      if (!event.target.closest('.math-field-container') && !event.target.closest('.text-field-container') && !event.target.closest('.image-container')) {
         document.querySelectorAll('.math-field-container.selected-field')
           .forEach(el => el.classList.remove('selected-field'));
       }
 
-      // Handle selection for both math and text groups
+      // Handle selection for math, text, and image groups
       const mathGroupTarget = event.target.closest('.math-group');
       const textGroupTarget = event.target.closest('.text-group');
-      const groupTarget = mathGroupTarget || textGroupTarget;
+      const imageGroupTarget = event.target.closest('.image-group');
+      const groupTarget = mathGroupTarget || textGroupTarget || imageGroupTarget;
 
       if (groupTarget) {
         if (!event.shiftKey) {
-          document.querySelectorAll('.math-group, .text-group').forEach((group) => group.classList.remove('selected'));
+          document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
           groupTarget.classList.add('selected');
         } else {
           groupTarget.classList.toggle('selected');
         }
       } else {
-        document.querySelectorAll('.math-group, .text-group').forEach((group) => group.classList.remove('selected'));
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
       }
     });
   }
@@ -174,14 +187,14 @@ class MathBoard {
       if (event.target.closest('.drag-handle')) return;
 
       let target = event.target;
-      while (target && !target.classList.contains('math-group') && !target.classList.contains('text-group')) {
+      while (target && !target.classList.contains('math-group') && !target.classList.contains('text-group') && !target.classList.contains('image-group')) {
         target = target.parentElement;
       }
 
-      if (target && (target.classList.contains('math-group') || target.classList.contains('text-group'))) {
+      if (target && (target.classList.contains('math-group') || target.classList.contains('text-group') || target.classList.contains('image-group'))) {
         let groups;
         if (target.classList.contains('selected')) {
-          groups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected'));
+          groups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected'));
         } else {
           groups = [target];
         }
@@ -200,7 +213,7 @@ class MathBoard {
       }
 
       if (!target) {
-        document.querySelectorAll('.math-group, .text-group').forEach((group) => group.classList.remove('selected'));
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
       }
     });
 
@@ -255,7 +268,7 @@ class MathBoard {
 
   initDoubleClickHandler() {
     document.addEventListener('dblclick', (event) => {
-      if (event.target.closest('.math-group') || event.target.closest('.text-group')) return;
+      if (event.target.closest('.math-group') || event.target.closest('.text-group') || event.target.closest('.image-group')) return;
       if (this.isPanning) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       
@@ -282,7 +295,7 @@ class MathBoard {
   }
 
   copySelectedGroups() {
-    const selectedGroups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected'));
+    const selectedGroups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected'));
     if (selectedGroups.length === 0) {
       this.clipboard = null;
       return;
@@ -328,6 +341,16 @@ class MathBoard {
           relativeTop: top - minY, 
           fields 
         };
+      } else if (group.classList.contains('image-group')) {
+        // Handle image groups
+        return { 
+          type: 'image',
+          relativeLeft: left - minX, 
+          relativeTop: top - minY, 
+          imageUrl: group.imageGroup.imageUrl,
+          imageWidth: group.imageGroup.imageWidth,
+          imageHeight: group.imageGroup.imageHeight
+        };
       }
     });
   }
@@ -336,7 +359,7 @@ class MathBoard {
     this.copySelectedGroups();
     if (!this.clipboard) return;
 
-    const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected');
+    const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
     selectedGroups.forEach(group => group.remove());
 
     this.fileManager.saveState();
@@ -345,7 +368,7 @@ class MathBoard {
   pasteGroups() {
     if (!this.clipboard) return;
 
-    document.querySelectorAll('.math-group.selected, .text-group.selected').forEach(group => group.classList.remove('selected'));
+    document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(group => group.classList.remove('selected'));
 
     const pasteCenterCoords = this.screenToCanvas(this.mouseX, this.mouseY);
     const pasteBaseX = pasteCenterCoords.x;
@@ -358,7 +381,10 @@ class MathBoard {
       const data = {
         left: `${newLeft}px`,
         top: `${newTop}px`,
-        fields: groupData.fields
+        fields: groupData.fields,
+        imageUrl: groupData.imageUrl,
+        imageWidth: groupData.imageWidth,
+        imageHeight: groupData.imageHeight
       };
       
       let newGroupInstance;
@@ -366,6 +392,8 @@ class MathBoard {
         newGroupInstance = new TextGroup(this, 0, 0, data);
       } else if (groupData.type === 'math') {
         newGroupInstance = new MathGroup(this, 0, 0, data);
+      } else if (groupData.type === 'image') {
+        newGroupInstance = new ImageGroup(this, 0, 0, data);
       } else {
         console.warn('Unknown group type:', groupData.type);
         return; // Skip unknown group types

@@ -51,9 +51,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add trigger for command palette (e.g., Ctrl+Shift+P or Cmd+Shift+P)
   document.addEventListener('keydown', (e) => {
     const modifier = isMac ? e.metaKey : e.ctrlKey;
-    if (modifier && e.shiftKey && e.key === 'P') {
+    
+    // Check if we're currently in an input field that should handle its own events
+    const isInInput = e.target.closest('.image-url-input') || 
+                      e.target.closest('.command-palette-input') ||
+                      e.target.closest('.text-editor') ||
+                      e.target.closest('.mq-editable-field');
+    
+    if (modifier && e.shiftKey && e.key === 'P' && !isInInput) {
       e.preventDefault();
       commandPalette.show();
+    }
+    
+    // Add trigger for image URL input (Ctrl/Cmd + I)
+    if (modifier && e.key === 'i' && !e.shiftKey && !e.altKey && !isInInput) {
+      e.preventDefault();
+      window.imageUrlInput.show((url) => {
+        // Use current mouse position or center of screen if no mouse position available
+        const coords = window.mathBoard ? 
+          window.mathBoard.screenToCanvas(window.mathBoard.mouseX || window.innerWidth / 2, window.mathBoard.mouseY || window.innerHeight / 2) :
+          { x: 100, y: 100 };
+        const imageGroup = new ImageGroup(window.mathBoard, coords.x, coords.y);
+        imageGroup.setImageUrl(url);
+      });
     }
   });
 

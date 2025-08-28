@@ -57,11 +57,12 @@ class ContextMenu {
   document.addEventListener('contextmenu', function (e) {
     e.preventDefault();
   
-    // Check if the right-click is on a math group or text group element.
+    // Check if the right-click is on a math group, text group, or image group element.
     const targetMathGroupElement = e.target.closest('.math-group');
     const targetTextGroupElement = e.target.closest('.text-group');
-    const targetGroupElement = targetMathGroupElement || targetTextGroupElement;
-    const isAnythingSelected = !!document.querySelector('.math-group.selected, .text-group.selected');
+    const targetImageGroupElement = e.target.closest('.image-group');
+    const targetGroupElement = targetMathGroupElement || targetTextGroupElement || targetImageGroupElement;
+    const isAnythingSelected = !!document.querySelector('.math-group.selected, .text-group.selected, .image-group.selected');
     const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
     const canPaste = window.mathBoard && window.mathBoard.clipboard;
   
@@ -86,6 +87,15 @@ class ContextMenu {
           window.mathBoard.fileManager.saveState();
         }
       },
+      {
+        label: 'New Image from URL',
+        action: () => {
+          window.imageUrlInput.show((url) => {
+            const imageGroup = new ImageGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
+            imageGroup.setImageUrl(url);
+          });
+        }
+      },
       { separator: true },
       {
         label: 'Cut',
@@ -93,7 +103,7 @@ class ContextMenu {
         action: () => {
           if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
             // If right-clicked on a non-selected group, select only it before cutting
-            document.querySelectorAll('.math-group.selected, .text-group.selected').forEach(g => g.classList.remove('selected'));
+            document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(g => g.classList.remove('selected'));
             targetGroupElement.classList.add('selected');
           }
           window.mathBoard.cutSelectedGroups();
@@ -105,7 +115,7 @@ class ContextMenu {
         action: () => {
            if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
              // If right-clicked on a non-selected group, select only it before copying
-             document.querySelectorAll('.math-group.selected, .text-group.selected').forEach(g => g.classList.remove('selected'));
+             document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(g => g.classList.remove('selected'));
              targetGroupElement.classList.add('selected');
            }
            window.mathBoard.copySelectedGroups();
@@ -127,8 +137,8 @@ class ContextMenu {
             // If right-clicked on a non-selected group, delete only it
              targetGroupElement.remove();
           } else {
-            // Otherwise, delete all selected groups (both math and text).
-            const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected');
+            // Otherwise, delete all selected groups (math, text, and image).
+            const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
             selectedGroups.forEach(group => group.remove());
           }
           window.mathBoard.fileManager.saveState();

@@ -3,11 +3,14 @@
 @import 'canvas.css';
 @import 'math-group.css';
 @import 'math-field.css';
+@import 'text-field.css';
+@import 'image-group.css';
 @import 'buttons.css';
 @import 'drag-handle.css';
 @import 'indicators.css';
 @import 'menus.css';
 @import 'context-menu.css';
 @import 'command-palette.css';
+@import 'image-url-input.css';
 @import 'settings-modal.css';
 @import 'zoom-controls.css';

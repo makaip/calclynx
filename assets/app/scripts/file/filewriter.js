@@ -43,6 +43,18 @@ class FileWriter {
             saveData.groups.push({ type: 'text', left, top, fields });
         });
         
+        // Save image groups
+        const imageGroupElements = this.board.canvas.querySelectorAll('.image-group');
+        imageGroupElements.forEach((group) => {
+            const left = group.style.left;
+            const top = group.style.top;
+            const imageUrl = group.imageGroup ? group.imageGroup.imageUrl : null;
+            const imageWidth = group.imageGroup ? group.imageGroup.imageWidth : null;
+            const imageHeight = group.imageGroup ? group.imageGroup.imageHeight : null;
+            
+            saveData.groups.push({ type: 'image', left, top, imageUrl, imageWidth, imageHeight });
+        });
+        
         const stateString = JSON.stringify(saveData);
         
         // Log storage efficiency if there are text groups
@@ -148,6 +160,18 @@ class FileWriter {
             }
             
             exportData.groups.push({ type: 'text', left, top, fields });
+        });
+        
+        // Export image groups
+        const imageGroupElements = this.board.canvas.querySelectorAll('.image-group');
+        imageGroupElements.forEach((group) => {
+            const left = group.style.left;
+            const top = group.style.top;
+            const imageUrl = group.imageGroup ? group.imageGroup.imageUrl : null;
+            const imageWidth = group.imageGroup ? group.imageGroup.imageWidth : null;
+            const imageHeight = group.imageGroup ? group.imageGroup.imageHeight : null;
+            
+            exportData.groups.push({ type: 'image', left, top, imageUrl, imageWidth, imageHeight });
         });
         
         const dataStr = JSON.stringify(exportData, null, 2);

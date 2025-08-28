@@ -89,6 +89,8 @@ class FileReader {
                     new TextGroup(this.board, 0, 0, groupData);
                 } else if (groupData.type === 'math') {
                     new MathGroup(this.board, 0, 0, groupData);
+                } else if (groupData.type === 'image') {
+                    new ImageGroup(this.board, 0, 0, groupData);
                 } else {
                     console.warn("Unknown group type:", groupData.type);
                 }

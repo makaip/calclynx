@@ -203,10 +203,10 @@ class Navigation {
         // Don't start box selection if group dragging is already in progress
         if (this.board.groupDragging) return;
         
-        // Check if clicking on a group (math or text group)
+        // Check if clicking on a group (math, text, or image group)
         let target = e.target;
         while (target && target !== canvas) {
-          if (target.classList.contains('math-group') || target.classList.contains('text-group')) {
+          if (target.classList.contains('math-group') || target.classList.contains('text-group') || target.classList.contains('image-group')) {
             // Clicking on a group, don't start box selection
             return;
           }
@@ -272,8 +272,8 @@ class Navigation {
         // Get the current selection rectangle's bounds.
         const selectionRect = this.boxSelect.element.getBoundingClientRect();
         
-        // For each math group and text group, check if it overlaps with the selection box.
-        document.querySelectorAll('.math-group, .text-group').forEach((group) => {
+        // For each math group, text group, and image group, check if it overlaps with the selection box.
+        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => {
           const groupRect = group.getBoundingClientRect();
           // Check for any overlap:
           const isOverlapping =
@@ -311,11 +311,11 @@ class Navigation {
     }
     
     selectGroupsWithinBox(selectionRect) {
-      document.querySelectorAll('.math-group, .text-group').forEach((group) => {
+      document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => {
         group.classList.remove('selected');
       });
   
-      document.querySelectorAll('.math-group, .text-group').forEach((group) => {
+      document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => {
       const groupRect = group.getBoundingClientRect();
         
         if (
