@@ -1,30 +1,4 @@
-/* Image group styling similar to math-group and text-group */
-.image-group {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 10px;
-    cursor: grab;
-}
-
-/* Hover state: white outline at 50% opacity */
-.image-group:hover {
-    outline: 2px solid rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
-}
-
-/* Selected state: green outline */
-.image-group.selected {
-    outline: 2px solid #00c59a;
-    border-radius: 5px;
-}
-
-/* Dragging state: green outline with grabbing cursor */
-.image-group.dragging {
-    outline: 2px solid #00c59a !important;
-    cursor: grabbing;
-}
+/* Image group specific styling - common styles are in object-group.css */
 
 /* Image container styling */
 .image-container {
@@ -118,12 +92,7 @@
     cursor: se-resize;
 }
 
-/* Resizing state styling */
-.image-group.resizing {
-    outline: 2px solid #00c59a !important;
-    cursor: grabbing;
-}
-
+/* Resizing state - specific image behavior */
 .image-group.resizing .image-content {
     pointer-events: none; /* Disable image interactions while resizing */
 }

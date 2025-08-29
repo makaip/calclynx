@@ -62,7 +62,7 @@ class ContextMenu {
     const targetTextGroupElement = e.target.closest('.text-group');
     const targetImageGroupElement = e.target.closest('.image-group');
     const targetGroupElement = targetMathGroupElement || targetTextGroupElement || targetImageGroupElement;
-    const isAnythingSelected = !!document.querySelector('.math-group.selected, .text-group.selected, .image-group.selected');
+    const isAnythingSelected = ObjectGroup.getSelectedGroups().length > 0;
     const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
     const canPaste = window.mathBoard && window.mathBoard.clipboard;
   
@@ -103,7 +103,7 @@ class ContextMenu {
         action: () => {
           if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
             // If right-clicked on a non-selected group, select only it before cutting
-            document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(g => g.classList.remove('selected'));
+            ObjectGroup.clearAllSelections();
             targetGroupElement.classList.add('selected');
           }
           window.mathBoard.cutSelectedGroups();
@@ -115,7 +115,7 @@ class ContextMenu {
         action: () => {
            if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
              // If right-clicked on a non-selected group, select only it before copying
-             document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(g => g.classList.remove('selected'));
+             ObjectGroup.clearAllSelections();
              targetGroupElement.classList.add('selected');
            }
            window.mathBoard.copySelectedGroups();
@@ -138,7 +138,7 @@ class ContextMenu {
              targetGroupElement.remove();
           } else {
             // Otherwise, delete all selected groups (math, text, and image).
-            const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
+            const selectedGroups = ObjectGroup.getSelectedGroups();
             selectedGroups.forEach(group => group.remove());
           }
           window.mathBoard.fileManager.saveState();

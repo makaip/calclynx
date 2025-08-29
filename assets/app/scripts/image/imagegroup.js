@@ -1,16 +1,7 @@
-class ImageGroup {
+class ImageGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
-    this.board = board;
-    this.element = document.createElement('div');
-    this.element.className = 'image-group';
-    
-    // Set position
-    const left = data ? data.left : `${x}px`;
-    const top = data ? data.top : `${y}px`;
-    this.element.style.left = left;
-    this.element.style.top = top;
-    this.element.tabIndex = -1; // Make focusable
-    this.element.imageGroup = this; // Link DOM element back to instance
+    // Call parent constructor with groupType
+    super(board, x, y, data, 'image');
     
     // Store the image URL and size
     this.imageUrl = data ? data.imageUrl : null;
@@ -21,8 +12,6 @@ class ImageGroup {
     this.isResizing = false;
     this.resizeHandle = null;
     this.resizeStartData = null;
-    
-    board.canvas.appendChild(this.element);
     
     if (this.imageUrl) {
       this.createImageElement();
@@ -277,8 +266,6 @@ class ImageGroup {
   }
 
   remove() {
-    this.element.remove();
-    // Save state after removal
-    this.board.fileManager.saveState();
+    super.remove(); // Call parent remove method
   }
 }

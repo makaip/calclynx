@@ -32,6 +32,7 @@ class MathField {
 
     this.container.addEventListener('mousedown', (event) => {
       if (!event.target.closest('.drag-handle')) {
+        // Only clear math group selections, not all groups for math fields
         document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
       }
       // Use new method and data attribute
@@ -52,6 +53,7 @@ class MathField {
         event.stopPropagation();
       } else {
         event.stopPropagation();
+        // Only clear math group selections, not all groups for math fields
         document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
         MathField.edit(this.container);
       }

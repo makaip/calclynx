@@ -1,17 +1,9 @@
-class MathGroup {
+class MathGroup extends ObjectGroup {
   // Now accepts an optional "data" parameter.
   constructor(board, x, y, data = null) {
-    this.board = board;
-    this.element = document.createElement('div');
-    this.element.className = 'math-group';
-    // Append "px" when there's no saved state.
-    const left = data ? data.left : `${x}px`;
-    const top = data ? data.top : `${y}px`;
-    this.element.style.left = left;
-    this.element.style.top = top;
-    this.element.tabIndex = -1; // Make focusable.
-    this.element.mathGroup = this; // Link DOM element back to instance
-    board.canvas.appendChild(this.element);
+    // Call parent constructor with groupType
+    super(board, x, y, data, 'math');
+    
     this.attachFocusOutHandler();
     this.mathFieldInstances = []; // Keep track of instances
 
@@ -71,9 +63,7 @@ class MathGroup {
 
   remove() {
     // Clean up listeners if necessary (though JS garbage collection should handle it)
-    this.element.remove();
-    // Save state after removal
-    this.board.fileManager.saveState();
+    super.remove(); // Call parent remove method
   }
 
   insertMathFieldAfter(referenceContainer) {

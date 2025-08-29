@@ -1,0 +1,41 @@
+/* Common object group styling for all group types (math, text, image) */
+.math-group, 
+.text-group, 
+.image-group {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px;
+    cursor: grab; /* Indicates draggable area */
+}
+
+/* Hover state: white outline at low opacity */
+.math-group:hover,
+.text-group:hover,
+.image-group:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+/* Selected state: green outline */
+.math-group.selected,
+.text-group.selected,
+.image-group.selected {
+    outline: 2px solid #00c59a;
+    border-radius: 5px;
+}
+
+/* Dragging state: green outline with grabbing cursor */
+.math-group.dragging,
+.text-group.dragging,
+.image-group.dragging {
+    outline: 2px solid #00c59a !important;
+    cursor: grabbing;
+}
+
+/* Resizing state for image groups */
+.image-group.resizing {
+    outline: 2px solid #00c59a !important;
+    cursor: grabbing;
+}

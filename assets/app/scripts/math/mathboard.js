@@ -59,7 +59,7 @@ class MathBoard {
         !document.querySelector('.mq-focused') &&
         !document.activeElement.closest('.text-editor')
       ) {
-        const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
+        const selectedGroups = ObjectGroup.getSelectedGroups();
         if (selectedGroups.length > 0) {
           e.preventDefault();
           selectedGroups.forEach((group) => {
@@ -127,7 +127,7 @@ class MathBoard {
       // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
       if (mathContainer) {
-        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        ObjectGroup.clearAllSelections();
         event.stopPropagation();
         MathField.edit(mathContainer);
         return;
@@ -136,7 +136,7 @@ class MathBoard {
       // If clicking on a text-field container:
       const textContainer = event.target.closest('.text-field-container');
       if (textContainer) {
-        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        ObjectGroup.clearAllSelections();
         event.stopPropagation();
         const textField = textContainer.textFieldInstance;
         if (textField) {
@@ -152,7 +152,7 @@ class MathBoard {
         const imageGroup = imageContainer.closest('.image-group');
         if (imageGroup) {
           if (!event.shiftKey) {
-            document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+            ObjectGroup.clearAllSelections();
             imageGroup.classList.add('selected');
           } else {
             imageGroup.classList.toggle('selected');
@@ -176,13 +176,13 @@ class MathBoard {
 
       if (groupTarget) {
         if (!event.shiftKey) {
-          document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+          ObjectGroup.clearAllSelections();
           groupTarget.classList.add('selected');
         } else {
           groupTarget.classList.toggle('selected');
         }
       } else {
-        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        ObjectGroup.clearAllSelections();
       }
     });
   }
@@ -203,7 +203,7 @@ class MathBoard {
       if (target && (target.classList.contains('math-group') || target.classList.contains('text-group') || target.classList.contains('image-group'))) {
         let groups;
         if (target.classList.contains('selected')) {
-          groups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected'));
+          groups = Array.from(ObjectGroup.getSelectedGroups());
         } else {
           groups = [target];
         }
@@ -222,7 +222,7 @@ class MathBoard {
       }
 
       if (!target) {
-        document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => group.classList.remove('selected'));
+        ObjectGroup.clearAllSelections();
       }
     });
 
@@ -304,7 +304,7 @@ class MathBoard {
   }
 
   copySelectedGroups() {
-    const selectedGroups = Array.from(document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected'));
+    const selectedGroups = Array.from(ObjectGroup.getSelectedGroups());
     if (selectedGroups.length === 0) {
       this.clipboard = null;
       return;
@@ -368,7 +368,7 @@ class MathBoard {
     this.copySelectedGroups();
     if (!this.clipboard) return;
 
-    const selectedGroups = document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected');
+    const selectedGroups = ObjectGroup.getSelectedGroups();
     selectedGroups.forEach(group => group.remove());
 
     this.fileManager.saveState();
@@ -377,7 +377,7 @@ class MathBoard {
   pasteGroups() {
     if (!this.clipboard) return;
 
-    document.querySelectorAll('.math-group.selected, .text-group.selected, .image-group.selected').forEach(group => group.classList.remove('selected'));
+    ObjectGroup.clearAllSelections();
 
     const pasteCenterCoords = this.screenToCanvas(this.mouseX, this.mouseY);
     const pasteBaseX = pasteCenterCoords.x;

@@ -311,9 +311,7 @@ class Navigation {
     }
     
     selectGroupsWithinBox(selectionRect) {
-      document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => {
-        group.classList.remove('selected');
-      });
+      ObjectGroup.clearAllSelections();
   
       document.querySelectorAll('.math-group, .text-group, .image-group').forEach((group) => {
       const groupRect = group.getBoundingClientRect();
