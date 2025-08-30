@@ -12,6 +12,15 @@ function executeMathGeneOperation(commandName, sourceMg) {
         return mgCalc.Simplify(sourceMg); // Fallback
     }
     
+    // Add special handling for "Derivative with respect to x" type commands
+    if (commandName.toLowerCase().startsWith('derivative with respect to ')) {
+        const variable = commandName.substring('derivative with respect to '.length).trim();
+        if (variable && mgCalc.Derivative) {
+            return mgCalc.Derivative(sourceMg, variable);
+        }
+        return mgCalc.Simplify(sourceMg); // Fallback
+    }
+    
     switch (commandName) {
         case 'Simplify':
             return mgCalc.Simplify(sourceMg);
@@ -19,6 +28,8 @@ function executeMathGeneOperation(commandName, sourceMg) {
             return mgCalc.Expand(sourceMg);
         case 'Solve for':
             return mgCalc.Simplify(sourceMg); // Use Simplify for Evaluate
+        case 'Derivative with respect to':
+            return mgCalc.Simplify(sourceMg); // Use Simplify as fallback
         case 'Factor':
             return mgCalc.Factor ? mgCalc.Factor(sourceMg) : mgCalc.Simplify(sourceMg);
         default:
@@ -85,6 +96,14 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
                 
                 resultMg = mgCalc.Solve ? mgCalc.Solve(processedSourceLatex, variable) : mgCalc.Simplify(processedSourceLatex);
                 console.log("Solve result:", resultMg);
+            // Handle "Derivative with respect to x" using mgCalc.Derivative
+            } else if (typeof commandName === 'string' && commandName.toLowerCase().startsWith('derivative with respect to ')) {
+                const variable = commandName.substring('derivative with respect to '.length).trim();
+                console.log("Extracted variable for Derivative:", variable);
+                console.log("mgCalc.Derivative available:", !!mgCalc.Derivative);
+                
+                resultMg = mgCalc.Derivative ? mgCalc.Derivative(processedSourceLatex, variable) : mgCalc.Simplify(processedSourceLatex);
+                console.log("Derivative result:", resultMg);
             } else {
                 switch (commandName) {
                     case 'Simplify':
@@ -94,6 +113,10 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
                         resultMg = mgCalc.Expand(processedSourceLatex);
                         break;
                     case 'Solve for':
+                        // Fallback if no variable specified
+                        resultMg = mgCalc.Simplify(processedSourceLatex);
+                        break;
+                    case 'Derivative with respect to':
                         // Fallback if no variable specified
                         resultMg = mgCalc.Simplify(processedSourceLatex);
                         break;

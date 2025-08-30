@@ -114,6 +114,38 @@ class CommandPalette {
       return;
     }
     
+    // Special case: User typed "Derivative with respect to x" but no command is selected
+    if (this.selectedIndex < 0 && typedInput.toLowerCase().startsWith('derivative with respect to ')) {
+      console.log("No selection but detected 'Derivative with respect to x' pattern - proceeding anyway");
+      const variable = typedInput.substring('derivative with respect to '.length).trim();
+      
+      if (variable) {
+        let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
+        
+        if (!referenceContainer && this.lastFocusedMathField) {
+          referenceContainer = this.lastFocusedMathField;
+          console.log("Using fallback to last focused math field");
+        }
+
+        if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+          const mathGroupInstance = referenceContainer.parentElement.mathGroup;
+          const sourceLatex = referenceContainer.dataset.latex || '';
+          const newMathFieldInstance = mathGroupInstance.insertMathFieldAfter(referenceContainer);
+          newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
+          
+          console.log(`Directly taking derivative with respect to variable: ${variable}`);
+          applyMathGeneCommand(typedInput, sourceLatex, newMathFieldInstance);
+          this.hide();
+          return;
+        }
+      }
+      
+      // If we got here, we couldn't process the command
+      console.log("Couldn't process Derivative command with no reference container");
+      this.hide();
+      return;
+    }
+    
     if (this.selectedIndex < 0 || this.selectedIndex >= this.filteredCommands.length) {
       console.log("No valid selection index, hiding palette");
       this.hide();
@@ -157,6 +189,37 @@ class CommandPalette {
         }
       }
     }
+    
+    // Check if the user directly typed a complete "Derivative with respect to x" command
+    if (typedInput.toLowerCase().startsWith('derivative with respect to ') && !this.variableInputMode) {
+      console.log("Detected direct 'Derivative with respect to x' input pattern");
+      // User directly typed "Derivative with respect to x" - extract variable and process
+      const variable = typedInput.substring('derivative with respect to '.length).trim();
+      console.log("Extracted variable:", variable);
+      
+      if (variable) {
+        let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
+        
+        if (!referenceContainer && this.lastFocusedMathField) {
+          referenceContainer = this.lastFocusedMathField;
+          console.log("Using fallback to last focused math field");
+        }
+
+        if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
+          const mathGroupInstance = referenceContainer.parentElement.mathGroup;
+          const sourceLatex = referenceContainer.dataset.latex || '';
+          const newMathFieldInstance = mathGroupInstance.insertMathFieldAfter(referenceContainer);
+          newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
+          
+          console.log(`Directly taking derivative with respect to variable: ${variable}`);
+          applyMathGeneCommand(typedInput, sourceLatex, newMathFieldInstance);
+          this.hide();
+          return;
+        } else {
+          console.warn("No reference container found for derivative operation");
+        }
+      }
+    }
 
     // Handle "Solve for" special case (when selected from list but no variable yet)
     if (commandLabel === 'Solve for' && !this.variableInputMode) {
@@ -170,10 +233,33 @@ class CommandPalette {
       this.inputElement.setSelectionRange(cursorPosition, cursorPosition);
       return;
     }
+    
+    // Handle "Derivative with respect to" special case (when selected from list but no variable yet)
+    if (commandLabel === 'Derivative with respect to' && !this.variableInputMode) {
+      this.inputElement.value = 'Derivative with respect to ';
+      this.inputElement.classList.add('variable-input-mode');
+      this.variableInputMode = true;
+      this.inputElement.focus();
+      
+      // Position cursor at the right position
+      const cursorPosition = 'Derivative with respect to '.length;
+      this.inputElement.setSelectionRange(cursorPosition, cursorPosition);
+      return;
+    }
 
     // If we're in variable input mode and Enter is pressed
     if (this.variableInputMode) {
-      const variable = typedInput.substring('Solve for '.length).trim();
+      let variable = '';
+      let commandName = '';
+      
+      // Determine which command we're in variable input mode for
+      if (typedInput.toLowerCase().startsWith('solve for ')) {
+        variable = typedInput.substring('Solve for '.length).trim();
+        commandName = 'Solve for';
+      } else if (typedInput.toLowerCase().startsWith('derivative with respect to ')) {
+        variable = typedInput.substring('Derivative with respect to '.length).trim();
+        commandName = 'Derivative with respect to';
+      }
       
       if (!variable) {
         // If no variable provided, just remind the user
@@ -182,7 +268,7 @@ class CommandPalette {
         return;
       }
       
-      // Variable is entered, proceed with solving
+      // Variable is entered, proceed with the operation
       this.variableInputMode = false;
       this.inputElement.classList.remove('variable-input-mode');
       
@@ -201,13 +287,14 @@ class CommandPalette {
 
         newMathFieldInstance.mathField.latex(`\\text{Processing...}`);
         
-        // Pass the full "Solve for variable" command to be processed
-        console.log(`Solving for variable: ${variable}`);
-        applyMathGeneCommand(`Solve for ${variable}`, sourceLatex, newMathFieldInstance);
+        // Pass the full command to be processed
+        const fullCommand = commandName === 'Solve for' ? `Solve for ${variable}` : `Derivative with respect to ${variable}`;
+        console.log(`Processing ${commandName} for variable: ${variable}`);
+        applyMathGeneCommand(fullCommand, sourceLatex, newMathFieldInstance);
       } else {
-        console.warn("No reference math field found to apply Solve for:", variable);
+        console.warn(`No reference math field found to apply ${commandName}:`, variable);
         const notification = document.createElement('div');
-        notification.textContent = `Please select a math field first before solving for ${variable}`;
+        notification.textContent = `Please select a math field first before applying ${commandName} ${variable}`;
         notification.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#f44336; color:white; padding:10px; border-radius:4px; z-index:9999;';
         document.body.appendChild(notification);
         setTimeout(() => notification.remove(), 3000);
@@ -291,6 +378,13 @@ class CommandPalette {
       this.filteredCommands = this.commands.filter(c => 
         c.label.toLowerCase() === 'solve for' || c.label.toLowerCase().includes(query)
       );
+    } 
+    // Special case for "Derivative with respect to x" - keep the "Derivative with respect to" command visible
+    else if (query.startsWith('derivative with respect to ') && query.length > 'derivative with respect to '.length) {
+      console.log("Special case: keeping 'Derivative with respect to' command for derivative operation");
+      this.filteredCommands = this.commands.filter(c => 
+        c.label.toLowerCase() === 'derivative with respect to' || c.label.toLowerCase().includes(query)
+      );
     } else {
       this.filteredCommands = this.commands.filter(c => c.label.toLowerCase().includes(query));
     }
@@ -303,6 +397,8 @@ class CommandPalette {
       optionEl.className = 'command-palette-option';
       if (cmd.label.toLowerCase() === 'solve for') {
         optionEl.innerHTML = 'Solve for <span class="solve-for-variable">variable</span>';
+      } else if (cmd.label.toLowerCase() === 'derivative with respect to') {
+        optionEl.innerHTML = 'Derivative with respect to <span class="solve-for-variable">variable</span>';
       } else {
         optionEl.textContent = cmd.label;
       }

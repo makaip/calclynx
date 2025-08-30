@@ -26,6 +26,7 @@ if (typeof CommandPalette !== 'undefined' && typeof CommandOption !== 'undefined
     new CommandOption('Simplify', () => {}),
     new CommandOption('Expand',   () => {}),
     new CommandOption('Solve for', () => {}), // Action is handled internally by selectCurrent
+    new CommandOption('Derivative with respect to', () => {}), // Action is handled internally by selectCurrent
     new CommandOption('Factor',   () => {}),
   ]);
 } else {
