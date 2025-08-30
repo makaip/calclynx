@@ -137,3 +137,34 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
   - <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd> — Deletes the entire math group.
 - **Text editor math insertion**:
   - <kbd>$</kbd> — Insert an inline math field at the cursor.
+
+## Mathematical Engine (MathGene)
+
+CalcLynx is powered by the **MathGene** mathematical computation engine, which provides comprehensive symbolic mathematics capabilities including:
+
+### Derivative Functions
+
+The system includes a complete symbolic differentiation engine that supports:
+
+- **Basic differentiation**: `mgCalc.Derivative(expression, variable, order?)`
+- **Partial derivatives**: `mgCalc.PartialDerivative(expression, variable, order?)`
+- **Total derivatives**: `mgCalc.TotalDerivative(expression, variable, order?)`
+- **Gradient calculation**: `mgCalc.Gradient(expression, variables?)`
+- **Directional derivatives**: `mgCalc.DirectionalDerivative(expression, variables, direction)`
+
+#### Supported Functions
+All standard mathematical functions and their derivatives:
+- Algebraic: polynomials, rational functions, radicals
+- Trigonometric: sin, cos, tan, sec, csc, cot and their inverses
+- Hyperbolic: sinh, cosh, tanh and their inverses  
+- Exponential and logarithmic: e^x, ln(x), log(x), a^x
+- Composite functions with automatic chain rule application
+
+#### Examples
+```javascript
+mgCalc.Derivative("x^2", "x");           // Returns: "2*x"
+mgCalc.Derivative("sin(x^2)", "x");      // Returns: "2*x*cos(x^2)"
+mgCalc.Gradient("x^2 + y^2", ["x","y"]); // Returns: ["2*x", "2*y"]
+```
+
+For complete documentation and examples, see [DERIVATIVE_DOCUMENTATION.md](DERIVATIVE_DOCUMENTATION.md).
