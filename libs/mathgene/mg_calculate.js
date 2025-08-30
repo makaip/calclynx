@@ -27,43 +27,6 @@ if (typeof module ==  "object") {
 //internal functions-objects
 var mgCalc = function() {
     
-    // Function to preprocess expressions to standardize function names
-    function preprocessExpression(expr) {
-        if (typeof expr !== 'string') return expr;
-        
-        // Map common function names to MathGene equivalents
-        const functionMap = {
-            'ln\\(': 'lne(',         // Natural logarithm
-            '\\\\ln\\(': 'lne(',     // LaTeX natural log
-            'log\\(': 'log(',        // Base-10 logarithm (already correct)
-            'sqrt\\(': 'sqt(',       // Square root
-            '\\\\sqrt\\{': 'sqt(',   // LaTeX square root
-            'cbrt\\(': 'cbt(',       // Cube root
-            'exp\\(': 'exp(',        // Exponential (already correct)
-            '\\\\exp\\(': 'exp(',    // LaTeX exponential
-            'arcsin\\(': 'asn(',     // Inverse sine
-            'arccos\\(': 'acs(',     // Inverse cosine
-            'arctan\\(': 'atn(',     // Inverse tangent
-            'arccot\\(': 'act(',     // Inverse cotangent
-            'arcsec\\(': 'asc(',     // Inverse secant
-            'arccsc\\(': 'acc(',     // Inverse cosecant
-            'sinh\\(': 'snh(',       // Hyperbolic sine
-            'cosh\\(': 'csh(',       // Hyperbolic cosine
-            'tanh\\(': 'tnh(',       // Hyperbolic tangent
-            'coth\\(': 'cth(',       // Hyperbolic cotangent
-            'sech\\(': 'sch(',       // Hyperbolic secant
-            'csch\\(': 'cch(',       // Hyperbolic cosecant
-        };
-        
-        // Apply function name mappings
-        for (const [pattern, replacement] of Object.entries(functionMap)) {
-            const regex = new RegExp(pattern, 'g');
-            expr = expr.replace(regex, replacement);
-        }
-        
-        return expr;
-    }
-    
     const passthruFunc = { //null functions
     cPow: function (xU,xL) {return "cPow("+xU+","+xL+")"},
     cMul: function (xU,xL) {return "cMul("+xU+","+xL+")"},
@@ -1894,6 +1857,43 @@ var mgCalc = function() {
         }
         return dExp
     }
+
+    function preprocessExpression(expr) { //preprocess expressions to standardize function names
+        if (typeof expr !== 'string') return expr;
+        
+        // Map common function names to MathGene equivalents
+        const functionMap = {
+            'ln\\(': 'lne(',         // Natural logarithm
+            '\\\\ln\\(': 'lne(',     // LaTeX natural log
+            'log\\(': 'log(',        // Base-10 logarithm (already correct)
+            'sqrt\\(': 'sqt(',       // Square root
+            '\\\\sqrt\\{': 'sqt(',   // LaTeX square root
+            'cbrt\\(': 'cbt(',       // Cube root
+            'exp\\(': 'exp(',        // Exponential (already correct)
+            '\\\\exp\\(': 'exp(',    // LaTeX exponential
+            'arcsin\\(': 'asn(',     // Inverse sine
+            'arccos\\(': 'acs(',     // Inverse cosine
+            'arctan\\(': 'atn(',     // Inverse tangent
+            'arccot\\(': 'act(',     // Inverse cotangent
+            'arcsec\\(': 'asc(',     // Inverse secant
+            'arccsc\\(': 'acc(',     // Inverse cosecant
+            'sinh\\(': 'snh(',       // Hyperbolic sine
+            'cosh\\(': 'csh(',       // Hyperbolic cosine
+            'tanh\\(': 'tnh(',       // Hyperbolic tangent
+            'coth\\(': 'cth(',       // Hyperbolic cotangent
+            'sech\\(': 'sch(',       // Hyperbolic secant
+            'csch\\(': 'cch(',       // Hyperbolic cosecant
+        };
+        
+        // Apply function name mappings
+        for (const [pattern, replacement] of Object.entries(functionMap)) {
+            const regex = new RegExp(pattern, 'g');
+            expr = expr.replace(regex, replacement);
+        }
+        
+        return expr;
+    }
+    
     //Derivatives
     const drvFunc = {
     cPowD: function(xU,xL,deeVar) {
@@ -4045,81 +4045,13 @@ var mgCalc = function() {
         PutTheta:   function(parm) {return finPUTtheta(parm)},
         OptionGamma:function(parm) {return finOPTgamma(parm)},
         OptionVega: function(parm) {return finOPTvega(parm)},
+        Derivative: function(xprA,xprB,nTh) {mgTrans.configCheck();if (typeof nTh == "undefined") {nTh = 1};var preprocessedExpr = preprocessExpression(xprA);var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));var variable = mgTrans.texImport(xprB);var result = drvS(funcExpr,variable,nTh);return mgTrans.Output(mgTrans.mgExport(cReduce(result)))},
+        PartialDerivative: function(xprA,xprB,nTh) {mgTrans.configCheck();if (typeof nTh == "undefined") {nTh = 1};var preprocessedExpr = preprocessExpression(xprA);var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));var variable = mgTrans.texImport(xprB);var result = drvS(funcExpr,variable,nTh);return mgTrans.Output(mgTrans.mgExport(cReduce(result)))},
+        TotalDerivative: function(xprA,xprB,nTh) {mgTrans.configCheck();if (typeof nTh == "undefined") {nTh = 1};var preprocessedExpr = preprocessExpression(xprA);var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));var variable = mgTrans.texImport(xprB);var result = tdvS(funcExpr,variable,nTh);return mgTrans.Output(mgTrans.mgExport(cReduce(result)))},
+        Gradient:   function(xprA,varList) {mgTrans.configCheck();var preprocessedExpr = preprocessExpression(xprA);var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));var variables = [];if (typeof varList === "string") {variables = varList.split(",").map(function(v) {return v.trim()})} else if (Array.isArray(varList)) {variables = varList} else {var inventory = cInventory(funcExpr);variables = inventory.map(function(v) {return mgTrans.mgExport(v)})};var gradient = [];for (var i = 0; i < variables.length; i++) {var variable = mgTrans.texImport(variables[i]);var partialDeriv = drvS(funcExpr,variable,1);gradient.push(mgTrans.Output(mgTrans.mgExport(cReduce(partialDeriv))))};return gradient},
+        DirectionalDerivative: function(xprA,varList,direction) {mgTrans.configCheck();var gradient = this.Gradient(xprA,varList);var dotProduct = "0";for (var i = 0; i < gradient.length && i < direction.length; i++) {var term = "cMul(" + mgTrans.texImport(gradient[i]) + "," + mgTrans.texImport(direction[i]) + ")";if (i === 0) {dotProduct = term} else {dotProduct = "cAdd(" + dotProduct + "," + term + ")"}};return mgTrans.Output(mgTrans.mgExport(cReduce(dotProduct)))},
         GCF:        function(p1,p2) {return cGcf(p1,p2)},
         irSolver:   function(p1,p2,p3,p4) {return iSolve(p1,p2,p3,p4)},
-        // Derivative Functions
-        Derivative: function(xprA, xprB, nTh) {
-            mgTrans.configCheck();
-            if (typeof nTh == "undefined") {nTh = 1}
-            var preprocessedExpr = preprocessExpression(xprA);
-            var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));
-            var variable = mgTrans.texImport(xprB);
-            var result = drvS(funcExpr, variable, nTh);
-            return mgTrans.Output(mgTrans.mgExport(cReduce(result)));
-        },
-        PartialDerivative: function(xprA, xprB, nTh) {
-            mgTrans.configCheck();
-            if (typeof nTh == "undefined") {nTh = 1}
-            var preprocessedExpr = preprocessExpression(xprA);
-            var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));
-            var variable = mgTrans.texImport(xprB);
-            var result = drvS(funcExpr, variable, nTh);
-            return mgTrans.Output(mgTrans.mgExport(cReduce(result)));
-        },
-        TotalDerivative: function(xprA, xprB, nTh) {
-            mgTrans.configCheck();
-            if (typeof nTh == "undefined") {nTh = 1}
-            var preprocessedExpr = preprocessExpression(xprA);
-            var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));
-            var variable = mgTrans.texImport(xprB);
-            var result = tdvS(funcExpr, variable, nTh);
-            return mgTrans.Output(mgTrans.mgExport(cReduce(result)));
-        },
-        // Gradient for multivariable functions
-        Gradient: function(xprA, varList) {
-            mgTrans.configCheck();
-            var preprocessedExpr = preprocessExpression(xprA);
-            var funcExpr = mgTrans.cFunc(parseCalculus(mgTrans.texImport(preprocessedExpr)));
-            var variables = [];
-            
-            // If varList is a string, split it, otherwise use as array
-            if (typeof varList === "string") {
-                variables = varList.split(",").map(v => v.trim());
-            } else if (Array.isArray(varList)) {
-                variables = varList;
-            } else {
-                // Auto-detect variables from expression
-                var inventory = cInventory(funcExpr);
-                variables = inventory.map(v => mgTrans.mgExport(v));
-            }
-            
-            var gradient = [];
-            for (var i = 0; i < variables.length; i++) {
-                var variable = mgTrans.texImport(variables[i]);
-                var partialDeriv = drvS(funcExpr, variable, 1);
-                gradient.push(mgTrans.Output(mgTrans.mgExport(cReduce(partialDeriv))));
-            }
-            
-            return gradient;
-        },
-        // Directional derivative
-        DirectionalDerivative: function(xprA, varList, direction) {
-            mgTrans.configCheck();
-            var gradient = this.Gradient(xprA, varList);
-            var dotProduct = "0";
-            
-            // Calculate dot product of gradient and direction vector
-            for (var i = 0; i < gradient.length && i < direction.length; i++) {
-                var term = "cMul(" + mgTrans.texImport(gradient[i]) + "," + mgTrans.texImport(direction[i]) + ")";
-                if (i === 0) {
-                    dotProduct = term;
-                } else {
-                    dotProduct = "cAdd(" + dotProduct + "," + term + ")";
-                }
-            }
-            
-            return mgTrans.Output(mgTrans.mgExport(cReduce(dotProduct)));
-        },
     }
 } ();
 // node.js export
