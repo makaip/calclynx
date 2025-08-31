@@ -23,6 +23,13 @@ class VariableInputManager {
       validator: (variable) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(variable),
       extractor: (input) => input.substring('derivative with respect to '.length).trim()
     });
+    
+    this.addPattern('integrate with respect to', {
+      prefix: 'Integrate with respect to ',
+      placeholder: 'variable',
+      validator: (variable) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(variable),
+      extractor: (input) => input.substring('integrate with respect to '.length).trim()
+    });
   }
 
   addPattern(key, config) {

@@ -110,6 +110,13 @@ function setupDefaultCommands() {
       description: 'Find the derivative with respect to a variable',
       requiresVariable: true,
       variablePattern: 'derivative with respect to'
+    }),
+    
+    new CommandTemplate('Integrate with respect to', {
+      category: 'calculus',
+      description: 'Find the indefinite integral with respect to a variable',
+      requiresVariable: true,
+      variablePattern: 'integrate with respect to'
     })
   ];
 
@@ -184,6 +191,11 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
         const variable = commandName.substring('derivative with respect to '.length).trim();
         resultMg = mgCalc.Derivative ? mgCalc.Derivative(processedSourceLatex, variable) : mgCalc.Simplify(processedSourceLatex);
       }
+      // Handle "Integrate with respect to x" using mgCalc.Integral
+      else if (typeof commandName === 'string' && commandName.toLowerCase().startsWith('integrate with respect to ')) {
+        const variable = commandName.substring('integrate with respect to '.length).trim();
+        resultMg = mgCalc.Integral ? mgCalc.Integral(processedSourceLatex, variable) : mgCalc.Simplify(processedSourceLatex);
+      }
       // Handle other commands
       else {
         switch (commandName) {
@@ -195,6 +207,10 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
             break;
           case 'Factor':
             resultMg = mgCalc.Factor ? mgCalc.Factor(processedSourceLatex) : mgCalc.Simplify(processedSourceLatex);
+            break;
+          case 'Integral':
+            // For a simple "Integral" command, we'll assume integration with respect to 'x'
+            resultMg = mgCalc.Integral ? mgCalc.Integral(processedSourceLatex, 'x') : mgCalc.Simplify(processedSourceLatex);
             break;
           default:
             resultMg = mgCalc.Simplify(processedSourceLatex);
