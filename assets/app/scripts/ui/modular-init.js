@@ -13,6 +13,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+/**
+ * Perform one-time setup of the modular UI system (command registry, palette, input managers, and default commands).
+ *
+ * Initializes global singletons and UI components used by the modular command system. This function is idempotent
+ * (returns early if initialization already completed) and performs a dependency check for required classes
+ * (BaseModal, CommandTemplate, VariableInputManager) before creating instances. On success it will:
+ * - create window.variableInputManager (VariableInputManager) if missing
+ * - create window.commandRegistry (CommandRegistry) if missing
+ * - register default math commands via setupDefaultCommands()
+ * - create window.commandPalette (ModularCommandPalette) when available
+ * - create window.imageUrlInput using TextInputModalFactory when available
+ * It sets the module state flags (isInitializing, isInitialized) and logs progress. If required dependencies are
+ * absent or an error occurs, the function logs an error and resets initialization flags to allow retrying later.
+ */
 function initializeModularSystem() {
   // Prevent double initialization
   if (isInitialized) {
@@ -80,6 +94,16 @@ function initializeModularSystem() {
   }
 }
 
+/**
+ * Register a set of default math command templates on the global command registry.
+ *
+ * Creates and registers common algebra and calculus commands (Simplify, Expand, Factor,
+ * Solve for, Derivative with respect to, Integrate with respect to) using CommandTemplate
+ * and window.commandRegistry.register.
+ *
+ * Requires window.commandRegistry to be present; if it's absent the function will throw a
+ * runtime error when attempting to call register.
+ */
 function setupDefaultCommands() {
   // Register default math commands
   const mathCommands = [
@@ -126,7 +150,13 @@ function setupDefaultCommands() {
   });
 }
 
-// Add additional math commands easily
+/**
+ * Register a math-scoped command and return the created CommandTemplate.
+ *
+ * @param {string} label - Visible label/name for the command.
+ * @param {Object} [config={}] - Optional CommandTemplate configuration; merged with `{ category: 'math' }`.
+ * @returns {CommandTemplate|undefined} The created CommandTemplate, or `undefined` if the global command registry is not initialized.
+ */
 function addMathCommand(label, config = {}) {
   if (!window.commandRegistry) {
     console.error('Command registry not initialized');
@@ -142,7 +172,13 @@ function addMathCommand(label, config = {}) {
   return command;
 }
 
-// Add variable command helper
+/**
+ * Convenience wrapper to create and register a math-scoped command that requires a variable.
+ * @param {string} label - Command label shown in the UI.
+ * @param {string} variablePatternKey - Key identifying the variable pattern to use (assigned to the command's `variablePattern`).
+ * @param {Object} [config={}] - Additional CommandTemplate configuration merged into the created command.
+ * @return {CommandTemplate} The registered CommandTemplate instance.
+ */
 function addVariableCommand(label, variablePatternKey, config = {}) {
   return addMathCommand(label, {
     requiresVariable: true,
@@ -156,7 +192,22 @@ window.addMathCommand = addMathCommand;
 window.addVariableCommand = addVariableCommand;
 window.initializeModularSystem = initializeModularSystem;
 
-// Core MathGene command execution function
+/**
+ * Execute a MathGene command on a target MathQuill-like field and write the resulting LaTeX into it.
+ *
+ * Attempts to run the named command (e.g., "Simplify", "Expand", "Factor",
+ * "Solve for x", "Derivative with respect to x", "Integrate with respect to x") against
+ * the provided LaTeX source. Prefers the global `mgCalc` API and falls back to
+ * `mgTrans`/`mgCalculate` when available. On success the resulting `.latex` is
+ * written to `targetMathFieldInstance.mathField.latex(...)`. Input validation
+ * and runtime errors are logged and rendered as an escaped LaTeX error message
+ * into the target field.
+ *
+ * @param {string} commandName - The command to execute (case-sensitive for simple commands; prefix forms like `"solve for x"` or `"derivative with respect to x"` are supported).
+ * @param {string} sourceLatex - The input expression in LaTeX. For "solve for" commands, an `=` is appended as ` = 0` when missing.
+ * @param {object} targetMathFieldInstance - The target object that must expose a `mathField` with a `.latex(string)` method where the result or error message will be written.
+ * @returns {void}
+ */
 function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance) {
   if (!sourceLatex || !targetMathFieldInstance || !targetMathFieldInstance.mathField) {
     console.error("Missing source LaTeX or target MathField instance.");

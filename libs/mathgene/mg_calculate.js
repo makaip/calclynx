@@ -1785,7 +1785,17 @@ var mgCalc = function() {
         return xReduce(execFunc(xE,expandFunc)).replace(/cnt\(/g,"(")
     }
     
-    //Calculus
+    /**
+     * Parse and normalize calculus expressions from MG format into internal FUNC form.
+     *
+     * Converts MG-style calculus tokens and placeholders (differentials Cv[8748], indefinite integral Cv[8747],
+     * derivative/limit/sum/product wrappers like `idr(...), tdr(...), lim(...), sum(...), prd(...)`) into the
+     * MathGene internal calculus function names (`drv, tdv, lmt, smm, pmm, ntg`, etc.), resolves differentials
+     * and integral limits, and injects integration constants for indefinite integrals.
+     *
+     * @param {string} dExp - Input expression in MG format (may contain Cv[...] markers and MG calculus wrappers).
+     * @return {string} Transformed expression in internal FUNC form, or an error sentinel (via cError / Cv[9998]) if parsing fails.
+     */
     function parseCalculus(dExp) { //parse calculus from MG format to FUNC: d/dx(x^2) = idr(x)x^2 -> drv(x^2,x)
         dExp = String(dExp);
         var dSplit = dExp.split("=");
@@ -1858,6 +1868,15 @@ var mgCalc = function() {
         return dExp
     }
 
+    /**
+     * Normalize common textual and LaTeX function names in an expression to MathGene internal names.
+     *
+     * Converts occurrences like `ln(`, `\ln(`, `sqrt(`, `\sqrt{`, `arcsin(`, `sinh(`, etc. to their MathGene equivalents
+     * (e.g., `lne(`, `sqt(`, `asn(`, `snh(`). Only performs string substitutions; other input types are returned unchanged.
+     *
+     * @param {string|any} expr - Input expression string to preprocess. If not a string, the value is returned as-is.
+     * @return {string|any} The preprocessed expression string with mapped function names, or the original non-string input.
+     */
     function preprocessExpression(expr) { //preprocess expressions to standardize function names
         if (typeof expr !== 'string') return expr;
         
