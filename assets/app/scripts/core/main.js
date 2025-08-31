@@ -46,36 +46,81 @@ document.addEventListener('DOMContentLoaded', () => {
     event.target.value = '';
   });
 
-  // Command Palette Initialization
-  const commandPalette = new CommandPalette(window.mathBoard);
-  // Add trigger for command palette (e.g., Ctrl+Shift+P or Cmd+Shift+P)
+  // Set up keyboard shortcuts early to prevent browser defaults
   document.addEventListener('keydown', (e) => {
     const modifier = isMac ? e.metaKey : e.ctrlKey;
     
     // Check if we're currently in an input field that should handle its own events
+    // Removed .mq-editable-field to allow command palette to work in mathfields
     const isInInput = e.target.closest('.image-url-input') || 
                       e.target.closest('.command-palette-input') ||
-                      e.target.closest('.text-editor') ||
-                      e.target.closest('.mq-editable-field');
+                      e.target.closest('.text-editor');
     
-    if (modifier && e.shiftKey && e.key === 'P' && !isInInput) {
+    // Command Palette shortcut (Ctrl+K only) - handle early to prevent browser default
+    if (modifier && e.key === 'k' && !e.shiftKey && !e.altKey && !isInInput) {
       e.preventDefault();
-      commandPalette.show();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      console.log('Command palette keyboard shortcut triggered!');
+      
+      // Use the global command palette instance created by modular-init.js
+      // Wait for initialization if needed with more robust retry mechanism
+      let retryCount = 0;
+      const maxRetries = 50; // Try for up to 500ms
+      
+      const tryShowCommandPalette = () => {
+        retryCount++;
+        if (window.commandPalette && typeof window.commandPalette.show === 'function') {
+          console.log('Command palette found, showing...');
+          const activeElement = document.activeElement;
+          const refElement = activeElement?.closest('.math-field-container');
+          window.commandPalette.show(refElement);
+        } else if (retryCount < maxRetries) {
+          console.log(`Command palette not ready yet, retrying... (${retryCount}/${maxRetries})`);
+          // If not ready yet, try again in a short moment
+          setTimeout(tryShowCommandPalette, 10);
+        } else {
+          console.error('Command palette failed to initialize after maximum retries');
+          // Fallback: try to initialize the modular system manually
+          if (typeof initializeModularSystem === 'function') {
+            console.log('Attempting manual modular system initialization...');
+            initializeModularSystem();
+            setTimeout(() => {
+              if (window.commandPalette && typeof window.commandPalette.show === 'function') {
+                const activeElement = document.activeElement;
+                const refElement = activeElement?.closest('.math-field-container');
+                window.commandPalette.show(refElement);
+              }
+            }, 50);
+          }
+        }
+      };
+      tryShowCommandPalette();
+      return false; // Additional prevention
     }
     
     // Add trigger for image URL input (Ctrl/Cmd + I)
     if (modifier && e.key === 'i' && !e.shiftKey && !e.altKey && !isInInput) {
       e.preventDefault();
-      window.imageUrlInput.show((url) => {
-        // Use current mouse position or center of screen if no mouse position available
-        const coords = window.mathBoard ? 
-          window.mathBoard.screenToCanvas(window.mathBoard.mouseX || window.innerWidth / 2, window.mathBoard.mouseY || window.innerHeight / 2) :
-          { x: 100, y: 100 };
-        const imageGroup = new ImageGroup(window.mathBoard, coords.x, coords.y);
-        imageGroup.setImageUrl(url);
-      });
+      const tryShowImageInput = () => {
+        if (window.imageUrlInput) {
+          window.imageUrlInput.show((url) => {
+            // Use current mouse position or center of screen if no mouse position available
+            const coords = window.mathBoard ? 
+              window.mathBoard.screenToCanvas(window.mathBoard.mouseX || window.innerWidth / 2, window.mathBoard.mouseY || window.innerHeight / 2) :
+              { x: 100, y: 100 };
+            const imageGroup = new ImageGroup(window.mathBoard, coords.x, coords.y);
+            imageGroup.setImageUrl(url);
+          });
+        } else {
+          // If not ready yet, try again in a short moment
+          setTimeout(tryShowImageInput, 10);
+        }
+      };
+      tryShowImageInput();
     }
-  });
+  }, true); // Use capture phase to handle before other listeners
 
   // Initialize context menu (assuming contextmenu.js is loaded)
   if (typeof ContextMenu !== 'undefined') {

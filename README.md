@@ -80,7 +80,7 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 ## Command palette and MathGene commands
 
 - **Open command palette**:
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd> opens the command palette.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd> opens the command palette.
 - **Command palette keyboard interactions**:
   - Type to filter commands. Use <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> to change selection, <kbd>Enter</kbd> to execute, and <kbd>Escape</kbd> to close.
   - Available commands include: `Simplify`, `Expand`, `Solve for`, and `Factor`.
@@ -137,3 +137,17 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
   - <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd> — Deletes the entire math group.
 - **Text editor math insertion**:
   - <kbd>$</kbd> — Insert an inline math field at the cursor.
+
+## Mathematical Engine (MathGene)
+
+CalcLynx is powered by the **MathGene** mathematical computation engine, which provides comprehensive symbolic mathematics capabilities including:
+
+### Command Palette Integration
+
+Both derivative and integral functions are accessible through the interactive command palette (Ctrl/Cmd + K):
+
+- **"Derivative with respect to [variable]"** - Computes derivatives for any variable
+- **"Integrate with respect to [variable]"** - Computes indefinite integrals for any variable  
+- **"Integral"** - Quick integration assuming variable x
+- **"Solve for [variable]"** - Solves equations for specified variables
+- **"Simplify"**, **"Expand"**, **"Factor"** - Standard algebraic operations

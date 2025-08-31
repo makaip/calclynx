@@ -11,7 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="assets/app/styles/main.css" /> 
-  <link rel="stylesheet" href="assets/app/styles/text-field.css" /> 
+  <link rel="stylesheet" href="assets/app/styles/text-field.css" />
+  <link rel="stylesheet" href="assets/app/styles/modular-modal.css" /> 
   
   <!-- Command Palette Selection Style -->
   <style>
@@ -247,9 +248,13 @@
 
   <!-- UI Scripts -->
   <script src="assets/app/scripts/ui/contextmenu.js"></script>
-  <script src="assets/app/scripts/ui/image-url-input.js"></script>
-  <script src="assets/app/scripts/ui/commandpalette-helpers.js"></script>
-  <script src="assets/app/scripts/ui/commandpalette.js"></script> <!-- Class definition -->
+  
+  <!-- Modular Modal System -->
+  <script src="assets/app/scripts/ui/base-modal.js"></script>
+  <script src="assets/app/scripts/ui/variable-input-manager.js"></script>
+  <script src="assets/app/scripts/ui/command-template.js"></script>
+  <script src="assets/app/scripts/ui/text-input-modal.js"></script>
+  <script src="assets/app/scripts/ui/modular-command-palette.js"></script>
   
   <!-- Sidebar Scripts -->
   <!-- sidebar.js contains helpers (like generateUUID), loadUserFiles and main sidebar DOM logic -->
@@ -266,6 +271,8 @@
   <script src="assets/app/scripts/core/app.js"></script>
   <!-- main.js initializes mathBoard etc. -->
   <script src="assets/app/scripts/core/main.js"></script>
-  <script src="assets/app/scripts/ui/commandpalette-init.js"></script>
+  
+  <!-- Initialize modular system -->
+  <script src="assets/app/scripts/ui/modular-init.js"></script>
 </body>
 </html>
