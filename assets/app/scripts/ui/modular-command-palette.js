@@ -216,10 +216,14 @@ class ModularCommandPalette extends BaseModal {
       const targetMathField = referenceContainer.parentElement.mathGroup.insertMathFieldAfter(referenceContainer);
       context.targetMathField = targetMathField;
       
-      // Get the LaTeX from the reference container's math field instance
+      // Get the LaTeX from the reference container
       const sourceMathFieldInstance = referenceContainer.mathFieldInstance;
       if (sourceMathFieldInstance && sourceMathFieldInstance.mathField) {
+        // If the field is currently being edited, get LaTeX from the active mathField
         context.sourceLatex = sourceMathFieldInstance.mathField.latex();
+      } else if (referenceContainer.dataset.latex) {
+        // If the field is not being edited (loaded from data), get LaTeX from dataset
+        context.sourceLatex = referenceContainer.dataset.latex;
       }
     }
 
