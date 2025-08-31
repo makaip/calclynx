@@ -19,8 +19,7 @@ class ModularCommandPalette extends BaseModal {
     this.variableInputMode = false;
     this.currentVariablePattern = null;
     
-    this.setupCommandPaletteElements();
-    this.setupMathFieldTracking();
+    this.initialize();
   }
 
   getModalHTML() {
@@ -30,6 +29,15 @@ class ModularCommandPalette extends BaseModal {
         <div class="command-palette-options"></div>
       </div>
     `;
+  }
+
+  initialize() {
+    this.modalElement = this.createModalElement();
+    this.contentElement = this.modalElement.querySelector('.modal-content');
+    this.setupCommandPaletteElements();
+    this.setupMathFieldTracking();
+    this.setupBaseEvents();
+    this.setupCustomEvents();
   }
 
   setupCommandPaletteElements() {
@@ -47,6 +55,12 @@ class ModularCommandPalette extends BaseModal {
   }
 
   setupCustomEvents() {
+    // Guard against missing input element
+    if (!this.inputElement) {
+      console.warn('ModularCommandPalette: inputElement not found during setupCustomEvents');
+      return;
+    }
+    
     this.inputElement.addEventListener('input', () => this.renderOptions());
     this.inputElement.addEventListener('keydown', (e) => this.handleKeyDown(e));
   }
@@ -112,7 +126,10 @@ class ModularCommandPalette extends BaseModal {
   executeCommand(result) {
     const { command, match } = result;
     
-    if (command.hasVariableInput() && !match.variable) {
+    // Add defensive check for match object
+    const matchVariable = match && match.variable;
+    
+    if (command.hasVariableInput() && !matchVariable) {
       // Enter variable input mode
       this.enterVariableInputMode({
         key: command.config.variablePattern,
@@ -122,10 +139,10 @@ class ModularCommandPalette extends BaseModal {
     }
 
     // Execute the command
-    const context = this.buildExecutionContext(command, match.variable);
+    const context = this.buildExecutionContext(command, matchVariable);
     
-    if (command.hasVariableInput() && match.variable) {
-      this.executeVariableCommand(command.config.variablePattern, match.variable, context);
+    if (command.hasVariableInput() && matchVariable) {
+      this.executeVariableCommand(command.config.variablePattern, matchVariable, context);
     } else {
       this.executeStandardCommand(command, context);
     }
@@ -195,11 +212,15 @@ class ModularCommandPalette extends BaseModal {
     };
 
     if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
-      const targetMathField = referenceContainer.parentElement.mathGroup.createEquivalentExpression();
+      // Create a new math field after the current one to display the result
+      const targetMathField = referenceContainer.parentElement.mathGroup.insertMathFieldAfter(referenceContainer);
       context.targetMathField = targetMathField;
       
-      const sourceMathField = referenceContainer.parentElement.mathGroup.mathField;
-      context.sourceLatex = sourceMathField.mathField.latex();
+      // Get the LaTeX from the reference container's math field instance
+      const sourceMathFieldInstance = referenceContainer.mathFieldInstance;
+      if (sourceMathFieldInstance && sourceMathFieldInstance.mathField) {
+        context.sourceLatex = sourceMathFieldInstance.mathField.latex();
+      }
     }
 
     return context;
@@ -255,7 +276,8 @@ class ModularCommandPalette extends BaseModal {
     option.className = 'command-palette-option';
     option.dataset.index = index;
     
-    if (match.type === 'variable' && match.variable) {
+    // Add defensive check for match object
+    if (match && match.type === 'variable' && match.variable) {
       option.innerHTML = command.getDisplayLabel(match.variable);
       if (match.isComplete) {
         option.classList.add('complete-variable');

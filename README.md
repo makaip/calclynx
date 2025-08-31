@@ -80,7 +80,7 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 ## Command palette and MathGene commands
 
 - **Open command palette**:
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> or <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd> opens the command palette.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd> opens the command palette.
 - **Command palette keyboard interactions**:
   - Type to filter commands. Use <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> to change selection, <kbd>Enter</kbd> to execute, and <kbd>Escape</kbd> to close.
   - Available commands include: `Simplify`, `Expand`, `Solve for`, and `Factor`.

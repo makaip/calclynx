@@ -3,43 +3,81 @@
  * Sets up the new modular system
  */
 
-// Initialize the modular system once DOM is ready
+// Add a flag to prevent double initialization
+let isInitialized = false;
+
+// Initialize the modular system once DOM is ready and all scripts are loaded
 document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(initializeModularSystem, 50);
+  if (!isInitialized) {
+    setTimeout(initializeModularSystem, 100); // Increased timeout to ensure all scripts are loaded
+  }
 });
 
 function initializeModularSystem() {
-  // Ensure all required classes are available
-  if (typeof BaseModal === 'undefined' || 
-      typeof CommandTemplate === 'undefined' || 
-      typeof VariableInputManager === 'undefined') {
-    console.error('Modular system dependencies not loaded');
+  // Prevent double initialization
+  if (isInitialized) {
+    console.log('Modular system already initialized.');
     return;
   }
-
-  // Initialize global instances
-  if (!window.variableInputManager) {
-    window.variableInputManager = new VariableInputManager();
-  }
   
-  if (!window.commandRegistry) {
-    window.commandRegistry = new CommandRegistry();
-  }
-
-  // Set up default commands using the new system
-  setupDefaultCommands();
+  console.log('Initializing modular system...');
   
-  // Initialize modular command palette
-  if (typeof ModularCommandPalette !== 'undefined') {
-    window.commandPalette = new ModularCommandPalette();
-  }
+  try {
+    // Ensure all required classes are available
+    if (typeof BaseModal === 'undefined' || 
+        typeof CommandTemplate === 'undefined' || 
+        typeof VariableInputManager === 'undefined') {
+      console.error('Modular system dependencies not loaded:', {
+        BaseModal: typeof BaseModal,
+        CommandTemplate: typeof CommandTemplate,
+        VariableInputManager: typeof VariableInputManager
+      });
+      isInitialized = false; // Allow re-initialization attempt
+      return;
+    }
 
-  // Initialize text input modals
-  if (typeof TextInputModal !== 'undefined') {
-    window.imageUrlInput = TextInputModalFactory.createImageUrlInput();
-  }
+    // Initialize global instances
+    if (!window.variableInputManager) {
+      window.variableInputManager = new VariableInputManager();
+      console.log('VariableInputManager initialized');
+    }
+    
+    if (!window.commandRegistry) {
+      window.commandRegistry = new CommandRegistry();
+      console.log('CommandRegistry initialized');
+    }
 
-  // System initialization complete
+    // Set up default commands using the new system
+    setupDefaultCommands();
+    console.log('Default commands set up');
+    
+    // Initialize modular command palette
+    if (typeof ModularCommandPalette !== 'undefined') {
+      window.commandPalette = new ModularCommandPalette();
+      console.log('ModularCommandPalette initialized:', window.commandPalette);
+    } else {
+      console.error('ModularCommandPalette class not found');
+    }
+
+    // Initialize text input modals
+    if (typeof TextInputModal !== 'undefined' && typeof TextInputModalFactory !== 'undefined') {
+      window.imageUrlInput = TextInputModalFactory.createImageUrlInput();
+      console.log('TextInputModal initialized');
+    } else {
+      console.error('TextInputModal or TextInputModalFactory class not found');
+    }
+
+    // Mark initialization as complete
+    isInitializing = false;
+    isInitialized = true;
+    
+    console.log('Modular system initialization complete');
+    
+  } catch (error) {
+    console.error('Error during modular system initialization:', error);
+    isInitializing = false;
+    isInitialized = false; // Reset flag on error
+  }
 }
 
 function setupDefaultCommands() {
@@ -109,6 +147,7 @@ function addVariableCommand(label, variablePatternKey, config = {}) {
 // Export helper functions globally
 window.addMathCommand = addMathCommand;
 window.addVariableCommand = addVariableCommand;
+window.initializeModularSystem = initializeModularSystem;
 
 // Core MathGene command execution function
 function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance) {

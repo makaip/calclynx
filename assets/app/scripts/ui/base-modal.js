@@ -21,7 +21,10 @@ class BaseModal {
     this.isVisible = false;
     this.callbacks = {};
     
-    this.initialize();
+    // Defer initialization to allow subclasses to set up
+    if (this.constructor !== BaseModal) {
+      this.initialize();
+    }
   }
 
   initialize() {
@@ -29,6 +32,11 @@ class BaseModal {
     this.contentElement = this.modalElement.querySelector('.modal-content');
     this.setupBaseEvents();
     this.setupCustomEvents();
+  }
+
+  // This method is now called by subclasses
+  _init() {
+    this.initialize();
   }
 
   createModalElement() {

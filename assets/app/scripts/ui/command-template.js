@@ -112,7 +112,12 @@ class CommandRegistry {
 
   search(query, maxResults = 10) {
     if (!query.trim()) {
-      return this.commands.slice(0, maxResults);
+      // Return all commands with default match objects for empty queries
+      return this.commands.slice(0, maxResults).map(command => ({
+        command,
+        match: { score: 1, type: 'label' },
+        score: 1
+      }));
     }
 
     const results = [];

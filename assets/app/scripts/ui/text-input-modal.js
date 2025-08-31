@@ -4,15 +4,8 @@
  */
 class TextInputModal extends BaseModal {
   constructor(options = {}) {
-    super({
-      className: 'text-input-modal',
-      zIndex: 3000,
-      ...options
-    });
-    
-    this.inputElement = null;
-    this.onSubmitCallback = null;
-    this.config = {
+    // Set up config before calling super
+    const config = {
       placeholder: 'Enter text...',
       title: '',
       submitText: 'Submit',
@@ -22,25 +15,59 @@ class TextInputModal extends BaseModal {
       ...options.config
     };
     
+    // Set config property before super call
+    options._textInputConfig = config;
+    
+    super({
+      className: 'text-input-modal',
+      zIndex: 3000,
+      ...options
+    });
+    
+    this.inputElement = null;
+    this.onSubmitCallback = null;
+    this.config = config;
+
+    this.initialize();
+  }
+
+  initialize() {
+    // Ensure config is available from options if not already set
+    if (!this.config && this.options._textInputConfig) {
+      this.config = this.options._textInputConfig;
+    }
+    
+    // Create the modal element first
+    this.modalElement = this.createModalElement();
+    this.contentElement = this.modalElement.querySelector('.modal-content');
+    
+    // Set up text input specific elements before setting up events
     this.setupTextInputElements();
+    
+    // Now set up base events and custom events
+    this.setupBaseEvents();
+    this.setupCustomEvents();
   }
 
   getModalHTML() {
-    const buttonsHTML = this.config.showButtons ? `
+    // Fallback config in case this is called before config is set
+    const config = this.config || this.options._textInputConfig || {};
+    
+    const buttonsHTML = config.showButtons ? `
       <div class="text-input-buttons">
-        <button class="text-input-cancel">${this.config.cancelText}</button>
-        <button class="text-input-submit">${this.config.submitText}</button>
+        <button class="text-input-cancel">${config.cancelText || 'Cancel'}</button>
+        <button class="text-input-submit">${config.submitText || 'Submit'}</button>
       </div>
     ` : '';
 
-    const titleHTML = this.config.title ? `
-      <div class="text-input-title">${this.config.title}</div>
+    const titleHTML = config.title ? `
+      <div class="text-input-title">${config.title}</div>
     ` : '';
 
     return `
       <div class="text-input-content modal-content">
         ${titleHTML}
-        <input class="text-input-field" type="text" placeholder="${this.config.placeholder}" />
+        <input class="text-input-field" type="text" placeholder="${config.placeholder || 'Enter text...'}" />
         ${buttonsHTML}
       </div>
     `;
@@ -65,6 +92,12 @@ class TextInputModal extends BaseModal {
   }
 
   setupCustomEvents() {
+    // Guard against missing input element
+    if (!this.inputElement) {
+      console.warn('TextInputModal: inputElement not found during setupCustomEvents');
+      return;
+    }
+
     this.inputElement.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
