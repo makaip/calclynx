@@ -1,16 +1,9 @@
-// script.js
 document.addEventListener('DOMContentLoaded', () => {
-  // Create and store MathBoard instance globally.
+
   window.mathBoard = new MathBoard();
+  window.expressionEquivalence = new ExpressionEquivalence();
 
-  // Initialize ExpressionEquivalence and related systems
-  if (typeof ExpressionEquivalence !== 'undefined') {
-    window.expressionEquivalence = new ExpressionEquivalence();
-  } else {
-    console.error("ExpressionEquivalence class not found. Check script loading order.");
-  }
-
-  // Add global function to initialize math support for text fields
+  // Initialize math support for text fields
   window.initializeMathSupportForTextFields = function() {
     document.querySelectorAll('.text-field-container').forEach(container => {
       const textField = container.textFieldInstance;
@@ -20,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Detect if user is on a Mac
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-
-  // Get the hamburger button element (but don't add listeners)
   const hamburgerBtn = document.getElementById('hamburgerBtn');
 
   // Import JSON file handling (keep this if import is triggered elsewhere)

@@ -1,14 +1,12 @@
 class ImageGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
-    // Call parent constructor with groupType
+
     super(board, x, y, data, 'image');
     
-    // Store the image URL and size
     this.imageUrl = data ? data.imageUrl : null;
     this.imageWidth = data ? data.imageWidth : null;
     this.imageHeight = data ? data.imageHeight : null;
     
-    // Resize state
     this.isResizing = false;
     this.resizeHandle = null;
     this.resizeStartData = null;
