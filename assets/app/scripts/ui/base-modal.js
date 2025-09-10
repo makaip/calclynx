@@ -1,7 +1,3 @@
-/**
- * BaseModal - Abstract base class for all modal implementations
- * Follows SOLID principles with single responsibility and open/closed principle
- */
 class BaseModal {
   constructor(options = {}) {
     if (this.constructor === BaseModal) {
@@ -21,10 +17,8 @@ class BaseModal {
     this.isVisible = false;
     this.callbacks = {};
     
-    // Defer initialization to allow subclasses to set up
-    if (this.constructor !== BaseModal) {
-      this.initialize();
-    }
+    // Initialize after subclass constructor completes
+    Promise.resolve().then(() => this.initialize());
   }
 
   initialize() {
@@ -32,11 +26,6 @@ class BaseModal {
     this.contentElement = this.modalElement.querySelector('.modal-content');
     this.setupBaseEvents();
     this.setupCustomEvents();
-  }
-
-  // This method is now called by subclasses
-  _init() {
-    this.initialize();
   }
 
   createModalElement() {
@@ -104,20 +93,11 @@ class BaseModal {
     }
   }
 
-  // Abstract methods to be implemented by subclasses
   getModalHTML() {
     throw new Error("getModalHTML() must be implemented by subclass");
   }
 
-  setupCustomEvents() {
-    // Override in subclasses if needed
-  }
-
-  onShow(data) {
-    // Override in subclasses if needed
-  }
-
-  onHide() {
-    // Override in subclasses if needed
-  }
+  setupCustomEvents() {}
+  onShow(data) {}
+  onHide() {}
 }

@@ -64,7 +64,6 @@ class FileWriter {
         
         if (!this.fileManager.fileId) {
             console.warn("No fileId found, skipping cloud save.");
-            // Optionally trigger equivalence check even if not saving to cloud
             EquivalenceUtils.updateEquivalenceState();
             return; 
         }
@@ -125,7 +124,6 @@ class FileWriter {
             groups: []
         };
         
-        // Export all group types using the same functions
         this.saveMathGroups(exportData);
         this.saveTextGroups(exportData);
         this.saveImageGroups(exportData);

@@ -27,8 +27,6 @@ class TextInputModal extends BaseModal {
     this.inputElement = null;
     this.onSubmitCallback = null;
     this.config = config;
-
-    this.initialize();
   }
 
   initialize() {

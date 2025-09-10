@@ -1,7 +1,3 @@
-/**
- * CommandTemplate - Manages command templates with variable placeholders
- * Provides extensible command system following open/closed principle
- */
 class CommandTemplate {
   constructor(label, config = {}) {
     this.label = label;
@@ -46,12 +42,10 @@ class CommandTemplate {
     const lowerInput = input.toLowerCase();
     const lowerLabel = this.label.toLowerCase();
     
-    // Direct label match
     if (lowerLabel.includes(lowerInput)) {
       return { score: 1, type: 'label' };
     }
 
-    // Variable pattern match
     if (this.hasVariableInput()) {
       const match = window.variableInputManager?.matchesPattern(input);
       if (match && match.key === this.config.variablePattern) {
@@ -68,51 +62,69 @@ class CommandTemplate {
   }
 }
 
-/**
- * CommandRegistry - Manages all available commands
- * Implements dependency inversion principle
- */
 class CommandRegistry {
   constructor() {
     this.commands = [];
     this.categories = new Map();
+    this.setupDefaultCommands();
   }
 
-  register(commandTemplate) {
-    if (!(commandTemplate instanceof CommandTemplate)) {
-      throw new Error("Command must be instance of CommandTemplate");
-    }
-    
-    this.commands.push(commandTemplate);
-    
-    // Group by category
-    const category = commandTemplate.config.category;
-    if (!this.categories.has(category)) {
-      this.categories.set(category, []);
-    }
-    this.categories.get(category).push(commandTemplate);
-  }
-
-  unregister(commandTemplate) {
-    const index = this.commands.indexOf(commandTemplate);
-    if (index > -1) {
-      this.commands.splice(index, 1);
-      
-      // Remove from category
-      const category = commandTemplate.config.category;
-      if (this.categories.has(category)) {
-        const categoryCommands = this.categories.get(category);
-        const categoryIndex = categoryCommands.indexOf(commandTemplate);
-        if (categoryIndex > -1) {
-          categoryCommands.splice(categoryIndex, 1);
-        }
+  setupDefaultCommands() {
+    // Define all commands here - easy to add new ones
+    const commandDefinitions = [
+      {
+        label: 'Simplify',
+        category: 'algebra',
+        description: 'Simplify the mathematical expression'
+      },
+      {
+        label: 'Expand',
+        category: 'algebra',
+        description: 'Expand the mathematical expression'
+      },
+      {
+        label: 'Factor',
+        category: 'algebra',
+        description: 'Factor the mathematical expression'
+      },
+      {
+        label: 'Solve for',
+        category: 'algebra',
+        description: 'Solve equation for a specified variable',
+        requiresVariable: true,
+        variablePattern: 'solve for'
+      },
+      {
+        label: 'Derivative with respect to',
+        category: 'calculus',
+        description: 'Find the derivative with respect to a variable',
+        requiresVariable: true,
+        variablePattern: 'derivative with respect to'
+      },
+      {
+        label: 'Integrate with respect to',
+        category: 'calculus',
+        description: 'Find the indefinite integral with respect to a variable',
+        requiresVariable: true,
+        variablePattern: 'integrate with respect to'
       }
-    }
+    ];
+
+    // Create CommandTemplate instances and organize them
+    commandDefinitions.forEach(def => {
+      const command = new CommandTemplate(def.label, def);
+      this.commands.push(command);
+      
+      const category = command.config.category;
+      if (!this.categories.has(category)) {
+        this.categories.set(category, []);
+      }
+      this.categories.get(category).push(command);
+    });
   }
 
   search(query, maxResults = 10) {
     if (!query.trim()) {
-      // Return all commands with default match objects for empty queries
       return this.commands.slice(0, maxResults).map(command => ({
         command,
         match: { score: 1, type: 'label' },
@@ -133,7 +145,6 @@ class CommandRegistry {
       }
     }
 
-    // Sort by score and return top results
     return results
       .sort((a, b) => b.score - a.score)
       .slice(0, maxResults)
@@ -153,5 +164,4 @@ class CommandRegistry {
   }
 }
 
-// Global instance
 window.commandRegistry = new CommandRegistry();

@@ -18,8 +18,6 @@ class ModularCommandPalette extends BaseModal {
     this.lastFocusedMathField = null;
     this.variableInputMode = false;
     this.currentVariablePattern = null;
-    
-    this.initialize();
   }
 
   getModalHTML() {

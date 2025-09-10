@@ -1,4 +1,3 @@
-
 class FileReader {
     constructor(board, fileManager) {
         this.board = board;
@@ -30,7 +29,6 @@ class FileReader {
                 .download(filePath);
 
             if (downloadError) {
-                // Handle different types of errors
                 if (downloadError.message && (
                     downloadError.message.includes("Object not found") || 
                     downloadError.message.includes("The resource was not found") ||
@@ -52,7 +50,6 @@ class FileReader {
             const fileContentText = await blob.text();
             this.importData(fileContentText, false); // Pass flag to prevent immediate re-save
             
-            // Update file title after successful load
             await this.fileManager.updateFileTitle();
 
         } catch (error) {
@@ -62,7 +59,6 @@ class FileReader {
     }
 
     initializeEmptyState() {
-        // Initialize with empty canvas
         this.board.canvas.innerHTML = '';
     }
 
@@ -95,17 +91,13 @@ class FileReader {
                 }
             });
 
-            // Only save state if shouldSave is true (defaults to true)
             if (shouldSave) {
-                // Save the new state and trigger equivalence check.
                 this.fileManager.fileWriter.saveState();
             } else {
-                // Even if not saving, update equivalence state after import
                 EquivalenceUtils.updateEquivalenceState();
             }
         } catch (error) {
             console.error("Error importing data:", error);
-            // Optionally clear the board or initialize empty state here as well
             this.board.canvas.innerHTML = '';
         }
     }

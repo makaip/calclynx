@@ -17,7 +17,6 @@ class ImageGroup extends ObjectGroup {
   }
 
   createImageElement() {
-    // Clear existing content
     this.element.innerHTML = '';
     
     // Create image container

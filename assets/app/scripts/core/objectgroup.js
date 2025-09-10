@@ -1,7 +1,3 @@
-/**
- * Base class for all object groups (Math, Text, Image)
- */
-
 class ObjectGroup {
   constructor(board, x, y, data = null, groupType) {
     if (this.constructor === ObjectGroup) {

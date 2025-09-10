@@ -44,12 +44,8 @@ function initializeModularSystem() {
     
     if (!window.commandRegistry) {
       window.commandRegistry = new CommandRegistry();
-      console.log('CommandRegistry initialized');
+      console.log('CommandRegistry initialized with default commands');
     }
-
-    // Set up default commands using the new system
-    setupDefaultCommands();
-    console.log('Default commands set up');
     
     // Initialize modular command palette
     if (typeof ModularCommandPalette !== 'undefined') {
@@ -80,80 +76,7 @@ function initializeModularSystem() {
   }
 }
 
-function setupDefaultCommands() {
-  // Register default math commands
-  const mathCommands = [
-    new CommandTemplate('Simplify', {
-      category: 'algebra',
-      description: 'Simplify the mathematical expression'
-    }),
-    
-    new CommandTemplate('Expand', {
-      category: 'algebra',
-      description: 'Expand the mathematical expression'
-    }),
-    
-    new CommandTemplate('Factor', {
-      category: 'algebra',
-      description: 'Factor the mathematical expression'
-    }),
-    
-    new CommandTemplate('Solve for', {
-      category: 'algebra',
-      description: 'Solve equation for a specified variable',
-      requiresVariable: true,
-      variablePattern: 'solve for'
-    }),
-    
-    new CommandTemplate('Derivative with respect to', {
-      category: 'calculus',
-      description: 'Find the derivative with respect to a variable',
-      requiresVariable: true,
-      variablePattern: 'derivative with respect to'
-    }),
-    
-    new CommandTemplate('Integrate with respect to', {
-      category: 'calculus',
-      description: 'Find the indefinite integral with respect to a variable',
-      requiresVariable: true,
-      variablePattern: 'integrate with respect to'
-    })
-  ];
-
-  // Register all commands
-  mathCommands.forEach(command => {
-    window.commandRegistry.register(command);
-  });
-}
-
-// Add additional math commands easily
-function addMathCommand(label, config = {}) {
-  if (!window.commandRegistry) {
-    console.error('Command registry not initialized');
-    return;
-  }
-  
-  const command = new CommandTemplate(label, {
-    category: 'math',
-    ...config
-  });
-  
-  window.commandRegistry.register(command);
-  return command;
-}
-
-// Add variable command helper
-function addVariableCommand(label, variablePatternKey, config = {}) {
-  return addMathCommand(label, {
-    requiresVariable: true,
-    variablePattern: variablePatternKey,
-    ...config
-  });
-}
-
-// Export helper functions globally
-window.addMathCommand = addMathCommand;
-window.addVariableCommand = addVariableCommand;
+// Export the initialization function globally
 window.initializeModularSystem = initializeModularSystem;
 
 // Core MathGene command execution function
