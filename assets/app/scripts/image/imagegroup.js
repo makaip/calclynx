@@ -3,6 +3,20 @@ class ImageGroup extends ObjectGroup {
 
     super(board, x, y, data, 'image');
     
+    this.resizeDirections = {
+      se: { dx: +1, dy: +1 },
+      nw: { dx: -1, dy: -1 },
+      ne: { dx: +1, dy: -1 },
+      sw: { dx: -1, dy: +1 },
+    };
+
+    this.positionAdjustments = {
+      nw: { moveX: true,  moveY: true  },
+      ne: { moveX: false, moveY: true  },
+      sw: { moveX: true,  moveY: false },
+      se: { moveX: false, moveY: false },
+    };
+    
     this.imageUrl = data ? data.imageUrl : null;
     this.imageWidth = data ? data.imageWidth : null;
     this.imageHeight = data ? data.imageHeight : null;
@@ -16,50 +30,61 @@ class ImageGroup extends ObjectGroup {
     }
   }
 
+  getScaleFactor(handle, deltaX, deltaY, startWidth, startHeight) {
+    const dir = this.resizeDirections[handle];
+    if (!dir) return 1; // default no-scale
+
+    return Math.max(
+      (startWidth + dir.dx * deltaX) / startWidth,
+      (startHeight + dir.dy * deltaY) / startHeight
+    );
+  }
+
+  getNewPosition(handle, start, widthDiff, heightDiff) {
+    const adj = this.positionAdjustments[handle];
+    if (!adj) return { newLeft: start.left, newTop: start.top };
+
+    return {
+      newLeft: start.left - (adj.moveX ? widthDiff : 0),
+      newTop: start.top - (adj.moveY ? heightDiff : 0),
+    };
+  }
+
   createImageElement() {
     this.element.innerHTML = '';
     
-    // Create image container
     const imageContainer = document.createElement('div');
     imageContainer.className = 'image-container';
     
-    // Create image element
     const img = document.createElement('img');
     img.src = this.imageUrl;
     img.alt = 'User image';
     img.className = 'image-content';
     
-    // Apply custom size if available
     if (this.imageWidth && this.imageHeight) {
       img.style.width = this.imageWidth + 'px';
       img.style.height = this.imageHeight + 'px';
     }
     
-    // Prevent default browser drag behavior for images
     img.draggable = false;
     img.addEventListener('dragstart', (e) => {
       e.preventDefault();
       return false;
     });
     
-    // Prevent context menu on image to avoid right-click save issues
     img.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     });
     
-    // Handle image load and error
     img.onload = () => {
       console.log('Image loaded successfully:', this.imageUrl);
-      // Store natural dimensions if not already set
       if (!this.imageWidth || !this.imageHeight) {
-        // Use natural dimensions up to a reasonable maximum
         const maxWidth = 800;
         const maxHeight = 600;
         
         let width = img.naturalWidth;
         let height = img.naturalHeight;
         
-        // Scale down proportionally if too large
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = width * ratio;
@@ -75,7 +100,6 @@ class ImageGroup extends ObjectGroup {
     
     img.onerror = () => {
       console.error('Failed to load image:', this.imageUrl);
-      // Show error placeholder with a more informative message
       const errorSvg = `
         <svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
           <rect width="100%" height="100%" fill="#2a2a2a" stroke="#666" stroke-width="1" rx="4"/>
@@ -91,10 +115,7 @@ class ImageGroup extends ObjectGroup {
     };
     
     imageContainer.appendChild(img);
-    
-    // Create resize handles
     this.createResizeHandles(imageContainer);
-    
     this.element.appendChild(imageContainer);
   }
 
@@ -105,10 +126,7 @@ class ImageGroup extends ObjectGroup {
       const handle = document.createElement('div');
       handle.className = `resize-handle resize-handle-${position}`;
       handle.dataset.position = position;
-      
-      // Add mouse event listeners for resize
       handle.addEventListener('mousedown', (e) => this.startResize(e, position));
-      
       container.appendChild(handle);
     });
   }
@@ -120,14 +138,9 @@ class ImageGroup extends ObjectGroup {
     this.resizeHandle = null;
     this.resizeStartData = null;
     
-    // Remove global event listeners
     document.removeEventListener('mousemove', this.boundHandleResize);
     document.removeEventListener('mouseup', this.boundEndResize);
-    
-    // Remove resizing class
     this.element.classList.remove('resizing');
-    
-    // Save state after resize
     this.board.fileManager.saveState();
   }
 
@@ -148,7 +161,7 @@ class ImageGroup extends ObjectGroup {
       startHeight: this.imageHeight,
       aspectRatio: this.imageWidth / this.imageHeight,
       originalRect: rect,
-      // Store original position
+
       originalLeft: parseFloat(this.element.style.left) || 0,
       originalTop: parseFloat(this.element.style.top) || 0
     };
@@ -173,84 +186,39 @@ class ImageGroup extends ObjectGroup {
     const deltaX = e.clientX - this.resizeStartData.startX;
     const deltaY = e.clientY - this.resizeStartData.startY;
     
-    // Calculate the distance from the starting point for uniform scaling
-    let scaleFactor = 1;
+    // Calculate the scale factor using the helper function
+    const scaleFactor = this.getScaleFactor(
+      this.resizeHandle, 
+      deltaX, 
+      deltaY, 
+      this.resizeStartData.startWidth, 
+      this.resizeStartData.startHeight
+    );
     
-    // Use the dominant axis to determine scale factor
-    switch (this.resizeHandle) {
-      case 'se': // Bottom-right (simple case)
-        scaleFactor = Math.max(
-          (this.resizeStartData.startWidth + deltaX) / this.resizeStartData.startWidth,
-          (this.resizeStartData.startHeight + deltaY) / this.resizeStartData.startHeight
-        );
-        break;
-      case 'nw': // Top-left
-        scaleFactor = Math.max(
-          (this.resizeStartData.startWidth - deltaX) / this.resizeStartData.startWidth,
-          (this.resizeStartData.startHeight - deltaY) / this.resizeStartData.startHeight
-        );
-        break;
-      case 'ne': // Top-right
-        scaleFactor = Math.max(
-          (this.resizeStartData.startWidth + deltaX) / this.resizeStartData.startWidth,
-          (this.resizeStartData.startHeight - deltaY) / this.resizeStartData.startHeight
-        );
-        break;
-      case 'sw': // Bottom-left
-        scaleFactor = Math.max(
-          (this.resizeStartData.startWidth - deltaX) / this.resizeStartData.startWidth,
-          (this.resizeStartData.startHeight + deltaY) / this.resizeStartData.startHeight
-        );
-        break;
-    }
-    
-    // Ensure minimum size
     const minSize = 50;
-    scaleFactor = Math.max(scaleFactor, minSize / Math.min(this.resizeStartData.startWidth, this.resizeStartData.startHeight));
+    const adjustedScaleFactor = Math.max(scaleFactor, minSize / Math.min(this.resizeStartData.startWidth, this.resizeStartData.startHeight));
     
-    // Calculate new dimensions maintaining aspect ratio
-    const newWidth = this.resizeStartData.startWidth * scaleFactor;
-    const newHeight = this.resizeStartData.startHeight * scaleFactor;
-    
-    // Calculate position adjustments based on which corner is being dragged
-    // Use the ORIGINAL position as the reference point
-    let newLeft = this.resizeStartData.originalLeft;
-    let newTop = this.resizeStartData.originalTop;
+    const newWidth = this.resizeStartData.startWidth * adjustedScaleFactor;
+    const newHeight = this.resizeStartData.startHeight * adjustedScaleFactor;
     
     const widthDiff = newWidth - this.resizeStartData.startWidth;
     const heightDiff = newHeight - this.resizeStartData.startHeight;
     
-    switch (this.resizeHandle) {
-      case 'nw': // Top-left: move left and up by the size difference
-        newLeft = this.resizeStartData.originalLeft - widthDiff;
-        newTop = this.resizeStartData.originalTop - heightDiff;
-        break;
-      case 'ne': // Top-right: only move up by height difference
-        newLeft = this.resizeStartData.originalLeft;
-        newTop = this.resizeStartData.originalTop - heightDiff;
-        break;
-      case 'sw': // Bottom-left: only move left by width difference
-        newLeft = this.resizeStartData.originalLeft - widthDiff;
-        newTop = this.resizeStartData.originalTop;
-        break;
-      case 'se': // Bottom-right: no position change
-        newLeft = this.resizeStartData.originalLeft;
-        newTop = this.resizeStartData.originalTop;
-        break;
-    }
+    const { newLeft, newTop } = this.getNewPosition(this.resizeHandle, {
+      left: this.resizeStartData.originalLeft,
+      top: this.resizeStartData.originalTop
+    }, widthDiff, heightDiff);
     
     // Update image dimensions
     this.imageWidth = newWidth;
     this.imageHeight = newHeight;
     
-    // Apply new dimensions to the image element
     const img = this.element.querySelector('.image-content');
     if (img) {
       img.style.width = newWidth + 'px';
       img.style.height = newHeight + 'px';
     }
     
-    // Update position
     this.element.style.left = newLeft + 'px';
     this.element.style.top = newTop + 'px';
   }
@@ -258,7 +226,6 @@ class ImageGroup extends ObjectGroup {
   setImageUrl(url) {
     this.imageUrl = url;
     this.createImageElement();
-    // Save state after setting image
     this.board.fileManager.saveState();
   }
 
