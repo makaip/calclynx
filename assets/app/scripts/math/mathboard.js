@@ -72,27 +72,22 @@ class MathBoard {
 
       
       if (e.ctrlKey || e.metaKey) {
-        // Check if a text editor is currently focused - if so, don't handle group copy/paste
         const isTextEditorFocused = document.activeElement && 
           (document.activeElement.closest('.text-editor') || 
            document.activeElement.classList.contains('text-editor'));
-        
-        // Also check if MathQuill field is focused (allow normal copy/paste there too)
         const isMathFieldFocused = document.querySelector('.mq-focused');
-        
-        // Check if image URL input is focused (allow normal copy/paste there too)
         const isImageUrlInputFocused = document.activeElement && 
           document.activeElement.closest('.image-url-input');
         
         if (!isTextEditorFocused && !isMathFieldFocused && !isImageUrlInputFocused) {
           if (e.key === 'c') {
-            e.preventDefault(); // Prevent default browser copy
+            e.preventDefault();
             this.copySelectedGroups();
           } else if (e.key === 'x') {
-            e.preventDefault(); // Prevent default browser cut
+            e.preventDefault();
             this.cutSelectedGroups();
           } else if (e.key === 'v') {
-            e.preventDefault(); // Prevent default browser paste
+            e.preventDefault();
             this.pasteGroups();
           }
         }
@@ -405,7 +400,7 @@ class MathBoard {
         newGroupInstance = new ImageGroup(this, 0, 0, data);
       } else {
         console.warn('Unknown group type:', groupData.type);
-        return; // Skip unknown group types
+        return;
       }
       pastedGroups.push(newGroupInstance.element);
     });
