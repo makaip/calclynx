@@ -51,34 +51,12 @@ class MathFieldUtils {
     }
   }
 
-  static clearMathGroupSelections() {
-    document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
-  }
-
-  static clearSelectedFields() {
-    document.querySelectorAll('.math-field-container.selected-field')
-      .forEach(el => el.classList.remove('selected-field'));
-  }
-
-  static markContainerAsSelected(container) {
-    this.clearSelectedFields();
-    container.classList.add('selected-field');
-  }
-
   static isEmpty(latexContent) {
     return latexContent === "" || latexContent === "\\placeholder";
   }
 
   static hasTextContent(latex) {
     return latex.includes('\\text{') || latex.includes('\\\\text{');
-  }
-
-  static canNavigateToPrevious(container, groupElement) {
-    return groupElement.children.length > 1 && container !== groupElement.firstElementChild;
-  }
-
-  static isCurrentlyEditing(container) {
-    return !!container.querySelector(':scope > .mq-editable-field');
   }
 
   static isDragHandleClicked(event) {
@@ -102,23 +80,6 @@ class MathFieldUtils {
       spaceBehavesLikeTab: false,
       handlers: {}
     };
-  }
-
-  static highlightGroupExpressions(container) {
-    if (window.expressionEquivalence && container.dataset.groupKey) {
-      window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, true);
-    }
-  }
-
-  static processEquivalenceColors(container, hasText) {
-    if (window.expressionEquivalence && !hasText) {
-      window.expressionEquivalence.applyIndicatorColors();
-      if (container.dataset.groupKey) {
-        window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
-      } else {
-        window.expressionEquivalence.removeAllHighlights();
-      }
-    }
   }
 
   static validateMathGroupElement(mathGroup) {

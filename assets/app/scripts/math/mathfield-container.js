@@ -37,9 +37,9 @@ class MathFieldContainer {
 
   handleContainerMouseDown(event) {
     if (!MathFieldUtils.isDragHandleClicked(event)) {
-      MathFieldUtils.clearMathGroupSelections();
+      MathFieldUIManager.clearMathGroupSelections();
     }
-    MathFieldUtils.highlightGroupExpressions(this.container);
+    MathFieldUIManager.highlightGroupExpressions(this.container);
   }
 
   handleContainerClick(event) {
@@ -50,12 +50,12 @@ class MathFieldContainer {
 
     event.stopPropagation();
     
-    if (!MathFieldUtils.isCurrentlyEditing(this.container)) {
-      MathFieldUtils.clearMathGroupSelections();
+    if (!MathFieldUIManager.isCurrentlyEditing(this.container)) {
+      MathFieldUIManager.clearMathGroupSelections();
       MathFieldEditor.edit(this.container);
     }
 
-    MathFieldUtils.markContainerAsSelected(this.container);
+    MathFieldUIManager.markContainerAsSelected(this.container);
   }
 
   appendToMathGroup() {
@@ -67,3 +67,4 @@ class MathFieldContainer {
     return this.container;
   }
 }
+

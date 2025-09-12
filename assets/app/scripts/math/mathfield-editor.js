@@ -80,7 +80,7 @@ class MathFieldEditor {
     const mathFieldElement = MathFieldEditor.createEditableMathField(container);
     const mathField = MathFieldEditor.initializeEditableMathField(mathFieldElement, existingLatex, container);
     
-    MathFieldUtils.highlightGroupExpressions(container);
+    MathFieldUIManager.highlightGroupExpressions(container);
     mathField.focus();
     
     return { mathFieldElement, mathField };
@@ -252,6 +252,6 @@ class MathFieldEditor {
   }
 
   static processEquivalenceOnBlur(container, hasText) {
-    MathFieldUtils.processEquivalenceColors(container, hasText);
+    MathFieldUIManager.processEquivalenceColors(container, hasText);
   }
 }
