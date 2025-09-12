@@ -32,8 +32,8 @@ class MathBoard {
       justCompleted: false
     };
 
-    this.clipboard = null;
     this.fileManager = new FileManager(this);
+    this.clipboard = new Clipboard(this);
     this.fileManager.loadState();
     this.initEventListeners();
     this.navigation = new Navigation(this);
@@ -85,13 +85,13 @@ class MathBoard {
         if (!isTextEditorFocused && !isMathFieldFocused && !isImageUrlInputFocused) {
           if (e.key === 'c') {
             e.preventDefault();
-            this.copySelectedGroups();
+            this.clipboard.copySelectedGroups();
           } else if (e.key === 'x') {
             e.preventDefault();
-            this.cutSelectedGroups();
+            this.clipboard.cutSelectedGroups();
           } else if (e.key === 'v') {
             e.preventDefault();
-            this.pasteGroups();
+            this.clipboard.pasteGroups();
           }
         }
       }
@@ -299,118 +299,6 @@ class MathBoard {
       x: (x - (this.canvasState.initialOffset.x + this.canvasState.offset.x)) / this.canvasState.scale,
       y: (y - (this.canvasState.initialOffset.y + this.canvasState.offset.y)) / this.canvasState.scale,
     };
-  }
-
-  copySelectedGroups() {
-    const selectedGroups = Array.from(ObjectGroup.getSelectedGroups());
-    if (selectedGroups.length === 0) {
-      this.clipboard = null;
-      return;
-    }
-
-    let minX = Infinity;
-    let minY = Infinity;
-    selectedGroups.forEach(group => {
-      const left = parseInt(group.style.left, 10);
-      const top = parseInt(group.style.top, 10);
-      if (left < minX) minX = left;
-      if (top < minY) minY = top;
-    });
-
-    this.clipboard = selectedGroups.map(group => {
-      const left = parseInt(group.style.left, 10);
-      const top = parseInt(group.style.top, 10);
-      
-      if (group.classList.contains('math-group')) {
-        // Handle math groups
-        const fields = [];
-        group.querySelectorAll('.math-field-container').forEach(container => {
-          if (container.dataset.latex) {
-            fields.push(container.dataset.latex);
-          }
-        });
-        return { 
-          type: 'math',
-          relativeLeft: left - minX, 
-          relativeTop: top - minY, 
-          fields 
-        };
-      } else if (group.classList.contains('text-group')) {
-        // Handle text groups (single field per group)
-        const fields = [];
-        const container = group.querySelector('.text-field-container');
-        if (container && container.textFieldInstance) {
-          fields.push(container.textFieldInstance.getContent());
-        }
-        return { 
-          type: 'text',
-          relativeLeft: left - minX, 
-          relativeTop: top - minY, 
-          fields 
-        };
-      } else if (group.classList.contains('image-group')) {
-        // Handle image groups
-        return { 
-          type: 'image',
-          relativeLeft: left - minX, 
-          relativeTop: top - minY, 
-          imageUrl: group.imageGroup.imageUrl,
-          imageWidth: group.imageGroup.imageWidth,
-          imageHeight: group.imageGroup.imageHeight
-        };
-      }
-    });
-  }
-
-  cutSelectedGroups() {
-    this.copySelectedGroups();
-    if (!this.clipboard) return;
-
-    const selectedGroups = ObjectGroup.getSelectedGroups();
-    selectedGroups.forEach(group => group.remove());
-
-    this.fileManager.saveState();
-  }
-
-  pasteGroups() {
-    if (!this.clipboard) return;
-
-    ObjectGroup.clearAllSelections();
-
-    const pasteCenterCoords = this.screenToCanvas(this.mouse.x, this.mouse.y);
-    const pasteBaseX = pasteCenterCoords.x;
-    const pasteBaseY = pasteCenterCoords.y;
-
-    const pastedGroups = [];
-    this.clipboard.forEach(groupData => {
-      const newLeft = pasteBaseX + groupData.relativeLeft;
-      const newTop = pasteBaseY + groupData.relativeTop;
-      const data = {
-        left: `${newLeft}px`,
-        top: `${newTop}px`,
-        fields: groupData.fields,
-        imageUrl: groupData.imageUrl,
-        imageWidth: groupData.imageWidth,
-        imageHeight: groupData.imageHeight
-      };
-      
-      let newGroupInstance;
-      if (groupData.type === 'text') {
-        newGroupInstance = new TextGroup(this, 0, 0, data);
-      } else if (groupData.type === 'math') {
-        newGroupInstance = new MathGroup(this, 0, 0, data);
-      } else if (groupData.type === 'image') {
-        newGroupInstance = new ImageGroup(this, 0, 0, data);
-      } else {
-        console.warn('Unknown group type:', groupData.type);
-        return;
-      }
-      pastedGroups.push(newGroupInstance.element);
-    });
-
-    pastedGroups.forEach(groupEl => groupEl.classList.add('selected'));
-
-    this.fileManager.saveState();
   }
 }
 
