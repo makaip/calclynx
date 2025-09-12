@@ -21,13 +21,11 @@ class ImageGroup extends ObjectGroup {
     this.imageWidth = data ? data.imageWidth : null;
     this.imageHeight = data ? data.imageHeight : null;
     
-    this.isResizing = false;
-    this.resizeHandle = null;
-    this.resizeStartData = null;
+    this.resizeHandler = new ImageGroupResizeHandler(this);
     
     if (this.imageUrl) {
       this.createImageElement();
-    }
+    }    
   }
 
   getScaleFactor(handle, deltaX, deltaY, startWidth, startHeight) {
@@ -98,129 +96,9 @@ class ImageGroup extends ObjectGroup {
       }
     };
     
-    img.onerror = () => {
-      console.error('Failed to load image:', this.imageUrl);
-      const errorSvg = `
-        <svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="#2a2a2a" stroke="#666" stroke-width="1" rx="4"/>
-          <text x="50%" y="40%" font-family="Arial, sans-serif" font-size="12" fill="#999" text-anchor="middle">⚠ Image not found</text>
-          <text x="50%" y="65%" font-family="Arial, sans-serif" font-size="10" fill="#666" text-anchor="middle">Check URL</text>
-        </svg>
-      `;
-      img.src = 'data:image/svg+xml;base64,' + btoa(errorSvg);
-      this.imageWidth = 200;
-      this.imageHeight = 100;
-      img.style.width = this.imageWidth + 'px';
-      img.style.height = this.imageHeight + 'px';
-    };
-    
     imageContainer.appendChild(img);
-    this.createResizeHandles(imageContainer);
+    this.resizeHandler.createResizeHandles(this.element);
     this.element.appendChild(imageContainer);
-  }
-
-  createResizeHandles(container) {
-    const handles = ['nw', 'ne', 'sw', 'se']; // Only corner handles
-    
-    handles.forEach(position => {
-      const handle = document.createElement('div');
-      handle.className = `resize-handle resize-handle-${position}`;
-      handle.dataset.position = position;
-      handle.addEventListener('mousedown', (e) => this.startResize(e, position));
-      container.appendChild(handle);
-    });
-  }
-
-  endResize(e) {
-    if (!this.isResizing) return;
-    
-    this.isResizing = false;
-    this.resizeHandle = null;
-    this.resizeStartData = null;
-    
-    document.removeEventListener('mousemove', this.boundHandleResize);
-    document.removeEventListener('mouseup', this.boundEndResize);
-    this.element.classList.remove('resizing');
-    this.board.fileManager.saveState();
-  }
-
-  startResize(e, position) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    this.isResizing = true;
-    this.resizeHandle = position;
-    
-    const img = this.element.querySelector('.image-content');
-    const rect = img.getBoundingClientRect();
-    
-    this.resizeStartData = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startWidth: this.imageWidth,
-      startHeight: this.imageHeight,
-      aspectRatio: this.imageWidth / this.imageHeight,
-      originalRect: rect,
-
-      originalLeft: parseFloat(this.element.style.left) || 0,
-      originalTop: parseFloat(this.element.style.top) || 0
-    };
-    
-    // Bind methods to preserve 'this' context
-    this.boundHandleResize = this.handleResize.bind(this);
-    this.boundEndResize = this.endResize.bind(this);
-    
-    // Add global mouse event listeners
-    document.addEventListener('mousemove', this.boundHandleResize);
-    document.addEventListener('mouseup', this.boundEndResize);
-    
-    // Add resizing class for visual feedback
-    this.element.classList.add('resizing');
-  }
-
-  handleResize(e) {
-    if (!this.isResizing || !this.resizeStartData) return;
-    
-    e.preventDefault();
-    
-    const deltaX = e.clientX - this.resizeStartData.startX;
-    const deltaY = e.clientY - this.resizeStartData.startY;
-    
-    // Calculate the scale factor using the helper function
-    const scaleFactor = this.getScaleFactor(
-      this.resizeHandle, 
-      deltaX, 
-      deltaY, 
-      this.resizeStartData.startWidth, 
-      this.resizeStartData.startHeight
-    );
-    
-    const minSize = 50;
-    const adjustedScaleFactor = Math.max(scaleFactor, minSize / Math.min(this.resizeStartData.startWidth, this.resizeStartData.startHeight));
-    
-    const newWidth = this.resizeStartData.startWidth * adjustedScaleFactor;
-    const newHeight = this.resizeStartData.startHeight * adjustedScaleFactor;
-    
-    const widthDiff = newWidth - this.resizeStartData.startWidth;
-    const heightDiff = newHeight - this.resizeStartData.startHeight;
-    
-    const { newLeft, newTop } = this.getNewPosition(this.resizeHandle, {
-      left: this.resizeStartData.originalLeft,
-      top: this.resizeStartData.originalTop
-    }, widthDiff, heightDiff);
-    
-    // Update image dimensions
-    this.imageWidth = newWidth;
-    this.imageHeight = newHeight;
-    
-    const img = this.element.querySelector('.image-content');
-    if (img) {
-      img.style.width = newWidth + 'px';
-      img.style.height = newHeight + 'px';
-    }
-    
-    this.element.style.left = newLeft + 'px';
-    this.element.style.top = newTop + 'px';
   }
 
   setImageUrl(url) {
@@ -230,6 +108,6 @@ class ImageGroup extends ObjectGroup {
   }
 
   remove() {
-    super.remove(); // Call parent remove method
+    super.remove();
   }
 }
