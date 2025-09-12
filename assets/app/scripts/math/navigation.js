@@ -38,7 +38,7 @@ class Navigation {
           const logical = this.screenToCanvas(e.clientX, e.clientY);
           const delta = this.normalizeWheelDelta(e);
           const factor = Math.pow(ZOOM.FACTOR, -delta / 3);
-          const newScale = this.clampScale(this.board.scale * factor);
+          const newScale = this.clampScale(this.board.canvasState.scale * factor);
 
           this.applyZoom(newScale, e.clientX, e.clientY, logical);
         },
@@ -58,9 +58,9 @@ class Navigation {
     }
 
     applyZoom(newScale, screenX, screenY, logical) {
-      this.board.scale = newScale;
-      this.board.canvasOffset.x = screenX - (this.board.canvasInitialOffset.x + logical.x * newScale);
-      this.board.canvasOffset.y = screenY - (this.board.canvasInitialOffset.y + logical.y * newScale);
+      this.board.canvasState.scale = newScale;
+      this.board.canvasState.offset.x = screenX - (this.board.canvasState.initialOffset.x + logical.x * newScale);
+      this.board.canvasState.offset.y = screenY - (this.board.canvasState.initialOffset.y + logical.y * newScale);
 
       this.updateTransform();
       this.updateZoomControls();
@@ -73,8 +73,8 @@ class Navigation {
       this.updateZoomControls();
 
       zoomSlider.addEventListener('input', (e) => this.setZoomLevel(parseFloat(e.target.value) / 100));
-      zoomIn.addEventListener('click', () => this.setZoomLevel(this.clampScale(this.board.scale * ZOOM.FACTOR)));
-      zoomOut.addEventListener('click', () => this.setZoomLevel(this.clampScale(this.board.scale / ZOOM.FACTOR)));
+      zoomIn.addEventListener('click', () => this.setZoomLevel(this.clampScale(this.board.canvasState.scale * ZOOM.FACTOR)));
+      zoomOut.addEventListener('click', () => this.setZoomLevel(this.clampScale(this.board.canvasState.scale / ZOOM.FACTOR)));
       resetZoom.addEventListener('click', () => this.setZoomLevel(1));
     }
 
@@ -83,11 +83,11 @@ class Navigation {
       const cy = window.innerHeight / 2;
       const logical = this.screenToCanvas(cx, cy);
 
-      this.board.scale = newScale;
-      this.board.canvasOffset.x =
-        cx - (this.board.canvasInitialOffset.x + logical.x * newScale);
-      this.board.canvasOffset.y =
-        cy - (this.board.canvasInitialOffset.y + logical.y * newScale);
+      this.board.canvasState.scale = newScale;
+      this.board.canvasState.offset.x =
+        cx - (this.board.canvasState.initialOffset.x + logical.x * newScale);
+      this.board.canvasState.offset.y =
+        cy - (this.board.canvasState.initialOffset.y + logical.y * newScale);
 
       this.updateTransform();
       this.updateZoomControls();
@@ -97,14 +97,14 @@ class Navigation {
       const { zoomControls, zoomSlider } = this.dom;
       if (!zoomControls || !zoomSlider) return;
 
-      zoomSlider.value = Math.round(this.board.scale * 100);
+      zoomSlider.value = Math.round(this.board.canvasState.scale * 100);
       zoomControls.classList.toggle(
         'visible',
-        Math.abs(this.board.scale - 1) >= 0.01
+        Math.abs(this.board.canvasState.scale - 1) >= 0.01
       );
       zoomControls.classList.toggle(
         'hidden',
-        Math.abs(this.board.scale - 1) < 0.01
+        Math.abs(this.board.canvasState.scale - 1) < 0.01
       );
     }
 
@@ -112,26 +112,26 @@ class Navigation {
       const canvas = this.board.canvas;
 
       canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 1 || (e.button === 0 && this.board.spaceDown)) {
-          this.board.isPanning = true;
-          this.board.panStart = {
-            x: e.clientX - this.board.canvasOffset.x,
-            y: e.clientY - this.board.canvasOffset.y,
+        if (e.button === 1 || (e.button === 0 && this.board.pan.spaceDown)) {
+          this.board.pan.active = true;
+          this.board.pan.start = {
+            x: e.clientX - this.board.canvasState.offset.x,
+            y: e.clientY - this.board.canvasState.offset.y,
           };
           e.preventDefault();
         }
       });
 
       canvas.addEventListener('mousemove', (e) => {
-        if (this.board.isPanning) {
-          this.board.canvasOffset.x = e.clientX - this.board.panStart.x;
-          this.board.canvasOffset.y = e.clientY - this.board.panStart.y;
+        if (this.board.pan.active) {
+          this.board.canvasState.offset.x = e.clientX - this.board.pan.start.x;
+          this.board.canvasState.offset.y = e.clientY - this.board.pan.start.y;
           this.updateTransform();
         }
       });
 
-      canvas.addEventListener('mouseup', () => (this.board.isPanning = false));
-      canvas.addEventListener('mouseleave', () => (this.board.isPanning = false));
+      canvas.addEventListener('mouseup', () => (this.board.pan.active = false));
+      canvas.addEventListener('mouseleave', () => (this.board.pan.active = false));
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
@@ -141,8 +141,8 @@ class Navigation {
         (e) => {
           if (e.deltaMode === 0 && (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) < 50)) {
             e.preventDefault();
-            this.board.canvasOffset.x -= e.deltaX;
-            this.board.canvasOffset.y -= e.deltaY;
+            this.board.canvasState.offset.x -= e.deltaX;
+            this.board.canvasState.offset.y -= e.deltaY;
             this.updateTransform();
           }
         },
@@ -154,7 +154,7 @@ class Navigation {
       const canvas = this.board.canvas;
 
       canvas.addEventListener('mousedown', (e) => {
-        if (e.button !== 0 || this.board.spaceDown || this.board.groupDragging) return;
+        if (e.button !== 0 || this.board.pan.spaceDown || this.board.drag.active) return;
         if (e.target.closest('.text-editor')) return;
         if (this.isInsideGroup(e.target, canvas)) return;
 
@@ -191,7 +191,7 @@ class Navigation {
 
     updateBoxSelect(e) {
       if (!this.boxSelect.isSelecting) return;
-      if (this.board.groupDragging) return this.cancelBoxSelect();
+      if (this.board.drag.active) return this.cancelBoxSelect();
 
       this.updateBoxElement(this.boxSelect.element, this.boxSelect.startX, this.boxSelect.startY, e.clientX, e.clientY);
       this.highlightGroups(this.boxSelect.element.getBoundingClientRect());
@@ -200,7 +200,7 @@ class Navigation {
     endBoxSelect() {
       if (!this.boxSelect.isSelecting) return;
       this.cancelBoxSelect();
-      this.board.justBoxSelected = true;
+      this.board.boxSelect.justCompleted = true;
     }
 
     cancelBoxSelect() {
@@ -238,16 +238,16 @@ class Navigation {
     }
 
     updateTransform() {
-      const { x, y } = this.board.canvasOffset;
-      const s = this.board.scale;
+      const { x, y } = this.board.canvasState.offset;
+      const s = this.board.canvasState.scale;
       this.board.canvas.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
       this.updateZoomControls();
     }
 
     screenToCanvas(x, y) {
       return {
-        x: (x - (this.board.canvasInitialOffset.x + this.board.canvasOffset.x)) / this.board.scale,
-        y: (y - (this.board.canvasInitialOffset.y + this.board.canvasOffset.y)) / this.board.scale,
+        x: (x - (this.board.canvasState.initialOffset.x + this.board.canvasState.offset.x)) / this.board.canvasState.scale,
+        y: (y - (this.board.canvasState.initialOffset.y + this.board.canvasState.offset.y)) / this.board.canvasState.scale,
       };
     }
 }

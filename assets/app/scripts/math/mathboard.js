@@ -3,36 +3,39 @@ const MQ = MathQuill.getInterface(2);
 class MathBoard {
   constructor() {
     this.canvas = document.getElementById('canvas');
+    this.mouse = { x: 0, y: 0 };
 
-    this.mouseX = 0;
-    this.mouseY = 0;
+    this.canvasState = {
+      offset: { x: 0, y: 0 },
+      initialOffset: { x: -10000, y: -10000 },
+      scale: 1
+    };
 
-    this.isPanning = false;
-    this.panStart = { x: 0, y: 0 };
-    this.canvasOffset = { x: 0, y: 0 };
-    this.spaceDown = false;
-    this.scale = 1;
-    this.canvasInitialOffset = { x: -10000, y: -10000 };
+    this.pan = {
+      active: false,
+      start: { x: 0, y: 0 },
+      spaceDown: false
+    };
 
-    this.groupDragging = false;
-    this.draggedGroup = null;
-    this.dragOffsetX = 0;
-    this.dragOffsetY = 0;
-    this.margin = 10;
-    this.gridSize = 20; // Define the grid size for snapping
+    this.drag = {
+      active: false,
+      group: null,
+      offset: { x: 0, y: 0 },
+      margin: 10,
+      gridSize: 20
+    };
 
-    this.isBoxSelecting = false;
-    this.boxSelectStart = { x: 0, y: 0 };
-    this.selectionBox = null;
-    this.justBoxSelected = false;
+    this.boxSelect = {
+      active: false,
+      start: { x: 0, y: 0 },
+      element: null,
+      justCompleted: false
+    };
 
-    this.clipboard = null; // To store copied/cut group data
-
+    this.clipboard = null;
     this.fileManager = new FileManager(this);
     this.fileManager.loadState();
-
     this.initEventListeners();
-
     this.navigation = new Navigation(this);
     this.navigation.init();
   }
@@ -48,7 +51,7 @@ class MathBoard {
   initGlobalKeyHandlers() {
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
-        this.spaceDown = true;
+        this.pan.spaceDown = true;
       }
 
       if (
@@ -96,7 +99,7 @@ class MathBoard {
 
     document.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
-        this.spaceDown = false;
+        this.pan.spaceDown = false;
       }
     });
   }
@@ -104,8 +107,8 @@ class MathBoard {
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
       // If this click was triggered immediately after a box selection, skip clearing the selection.
-      if (this.justBoxSelected) {
-        this.justBoxSelected = false;
+      if (this.boxSelect.justCompleted) {
+        this.boxSelect.justCompleted = false;
         return;
       }
 
@@ -185,7 +188,7 @@ class MathBoard {
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
       // Ignore if not left click, if space is down, or if clicking inside an editable field
-      if (event.button !== 0 || this.spaceDown || event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) return;
+      if (event.button !== 0 || this.pan.spaceDown || event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) return;
       
       // Ignore clicks starting on the field drag handle
       if (event.target.closest('.drag-handle')) return;
@@ -203,7 +206,7 @@ class MathBoard {
           groups = [target];
         }
 
-        this.groupDragging = true;
+        this.drag.active = true;
         this.selectedGroups = groups;
         this.dragStart = { x: event.clientX, y: event.clientY };
         this.initialPositions = groups.map((group) => ({
@@ -222,10 +225,10 @@ class MathBoard {
     });
 
     document.addEventListener('mousemove', (event) => {
-      this.mouseX = event.clientX;
-      this.mouseY = event.clientY;
+      this.mouse.x = event.clientX;
+      this.mouse.y = event.clientY;
 
-      if (this.groupDragging && this.selectedGroups) {
+      if (this.drag.active && this.selectedGroups) {
         const deltaX = event.clientX - this.dragStart.x;
         const deltaY = event.clientY - this.dragStart.y;
         const snapToGrid = event.ctrlKey || event.metaKey; // Check for Ctrl/Cmd key
@@ -240,11 +243,11 @@ class MathBoard {
             const canvasDeltaX = canvasCoords.x - initialCanvasCoords.x;
             const canvasDeltaY = canvasCoords.y - initialCanvasCoords.y;
 
-            const snappedCanvasX = Math.round((initialCanvasCoords.x + canvasDeltaX) / this.gridSize) * this.gridSize;
-            const snappedCanvasY = Math.round((initialCanvasCoords.y + canvasDeltaY) / this.gridSize) * this.gridSize;
+            const snappedCanvasX = Math.round((initialCanvasCoords.x + canvasDeltaX) / this.drag.gridSize) * this.drag.gridSize;
+            const snappedCanvasY = Math.round((initialCanvasCoords.y + canvasDeltaY) / this.drag.gridSize) * this.drag.gridSize;
 
-            newLeft = Math.round(newLeft / this.gridSize) * this.gridSize;
-            newTop = Math.round(newTop / this.gridSize) * this.gridSize;
+            newLeft = Math.round(newLeft / this.drag.gridSize) * this.drag.gridSize;
+            newTop = Math.round(newTop / this.drag.gridSize) * this.drag.gridSize;
           }
 
           item.group.style.left = newLeft + 'px';
@@ -254,9 +257,9 @@ class MathBoard {
     });
 
     document.addEventListener('mouseup', () => {
-      if (this.groupDragging && this.selectedGroups) {
+      if (this.drag.active && this.selectedGroups) {
         this.selectedGroups.forEach((group) => group.classList.remove('dragging'));
-        this.groupDragging = false;
+        this.drag.active = false;
         this.selectedGroups = null;
         this.initialPositions = null;
         this.fileManager.saveState();
@@ -273,7 +276,7 @@ class MathBoard {
   initDoubleClickHandler() {
     document.addEventListener('dblclick', (event) => {
       if (event.target.closest('.math-group') || event.target.closest('.text-group') || event.target.closest('.image-group')) return;
-      if (this.isPanning) return;
+      if (this.pan.active) return;
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       
       if (event.shiftKey) {
@@ -288,13 +291,13 @@ class MathBoard {
   }
 
   updateTransform() {
-    this.canvas.style.transform = `translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
+    this.canvas.style.transform = `translate(${this.canvasState.offset.x}px, ${this.canvasState.offset.y}px)`;
   }
 
   screenToCanvas(x, y) {
     return {
-      x: (x - (this.canvasInitialOffset.x + this.canvasOffset.x)) / this.scale,
-      y: (y - (this.canvasInitialOffset.y + this.canvasOffset.y)) / this.scale,
+      x: (x - (this.canvasState.initialOffset.x + this.canvasState.offset.x)) / this.canvasState.scale,
+      y: (y - (this.canvasState.initialOffset.y + this.canvasState.offset.y)) / this.canvasState.scale,
     };
   }
 
@@ -374,7 +377,7 @@ class MathBoard {
 
     ObjectGroup.clearAllSelections();
 
-    const pasteCenterCoords = this.screenToCanvas(this.mouseX, this.mouseY);
+    const pasteCenterCoords = this.screenToCanvas(this.mouse.x, this.mouse.y);
     const pasteBaseX = pasteCenterCoords.x;
     const pasteBaseY = pasteCenterCoords.y;
 
