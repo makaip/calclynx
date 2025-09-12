@@ -66,7 +66,10 @@ class MathGroup extends ObjectGroup {
         this.mathFieldInstances.push(newFieldInstance); // Fallback: add to end
     }
 
-    newFieldInstance.mathField.focus();
+    const mathField = newFieldInstance.editor.getMathField();
+    if (mathField && typeof mathField.focus === 'function') {
+      mathField.focus();
+    }
     return newFieldInstance; // <<< Return the new instance
   }
 

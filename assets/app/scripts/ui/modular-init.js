@@ -81,10 +81,10 @@ window.initializeModularSystem = initializeModularSystem;
 
 // Core MathGene command execution function
 function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance) {
-  if (!sourceLatex || !targetMathFieldInstance || !targetMathFieldInstance.mathField) {
+  if (!sourceLatex || !targetMathFieldInstance || !targetMathFieldInstance.editor.getMathField()) {
     console.error("Missing source LaTeX or target MathField instance.");
-    if (targetMathFieldInstance && targetMathFieldInstance.mathField) {
-      targetMathFieldInstance.mathField.latex(`\\text{Error: Invalid input}`);
+    if (targetMathFieldInstance && targetMathFieldInstance.editor.getMathField()) {
+      targetMathFieldInstance.editor.getMathField().latex(`\\text{Error: Invalid input}`);
     }
     return;
   }
@@ -143,12 +143,12 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
       
       if (!resultMg || !resultMg.latex) {
         console.error("MathGene operation returned invalid result.");
-        targetMathFieldInstance.mathField.latex(`\\text{Error: Invalid calculation result}`);
+        targetMathFieldInstance.editor.getMathField().latex(`\\text{Error: Invalid calculation result}`);
         return;
       }
       
       const resultLatex = resultMg.latex;
-      targetMathFieldInstance.mathField.latex(resultLatex);
+      targetMathFieldInstance.editor.getMathField().latex(resultLatex);
     }
     // Fall back to mgTrans/mgCalculate if mgCalc not available
     else if (typeof mgTrans !== 'undefined' && typeof mgCalculate !== 'undefined') {
@@ -157,19 +157,19 @@ function applyMathGeneCommand(commandName, sourceLatex, targetMathFieldInstance)
       const mathGeneResult = mgTrans.Output(resultMg);
       
       if (mathGeneResult && mathGeneResult.latex) {
-        targetMathFieldInstance.mathField.latex(mathGeneResult.latex);
+        targetMathFieldInstance.editor.getMathField().latex(mathGeneResult.latex);
       } else {
-        targetMathFieldInstance.mathField.latex(`\\text{Error: Processing failed}`);
+        targetMathFieldInstance.editor.getMathField().latex(`\\text{Error: Processing failed}`);
       }
     } else {
       console.error("No MathGene libraries found globally.");
-      targetMathFieldInstance.mathField.latex(`\\text{Error: MathGene not available}`);
+      targetMathFieldInstance.editor.getMathField().latex(`\\text{Error: MathGene not available}`);
     }
   } catch (error) {
     console.error("Error during MathGene processing:", error);
     const errorMessage = error.message || 'Processing failed';
     const escapedErrorMessage = errorMessage.replace(/\\/g, '\\textbackslash ').replace(/_/g, '\\_').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
-    targetMathFieldInstance.mathField.latex(`\\text{Error: ${escapedErrorMessage}}`);
+    targetMathFieldInstance.editor.getMathField().latex(`\\text{Error: ${escapedErrorMessage}}`);
   }
 }
 
