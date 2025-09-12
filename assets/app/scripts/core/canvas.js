@@ -49,59 +49,75 @@ class MathBoard {
   }
 
   initGlobalKeyHandlers() {
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        this.pan.spaceDown = true;
-      }
+    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+  }
 
-      if (
-        (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'x') &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey &&
-        !document.querySelector('.mq-focused') &&
-        !document.activeElement.closest('.text-editor')
-      ) {
-        const selectedGroups = ObjectGroup.getSelectedGroups();
-        if (selectedGroups.length > 0) {
-          e.preventDefault();
-          selectedGroups.forEach((group) => {
-            group.remove();
-          });
-          // Save updated state
-          this.fileManager.saveState();
-        }
-      }
+  handleKeyDown(e) {
+    this.handleSpaceKey(e);
+    this.handleDeleteKeys(e);
+    this.handleCtrlCommands(e);
+  }
 
-      
-      if (e.ctrlKey || e.metaKey) {
-        const isTextEditorFocused = document.activeElement && 
-          (document.activeElement.closest('.text-editor') || 
-           document.activeElement.classList.contains('text-editor'));
-        const isMathFieldFocused = document.querySelector('.mq-focused');
-        const isImageUrlInputFocused = document.activeElement && 
-          document.activeElement.closest('.image-url-input');
-        
-        if (!isTextEditorFocused && !isMathFieldFocused && !isImageUrlInputFocused) {
-          if (e.key === 'c') {
-            e.preventDefault();
-            this.clipboard.copySelectedGroups();
-          } else if (e.key === 'x') {
-            e.preventDefault();
-            this.clipboard.cutSelectedGroups();
-          } else if (e.key === 'v') {
-            e.preventDefault();
-            this.clipboard.pasteGroups();
-          }
-        }
-      }
-    });
+  handleKeyUp(e) {
+    if (e.code === 'Space') this.pan.spaceDown = false;
+  }
 
-    document.addEventListener('keyup', (e) => {
-      if (e.code === 'Space') {
-        this.pan.spaceDown = false;
-      }
-    });
+  handleSpaceKey(e) {
+    if (e.code === 'Space') this.pan.spaceDown = true;
+  }
+
+  handleDeleteKeys(e) {
+    const isDeleteKey = e.key === 'Backspace' || e.key === 'Delete';
+    const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
+    const isEditingMath = document.querySelector('.mq-focused');
+    const isEditingText = document.activeElement.closest('.text-editor');
+    
+    if (!isDeleteKey || hasModifiers || isEditingMath || isEditingText) {
+      return;
+    }
+
+    const selectedGroups = ObjectGroup.getSelectedGroups();
+    if (selectedGroups.length > 0) {
+      e.preventDefault();
+      this.deleteSelectedGroups(selectedGroups);
+    }
+  }
+
+  handleCtrlCommands(e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (this.isUserCurrentlyEditing()) return;
+
+    switch (e.key) {
+      case 'c':
+        e.preventDefault();
+        this.clipboard.copySelectedGroups();
+        break;
+      case 'x':
+        e.preventDefault();
+        this.clipboard.cutSelectedGroups();
+        break;
+      case 'v':
+        e.preventDefault();
+        this.clipboard.pasteGroups();
+        break;
+    }
+  }
+
+  isUserCurrentlyEditing() {
+    const isTextEditorFocused = document.activeElement && 
+      (document.activeElement.closest('.text-editor') || 
+       document.activeElement.classList.contains('text-editor'));
+    const isMathFieldFocused = document.querySelector('.mq-focused');
+    const isImageUrlInputFocused = document.activeElement && 
+      document.activeElement.closest('.image-url-input');
+    
+    return isTextEditorFocused || isMathFieldFocused || isImageUrlInputFocused;
+  }
+
+  deleteSelectedGroups(groups) {
+    groups.forEach((group) => group.remove());
+    this.fileManager.saveState();
   }
 
   initDocumentClickHandler() {
@@ -113,14 +129,9 @@ class MathBoard {
       }
 
       // If click target is inside an editable math field, handle it there.
-      if (event.target.closest('.mq-editable-field')) {
-        return;
-      }
-
       // If click target is inside a text editor, handle it there.
-      if (event.target.closest('.text-editor')) {
-        return;
-      }
+      if (event.target.closest('.mq-editable-field')) return;
+      if (event.target.closest('.text-editor')) return;
 
       // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
@@ -267,12 +278,6 @@ class MathBoard {
     });
   }
 
-  initWindowResizeHandler() {
-    window.addEventListener('resize', () => {
-      this.updateTransform();
-    });
-  }
-
   initDoubleClickHandler() {
     document.addEventListener('dblclick', (event) => {
       if (event.target.closest('.math-group') || event.target.closest('.text-group') || event.target.closest('.image-group')) return;
@@ -280,13 +285,18 @@ class MathBoard {
       const coords = this.screenToCanvas(event.clientX, event.clientY);
       
       if (event.shiftKey) {
-        // Shift + double-click creates a text field
         new TextGroup(this, coords.x, coords.y);
       } else {
-        // Regular double-click creates a math field
         new MathGroup(this, coords.x, coords.y);
       }
+
       this.fileManager.saveState();
+    });
+  }
+
+	initWindowResizeHandler() {
+    window.addEventListener('resize', () => {
+      this.updateTransform();
     });
   }
 
