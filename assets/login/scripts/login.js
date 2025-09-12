@@ -1,4 +1,4 @@
-import { supabaseClient } from '../../supabaseinit.js';
+// Use the globally available supabaseClient from initsupabaseapp.js
 
 const googleSignInButton = document.getElementById('google-signin-button');
 const emailPasswordForm = document.getElementById('email-password-form');
