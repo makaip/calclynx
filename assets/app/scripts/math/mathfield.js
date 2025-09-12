@@ -66,25 +66,11 @@ class MathField {
     MathFieldUtils.markContainerAsSelected(this.container);
   }
 
-  isDragHandleClicked(event) {
-    return MathFieldUtils.isDragHandleClicked(event);
-  }
-
-  isCurrentlyEditing() {
-    return MathFieldUtils.isCurrentlyEditing(this.container);
-  }
-
-  clearMathGroupSelections() {
-    MathFieldUtils.clearMathGroupSelections();
-  }
-
-  highlightGroupExpressions() {
-    MathFieldUtils.highlightGroupExpressions(this.container);
-  }
-
-  markContainerAsSelected() {
-    MathFieldUtils.markContainerAsSelected(this.container);
-  }
+  isDragHandleClicked(event) { return MathFieldUtils.isDragHandleClicked(event); }
+  isCurrentlyEditing() { return MathFieldUtils.isCurrentlyEditing(this.container); }
+  clearMathGroupSelections() { MathFieldUtils.clearMathGroupSelections(); }
+  highlightGroupExpressions() { MathFieldUtils.highlightGroupExpressions(this.container); }
+  markContainerAsSelected() { MathFieldUtils.markContainerAsSelected(this.container); }
 
   appendToMathGroup() {
     MathFieldUtils.validateMathGroupElement(this.mathGroup);
@@ -107,13 +93,9 @@ class MathField {
     MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
   }
 
-  insertMathFieldElement() {
-    MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
-  }
+  insertMathFieldElement() { MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement); }
 
-  initializeMathQuillField() {
-    this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig());
-  }
+  initializeMathQuillField() { this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig()); }
 
   getMathQuillConfig() {
     const baseConfig = MathFieldUtils.getBaseMathQuillConfig();
@@ -190,7 +172,7 @@ class MathField {
 
   handleEnterNavigation(event, groupElement) {
     if (event.ctrlKey) {
-      // Ctrl+Enter behavior can be added here
+      // TODO: ctrl + enter auto-simplifies the expression?
     } else if (this.container === groupElement.lastElementChild) {
       this.mathGroup.addMathField(true);
     } else {
@@ -204,13 +186,9 @@ class MathField {
     }, 50);
   }
 
-  isEmpty(latexContent) {
-    return MathFieldUtils.isEmpty(latexContent);
-  }
+  isEmpty(latexContent) { return MathFieldUtils.isEmpty(latexContent); }
 
-  canNavigateToPrevious(groupElement) {
-    return MathFieldUtils.canNavigateToPrevious(this.container, groupElement);
-  }
+  canNavigateToPrevious(groupElement) { return MathFieldUtils.canNavigateToPrevious(this.container, groupElement);}
 
   navigateToPreviousField() {
     const previousContainer = this.container.previousElementSibling;
@@ -263,9 +241,7 @@ class MathField {
     this.mathGroup.board.fileManager.saveState();
   }
 
-  updateLatexData(latex) {
-    this.container.dataset.latex = latex;
-  }
+  updateLatexData(latex) { this.container.dataset.latex = latex; }
 
   replaceWithStaticMath(latex) {
     const mathFieldElement = this.container.querySelector('.math-field');
@@ -276,22 +252,16 @@ class MathField {
     MQ.StaticMath(staticMath).latex(latex);
   }
 
-  createStaticMathElement() {
-    return MathFieldUtils.createStaticMathElement();
-  }
+  createStaticMathElement() { return MathFieldUtils.createStaticMathElement(); }
 
-  insertStaticMathElement(staticMath) {
-    MathFieldUtils.insertElementAfterHandle(this.container, staticMath);
-  }
+  insertStaticMathElement(staticMath) { MathFieldUtils.insertElementAfterHandle(this.container, staticMath); }
 
   handleEquivalenceProcessing(latex) {
     const hasText = MathFieldUtils.hasTextContent(latex);
     MathFieldUtils.processEquivalenceColors(this.container, hasText);
   }
 
-  hasTextContent(latex) {
-    return MathFieldUtils.hasTextContent(latex);
-  }
+  hasTextContent(latex) { return MathFieldUtils.hasTextContent(latex); }
 
   static edit(container) {
     const existingLatex = container.dataset.latex || '';
@@ -366,9 +336,7 @@ class MathField {
     return mathField;
   }
 
-  static highlightExpressions(container) {
-    MathFieldUtils.highlightGroupExpressions(container);
-  }
+  static highlightExpressions(container) { MathFieldUtils.highlightGroupExpressions(container); }
 
   static attachEditEventListeners(container) {
     const mathFieldElement = container.querySelector('.math-field');
@@ -492,10 +460,10 @@ class MathField {
   }
 
   static handleStaticBlur(container, latexValue) {
-    const hasText = latexValue.includes('\\text{') || latexValue.includes('\\\\text{');
+    const hasText = MathFieldUtils.hasTextContent(latexValue);
     
     container.dataset.latex = latexValue;
-    MathField.recreateStaticContainer(container, latexValue);
+    MathFieldUtils.recreateStaticContainer(container, latexValue);
     
     const group = container.parentElement;
     if (group && group.mathGroup) {
@@ -505,13 +473,6 @@ class MathField {
   }
 
   static processEquivalenceOnBlur(container, hasText) {
-    if (window.expressionEquivalence && !hasText) {
-      window.expressionEquivalence.applyIndicatorColors();
-      if (container.dataset.groupKey) {
-        window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
-      } else {
-        window.expressionEquivalence.removeAllHighlights();
-      }
-    }
+    MathFieldUtils.processEquivalenceColors(container, hasText);
   }
 }
