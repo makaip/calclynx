@@ -4,6 +4,10 @@ class ObjectGroup {
       throw new Error("ObjectGroup is an abstract class and cannot be instantiated directly");
     }
     
+    if (!board || !board.canvas) {
+      throw new Error("ObjectGroup requires a valid board object with a canvas property");
+    }
+    
     this.board = board;
     this.groupType = groupType;
     

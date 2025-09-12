@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 confirmRenameFileBtn.disabled = true;
                 confirmRenameFileBtn.textContent = 'Renaming...';
-                if (window.mathBoard && window.mathBoard.fileManager) {
-                    await window.mathBoard.fileManager.renameFile(fileIdToRename, newName);
+                if (window.App?.mathBoard && window.App.mathBoard.fileManager) {
+                    await window.App.mathBoard.fileManager.renameFile(fileIdToRename, newName);
                 } else {
                     throw new Error("FileManager not available.");
                 }
@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmDeleteSidebarFileBtn.disabled = true;
                 confirmDeleteSidebarFileBtn.textContent = 'Deleting...';
             }
-            if (window.mathBoard && window.mathBoard.fileManager) {
-                await window.mathBoard.fileManager.deleteFile(fileIdToDeleteFromSidebar);
+            if (window.App?.mathBoard && window.App.mathBoard.fileManager) {
+                await window.App.mathBoard.fileManager.deleteFile(fileIdToDeleteFromSidebar);
             } else {
                 throw new Error("FileManager not available.");
             }

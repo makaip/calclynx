@@ -93,4 +93,13 @@ class BoxSelection {
       group.classList.toggle('selected', overlap);
     });
   }
+
+  static selectGroup(groupElement, isShiftHeld = false) {
+    if (isShiftHeld) {
+      groupElement.classList.toggle('selected');
+    } else {
+      ObjectGroup.clearAllSelections();
+      groupElement.classList.add('selected');
+    }
+  }
 }

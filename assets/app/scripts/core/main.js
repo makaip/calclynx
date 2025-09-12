@@ -89,6 +89,7 @@
     App.expressionEquivalence = new ExpressionEquivalence();
 
     window.App = App;
+    window.mathBoard = App.mathBoard; // expose for backwards compatibility
     window.initializeMathSupportForTextFields = () => {
       document.querySelectorAll('.text-field-container').forEach((container) => {
         const tf = container.textFieldInstance;
@@ -107,7 +108,6 @@
     window.updateUserStatus?.();
   });
 
-  // --- Keep updateUserStatus function but simplified and attached for compatibility ---
   async function updateUserStatus() {
     const userEmailDisplay = getById('user-email-display');
     const authButton = getById('auth-button');

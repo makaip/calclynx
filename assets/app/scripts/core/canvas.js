@@ -54,17 +54,13 @@ class MathBoard {
   }
 
   handleKeyDown(e) {
-    this.handleSpaceKey(e);
+    if (e.code === 'Space') this.pan.spaceDown = true;
     this.handleDeleteKeys(e);
     this.handleCtrlCommands(e);
   }
 
   handleKeyUp(e) {
     if (e.code === 'Space') this.pan.spaceDown = false;
-  }
-
-  handleSpaceKey(e) {
-    if (e.code === 'Space') this.pan.spaceDown = true;
   }
 
   handleDeleteKeys(e) {
@@ -122,83 +118,97 @@ class MathBoard {
 
   initDocumentClickHandler() {
     document.addEventListener('click', (event) => {
-      // If this click was triggered immediately after a box selection, skip clearing the selection.
       if (this.boxSelect.justCompleted) {
         this.boxSelect.justCompleted = false;
         return;
       }
 
-      // if click target inside an editable math field or text editor, handle it there.
-      if (event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) { return; }
+      const clickHandlers = [
+        () => this.handleEditableFieldClick(event),
+        () => this.handleContainerClick(event),
+        () => this.handleGroupClick(event)
+      ];
 
-      // If clicking on a math-field container that is finalized:
-      const mathContainer = event.target.closest('.math-field-container');
-      if (mathContainer) {
-        ObjectGroup.clearAllSelections();
-        event.stopPropagation();
-        MathField.edit(mathContainer);
-        return;
+      for (const handler of clickHandlers) {
+        if (handler()) return;
       }
 
-      // If clicking on a text-field container:
-      const textContainer = event.target.closest('.text-field-container');
-      if (textContainer) {
-        ObjectGroup.clearAllSelections();
-        event.stopPropagation();
-        const textField = textContainer.textFieldInstance;
-        if (textField) {
-          textField.focus();
-        }
-        return;
-      }
+      ObjectGroup.clearAllSelections();
+    });
+  }
 
-      // If clicking on an image-container:
-      const imageContainer = event.target.closest('.image-container');
-      if (imageContainer) {
-        // Find the parent image-group and select it
-        const imageGroup = imageContainer.closest('.image-group');
-        if (imageGroup) {
-          if (!event.shiftKey) {
-            ObjectGroup.clearAllSelections();
-            imageGroup.classList.add('selected');
-          } else {
-            imageGroup.classList.toggle('selected');
+  handleEditableFieldClick(event) {
+    if (event.target.closest('.mq-editable-field') || 
+        event.target.closest('.text-editor')) {
+      return true; 
+    }
+    return false;
+  }
+
+  handleContainerClick(event) {
+    const containers = [
+      { 
+        selector: '.math-field-container', 
+        action: (container) => MathField.edit(container) 
+      },
+      { 
+        selector: '.text-field-container', 
+        action: (container) => container.textFieldInstance?.focus() 
+      },
+      { 
+        selector: '.image-container', 
+        action: (container) => {
+          const imageGroup = container.closest('.image-group');
+          if (imageGroup) {
+            BoxSelection.selectGroup(imageGroup, event.shiftKey);
           }
         }
-        event.stopPropagation();
-        return;
       }
+    ];
 
-      // Remove container selection if clicking outside
-      if (!event.target.closest('.math-field-container') && !event.target.closest('.text-field-container') && !event.target.closest('.image-container')) {
-        document.querySelectorAll('.math-field-container.selected-field')
-          .forEach(el => el.classList.remove('selected-field'));
-      }
-
-      // Handle selection for math, text, and image groups
-      const mathGroupTarget = event.target.closest('.math-group');
-      const textGroupTarget = event.target.closest('.text-group');
-      const imageGroupTarget = event.target.closest('.image-group');
-      const groupTarget = mathGroupTarget || textGroupTarget || imageGroupTarget;
-
-      if (groupTarget) {
-        if (!event.shiftKey) {
-          ObjectGroup.clearAllSelections();
-          groupTarget.classList.add('selected');
-        } else {
-          groupTarget.classList.toggle('selected');
-        }
-      } else {
+    for (const { selector, action } of containers) {
+      const container = event.target.closest(selector);
+      if (container) {
         ObjectGroup.clearAllSelections();
+        event.stopPropagation();
+        action(container);
+        return true; 
       }
-    });
+    }
+
+    this.cleanupContainerSelections(event);
+    return false;
+  }
+
+  cleanupContainerSelections(event) {
+    const containerSelectors = ['.math-field-container', '.text-field-container', '.image-container'];
+    const isOutsideContainers = !containerSelectors.some(selector => 
+      event.target.closest(selector)
+    );
+
+    if (isOutsideContainers) {
+      document.querySelectorAll('.math-field-container.selected-field')
+        .forEach(el => el.classList.remove('selected-field'));
+    }
+  }
+
+  handleGroupClick(event) {
+    const groupSelectors = ['.math-group', '.text-group', '.image-group'];
+    const groupTarget = groupSelectors
+      .map(selector => event.target.closest(selector))
+      .find(Boolean);
+
+    if (groupTarget) {
+      BoxSelection.selectGroup(groupTarget, event.shiftKey);
+      return true; 
+    }
+    return false;
   }
 
   initGroupDragging() {
     document.addEventListener('mousedown', (event) => {
       // Ignore if not left click, if space is down, or if clicking inside an editable field
       if (event.button !== 0 || this.pan.spaceDown || event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) return;
-      
       // Ignore clicks starting on the field drag handle
       if (event.target.closest('.drag-handle')) return;
 
@@ -292,7 +302,7 @@ class MathBoard {
     });
   }
 
-	initWindowResizeHandler() {
+  initWindowResizeHandler() {
     window.addEventListener('resize', () => {
       this.updateTransform();
     });
