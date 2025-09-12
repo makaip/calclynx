@@ -112,15 +112,8 @@ class MathBoard {
         return;
       }
 
-      // If click target is inside an editable math field, handle it there.
-      if (event.target.closest('.mq-editable-field')) {
-        return;
-      }
-
-      // If click target is inside a text editor, handle it there.
-      if (event.target.closest('.text-editor')) {
-        return;
-      }
+      // if click target inside an editable math field or text editor, handle it there.
+      if (event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) { return; }
 
       // If clicking on a math-field container that is finalized:
       const mathContainer = event.target.closest('.math-field-container');
