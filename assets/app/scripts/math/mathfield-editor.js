@@ -9,21 +9,13 @@ class MathFieldEditor {
   createMathField() {
     if (this.hasMathField()) return;
 
-    this.createMathFieldElement();
-    this.initializeMathQuillField();
+    this.mathFieldElement = MathFieldUtils.createMathFieldElement();
+    MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
+    this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig()); 
   }
 
   hasMathField() {
     return !!this.container.querySelector(':scope > .math-field');
-  }
-
-  createMathFieldElement() {
-    this.mathFieldElement = MathFieldUtils.createMathFieldElement();
-    MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
-  }
-
-  initializeMathQuillField() { 
-    this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig()); 
   }
 
   getMathQuillConfig() {
@@ -189,21 +181,18 @@ class MathFieldEditor {
     const latex = mathField.latex().trim();
     
     if (!latex) {
-      MathFieldEditor.handleStaticEmptyEnter(container);
+      container.remove();
+      const group = container.parentElement;
+      if (group && !group.querySelector('.math-field-container')) {
+        group.remove();
+      }
+
       return;
     }
     
     container.dataset.latex = latex;
     MathFieldUtils.recreateStaticContainer(container, latex);
     MathFieldEditor.handleStaticEnterNavigation(container);
-  }
-
-  static handleStaticEmptyEnter(container) {
-    container.remove();
-    const group = container.parentElement;
-    if (group && !group.querySelector('.math-field-container')) {
-      group.remove();
-    }
   }
 
   static handleStaticEnterNavigation(container) {
@@ -247,11 +236,7 @@ class MathFieldEditor {
     const group = container.parentElement;
     if (group && group.mathGroup) {
       group.mathGroup.board.fileManager.saveState();
-      MathFieldEditor.processEquivalenceOnBlur(container, hasText);
+      MathFieldUIManager.processEquivalenceColors(container, hasText);
     }
-  }
-
-  static processEquivalenceOnBlur(container, hasText) {
-    MathFieldUIManager.processEquivalenceColors(container, hasText);
   }
 }
