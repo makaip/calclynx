@@ -47,20 +47,12 @@ function initializeModularSystem() {
       console.log('CommandRegistry initialized with default commands');
     }
     
-    // Initialize modular command palette
+    // Initialize modular command palette only
     if (typeof ModularCommandPalette !== 'undefined') {
       window.commandPalette = new ModularCommandPalette();
       console.log('ModularCommandPalette initialized:', window.commandPalette);
     } else {
       console.error('ModularCommandPalette class not found');
-    }
-
-    // Initialize text input modals
-    if (typeof TextInputModal !== 'undefined' && typeof TextInputModalFactory !== 'undefined') {
-      window.imageUrlInput = TextInputModalFactory.createImageUrlInput();
-      console.log('TextInputModal initialized');
-    } else {
-      console.error('TextInputModal or TextInputModalFactory class not found');
     }
 
     // Mark initialization as complete

@@ -88,9 +88,10 @@ class ContextMenu {
       {
         label: 'New Image from URL',
         action: () => {
-          window.imageUrlInput.show((url) => {
+          window.showImageUrlModal((url) => {
             const imageGroup = new ImageGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
             imageGroup.setImageUrl(url);
+            window.App.mathBoard.fileManager.saveState();
           });
         }
       },

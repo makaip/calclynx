@@ -222,6 +222,10 @@ window.addEventListener('click', (event) => {
     if (createBlankFileModalInstance && event.target === createBlankFileModalInstance) {
         createBlankFileModalInstance.style.display = 'none';
     }
+    const imageUrlModalInstance = document.getElementById('imageUrlModal');
+    if (imageUrlModalInstance && event.target === imageUrlModalInstance) {
+        imageUrlModalInstance.style.display = 'none';
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -302,4 +302,89 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("sidebar-file-actions.js: confirmCreateBlankFileButton NOT FOUND in DOMContentLoaded. Listener not attached."); // Log if button not found
     }
+
+    // --- Image URL Modal Logic ---
+    const imageUrlModal = document.getElementById('imageUrlModal');
+    const closeImageUrlModalBtn = document.getElementById('closeImageUrlModal');
+    const cancelImageUrlBtn = document.getElementById('cancelImageUrlButton');
+    const confirmImageUrlBtn = document.getElementById('confirmImageUrlButton');
+    const imageUrlInput = document.getElementById('imageUrlInput');
+    const imageUrlErrorMessage = document.getElementById('imageUrl-error-message');
+    let imageUrlCallback = null;
+
+    // Global function to show the image URL modal
+    window.showImageUrlModal = function(callback) {
+        imageUrlCallback = callback;
+        if (imageUrlInput) imageUrlInput.value = '';
+        if (imageUrlErrorMessage) {
+            imageUrlErrorMessage.textContent = '';
+            imageUrlErrorMessage.style.display = 'none';
+        }
+        if (imageUrlModal) imageUrlModal.style.display = 'block';
+        if (imageUrlInput) imageUrlInput.focus();
+    };
+
+    if (closeImageUrlModalBtn) {
+        closeImageUrlModalBtn.addEventListener('click', () => {
+            imageUrlModal.style.display = 'none';
+            imageUrlCallback = null;
+        });
+    }
+    if (cancelImageUrlBtn) {
+        cancelImageUrlBtn.addEventListener('click', () => {
+            imageUrlModal.style.display = 'none';
+            imageUrlCallback = null;
+        });
+    }
+    if (confirmImageUrlBtn) {
+        confirmImageUrlBtn.addEventListener('click', () => {
+            const url = imageUrlInput.value.trim();
+            if (!url) {
+                imageUrlErrorMessage.textContent = 'Please enter a URL.';
+                imageUrlErrorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Basic URL validation
+            try {
+                new URL(url);
+            } catch (e) {
+                imageUrlErrorMessage.textContent = 'Please enter a valid URL.';
+                imageUrlErrorMessage.style.display = 'block';
+                return;
+            }
+
+            if (imageUrlCallback) {
+                imageUrlCallback(url);
+            }
+            imageUrlModal.style.display = 'none';
+            imageUrlCallback = null;
+        });
+    }
+
+    // Handle Enter key in image URL input
+    if (imageUrlInput) {
+        imageUrlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (confirmImageUrlBtn) confirmImageUrlBtn.click();
+            }
+            // Allow Ctrl+V paste
+            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                // Let the default paste behavior happen
+                return;
+            }
+        });
+        
+        // Handle paste events explicitly
+        imageUrlInput.addEventListener('paste', (e) => {
+            // Allow default paste behavior
+            setTimeout(() => {
+                // Clear any existing error messages when user pastes
+                if (imageUrlErrorMessage) {
+                    imageUrlErrorMessage.style.display = 'none';
+                }
+            }, 0);
+        });
+    }
 });

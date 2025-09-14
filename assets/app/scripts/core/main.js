@@ -49,8 +49,8 @@
   }; 
 
   const showImageUrlInput = () => {
-    if (window.imageUrlInput && typeof window.imageUrlInput.show === 'function') {
-      window.imageUrlInput.show((url) => {
+    if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
+      window.showImageUrlModal((url) => {
         const coords = App.mathBoard
           ? App.mathBoard.screenToCanvas(
               App.mathBoard.mouseX ?? window.innerWidth / 2,
@@ -59,6 +59,7 @@
           : { x: 100, y: 100 };
         const imageGroup = new ImageGroup(App.mathBoard, coords.x, coords.y);
         imageGroup.setImageUrl(url);
+        App.mathBoard.fileManager.saveState();
       });
     }
   };
