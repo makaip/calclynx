@@ -1,21 +1,3 @@
-const SidebarLogger = {
-    prefix: '[Sidebar]',
-    info(message, ...args) {
-        console.log(`${this.prefix} ${message}`, ...args);
-    },
-    warn(message, ...args) {
-        console.warn(`${this.prefix} ${message}`, ...args);
-    },
-    error(message, ...args) {
-        console.error(`${this.prefix} ${message}`, ...args);
-    },
-    debug(message, ...args) {
-        if (window.DEBUG_MODE) {
-            console.debug(`${this.prefix} ${message}`, ...args);
-        }
-    }
-};
-
 const SidebarUtils = {
     formatDate(dateString) {
         if (!dateString) return 'N/A';
@@ -31,6 +13,7 @@ const SidebarUtils = {
             return 'Invalid date';
         }
     },
+
     formatFileSize(bytes) {
         if (bytes === undefined || bytes === null || isNaN(bytes)) return 'N/A';
         if (bytes === 0) return '0 B';
@@ -40,16 +23,20 @@ const SidebarUtils = {
         if (i < 0) return '0 B';
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     },
+
     getCurrentFileId() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('fileId');
     },
+
     createLoadingIndicator(message = 'Loading files...') {
         return `<li><span class="loading-text">${message}</span></li>`;
     },
+
     createErrorIndicator(message = 'Error loading files.') {
         return `<li><span class="error-text">${message}</span></li>`;
     },
+
     createInfoIndicator(message = 'No files found.') {
         return `<li><span class="info-text">${message}</span></li>`;
     }
@@ -80,6 +67,7 @@ const FileListManager = {
         fileLinkContent.appendChild(metadataDiv);
         return fileLinkContent;
     },
+
     createActionMenu(file) {
         const actionMenu = document.createElement('div');
         actionMenu.classList.add('file-actions-menu');
@@ -92,6 +80,7 @@ const FileListManager = {
         `;
         return actionMenu;
     },
+
     attachActionMenuListeners(actionMenu, actionButton) {
         actionButton.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -105,6 +94,7 @@ const FileListManager = {
         });
         this.attachActionHandlers(actionMenu);
     },
+
     attachActionHandlers(actionMenu) {
         const downloadLink = actionMenu.querySelector('.download-file-link');
         const renameLink = actionMenu.querySelector('.rename-file-link');
@@ -119,10 +109,11 @@ const FileListManager = {
                 if (typeof window.handleDownloadFileClick === 'function') {
                     window.handleDownloadFileClick(fileId, fileName);
                 } else {
-                    SidebarLogger.error('handleDownloadFileClick function not found');
+                    console.error('handleDownloadFileClick function not found');
                 }
             });
         }
+
         if (renameLink) {
             renameLink.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -133,10 +124,11 @@ const FileListManager = {
                 if (typeof window.handleRenameFileClick === 'function') {
                     window.handleRenameFileClick(fileId, fileName);
                 } else {
-                    SidebarLogger.error('handleRenameFileClick function not found');
+                    console.error('handleRenameFileClick function not found');
                 }
             });
         }
+
         if (deleteLink) {
             deleteLink.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -147,11 +139,12 @@ const FileListManager = {
                 if (typeof window.handleDeleteFileClick === 'function') {
                     window.handleDeleteFileClick(fileId, fileName);
                 } else {
-                    SidebarLogger.error('handleDeleteFileClick function not found');
+                    console.error('handleDeleteFileClick function not found');
                 }
             });
         }
     },
+
     createFileListItem(file, currentFileId) {
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -178,35 +171,35 @@ const FileListManager = {
 window.loadUserFiles = async function() {
     const sidebarFileList = document.getElementById('sidebar-file-list');
     if (!sidebarFileList) {
-        SidebarLogger.error("Sidebar file list element not found");
+        console.error("Sidebar file list element not found");
         return;
     }
-    SidebarLogger.debug("Loading user files");
+    console.debug("Loading user files");
     sidebarFileList.innerHTML = SidebarUtils.createLoadingIndicator();
     try {
         const result = await userManager.listUserFiles();
         if (!result.success) {
-            SidebarLogger.warn("Failed to load files:", result.error);
+            console.error("Failed to load files:", result.error);
             sidebarFileList.innerHTML = SidebarUtils.createErrorIndicator('Failed to load files.');
             return;
         }
         const files = result.files;
         sidebarFileList.innerHTML = '';
         if (!files || files.length === 0) {
-            SidebarLogger.info("No files found");
+            console.log("No files found");
             sidebarFileList.innerHTML = SidebarUtils.createInfoIndicator();
             return;
         }
         const currentFileId = SidebarUtils.getCurrentFileId();
-        SidebarLogger.info(`Loading ${files.length} files`, { currentFileId });
+        console.log(`Loading ${files.length} files`, { currentFileId });
         files.forEach(file => {
             const listItem = FileListManager.createFileListItem(file, currentFileId);
             sidebarFileList.appendChild(listItem);
         });
         initializeActionMenuClickHandler();
-        SidebarLogger.debug("User files loaded successfully");
+        console.debug("User files loaded successfully");
     } catch (error) {
-        SidebarLogger.error("Error loading user files:", error);
+        console.error("Error loading user files:", error);
         sidebarFileList.innerHTML = SidebarUtils.createErrorIndicator();
     }
 };
@@ -359,16 +352,14 @@ document.addEventListener('DOMContentLoaded', () => {
         .map(([key]) => key);
 
     if (missingElements.length > 0) {
-        SidebarLogger.error('Missing required sidebar elements:', missingElements);
+        console.error('Missing required sidebar elements:', missingElements);
         return;
     }
 
-    SidebarLogger.info("Initializing sidebar with all required elements");
     SidebarResizer.init(elements);
 
     initializeDocumentClickHandlers();
 });
-
 
 function initializeDocumentClickHandlers() {
     document.addEventListener('click', (e) => {

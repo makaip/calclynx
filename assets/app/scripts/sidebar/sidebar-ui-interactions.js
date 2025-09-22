@@ -1,25 +1,14 @@
-const UILogger = {
-    prefix: '[SidebarUI]',
-    
-    info(message, ...args) {
-        console.log(`${this.prefix} ${message}`, ...args);
-    },
-    
-    warn(message, ...args) {
-        console.warn(`${this.prefix} ${message}`, ...args);
-    },
-    
-    error(message, ...args) {
-        console.error(`${this.prefix} ${message}`, ...args);
-    },
-    
-    debug(message, ...args) {
-        if (window.DEBUG_MODE) {
-            console.debug(`${this.prefix} ${message}`, ...args);
-        }
-    }
-};
+document.addEventListener('DOMContentLoaded', () => {
+    initializeSettingsHandler();
+    initializeNewFileDropdown();
+    initializeDocumentClickHandlers();
 
+    initializeCreateBlankFileModal();
+    initializeDeleteFileModal();
+    initializeImageUrlModal();
+    initializeRenameFileModal();
+    initializeFileDownloadHandler();
+});
 
 const UIStateManager = {
     toggleVisibility(element, forceState = null) {
@@ -65,30 +54,20 @@ const UIStateManager = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    UILogger.info("DOMContentLoaded - Initializing sidebar UI interactions");
-    
-    initializeSettingsHandler();
-    initializeNewFileDropdown();
-    initializeDocumentClickHandlers();
-    
-    UILogger.info("All UI handlers initialized successfully");
-});
-
 function initializeSettingsHandler() {
     const settingsLink = document.getElementById('settings-link');
     const settingsModal = document.getElementById('settings-modal');
     
     if (!settingsLink || !settingsModal) {
-        UILogger.warn('Settings elements not found - settings functionality disabled');
+        // settings elements not found, disable functionality
         return;
     }
 
-    UILogger.debug("Settings modal handler initialized");
+    console.debug("Settings modal handler initialized");
     settingsLink.addEventListener('click', (e) => {
         e.preventDefault();
         UIStateManager.toggleVisibility(settingsModal, true);
-        UILogger.debug("Settings modal opened");
+        console.debug("Settings modal opened");
     });
 }
 
@@ -106,11 +85,11 @@ function initializeNewFileDropdown() {
     };
 
     if (!elements.button || !elements.dropdown) {
-        UILogger.warn('New file dropdown elements not found - dropdown functionality disabled');
+        // new file dropdown elements not found, disable functionality
         return;
     }
 
-    UILogger.debug("New file dropdown handler initialized");
+    console.debug("New file dropdown handler initialized");
 
     elements.button.addEventListener('click', (e) => {
         e.stopPropagation();
