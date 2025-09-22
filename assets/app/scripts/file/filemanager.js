@@ -26,32 +26,7 @@ class FileManager {
             return;
         }
         
-        try {
-            const { data, error } = await supabaseClient
-                .from('files')
-                .select('file_name')
-                .eq('id', this.fileId)
-                .single();
-                
-            if (error) {
-                console.error('Error fetching file title:', error);
-                fileTitleElement.textContent = 'Untitled';
-                fileTitleElement.style.display = '';
-                return;
-            }
-
-            if (data && data.file_name) {
-                fileTitleElement.textContent = data.file_name;
-                fileTitleElement.style.display = '';
-            } else {
-                fileTitleElement.textContent = 'Untitled';
-                fileTitleElement.style.display = '';
-            }
-        } catch (err) {
-            console.error('Exception fetching file title:', err);
-            fileTitleElement.textContent = 'Untitled';
-            fileTitleElement.style.display = '';
-        }
+        const result = await userManager.updateFileTitle(this.fileId);
     }
 
     async saveState() {
@@ -71,61 +46,27 @@ class FileManager {
     }
 
     async validateFileName(fileId, newName, userId) {
-        if (!fileId || !newName) {
-            throw new Error("File ID and new name are required.");
+        const result = await userManager.validateFileName(fileId, newName);
+        
+        if (!result.success) {
+            throw new Error(result.error);
         }
-        newName = newName.trim();
-        if (!newName) {
-            throw new Error("File name cannot be empty.");
-        }
-
-        const { data: existingFiles, error: checkError } = await supabaseClient
-            .from('files')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('file_name', newName)
-            .neq('id', fileId) // exclude current file from check or else everything is nuked
-            .limit(1);
-
-        if (checkError) {
-            console.error('Error checking for existing file name:', checkError);
-            throw new Error(`Error checking for existing file: ${checkError.message}`);
-        }
-        if (existingFiles && existingFiles.length > 0) {
-            throw new Error(`A file named "${newName}" already exists.`);
-        }
-
-        return newName;
+        
+        return result.name;
     }
 
     async renameFile(fileId, newName) {
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-        if (sessionError || !session) {
-            throw new Error("User session not found. Please log in again.");
-        }
-        const userId = session.user.id;
-
-        newName = await this.validateFileName(fileId, newName, userId);
-
-        const now = new Date().toISOString();
-        const { error: updateError } = await supabaseClient
-            .from('files')
-            .update({ file_name: newName, last_modified: now })
-            .eq('id', fileId)
-            .eq('user_id', userId);
-
-        if (updateError) {
-            console.error('Error renaming file in database:', updateError);
-            throw new Error(`Database error: ${updateError.message}`);
-        }
-
-        console.log(`File ${fileId} renamed to ${newName}`);
+        const result = await userManager.renameFile(fileId, newName);
         
-        // if the currently loaded file was renamed, update its title in the header
-        if (this.fileId === fileId) {
-            await this.updateFileTitle(); // updateFileTitle fetches the new name
+        if (!result.success) {
+            throw new Error(result.error);
         }
-        // refreshed in sidebar.js
+
+        console.log(`File ${fileId} renamed to ${result.newName}`);
+        
+        if (this.fileId === fileId) {
+            await this.updateFileTitle();
+        }
     }
 
     async deleteFile(fileId) {
@@ -133,42 +74,20 @@ class FileManager {
             throw new Error("File ID is required for deletion.");
         }
 
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-        if (sessionError || !session) {
-            throw new Error("User session not found. Please log in again.");
-        }
-        const userId = session.user.id;
-        const filePath = `${userId}/${fileId}.json`;
-
-        console.log(`Deleting from storage: ${filePath}`);
-        const { error: storageError } = await supabaseClient
-            .storage
-            .from('storage')
-            .remove([filePath]);
-
-        if (storageError) {
-            console.warn(`Storage deletion warning for ${filePath}: ${storageError.message} (Proceeding with DB deletion)`);
-        } else {
-            console.log(`Successfully deleted from storage: ${filePath}`);
-        }
-
-        const { error: dbError } = await supabaseClient
-            .from('files')
-            .delete()
-            .eq('id', fileId)
-            .eq('user_id', userId); // ensure user owns the file
-
-        if (dbError) {
-            console.error('Error deleting file record from database:', dbError);
-            throw new Error(`Database deletion error: ${dbError.message}`);
+        const result = await userManager.deleteFileRecord(fileId);
+        
+        if (!result.success) {
+            throw new Error(result.error);
         }
 
         console.log(`Successfully deleted file record for ID: ${fileId}`);
+        if (!result.storageDeleted) {
+            console.warn(`Storage deletion had issues but database deletion succeeded`);
+        }
 
         if (this.fileId === fileId) {
-            this.fileId = null; // clear loaded fileId
+            this.fileId = null;
             await this.updateFileTitle();
         }
-        // refresh in sidebar.js
     }
 }

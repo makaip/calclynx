@@ -1,44 +1,127 @@
-// This file handles modal interactions for file operations (Rename, Delete, Create)
+const Logger = {
+    prefix: '[SidebarFileActions]',
+    
+    info(message, ...args) {
+        console.log(`${this.prefix} ${message}`, ...args);
+    },
+    
+    warn(message, ...args) {
+        console.warn(`${this.prefix} ${message}`, ...args);
+    },
+    
+    error(message, ...args) {
+        console.error(`${this.prefix} ${message}`, ...args);
+    },
+    
+    debug(message, ...args) {
+        if (window.DEBUG_MODE) {
+            console.debug(`${this.prefix} ${message}`, ...args);
+        }
+    }
+};
 
-// Ensure this script runs after the DOM is fully loaded
+
+const ErrorHandler = {
+    handleAsyncError(error, operation, errorElement = null, userMessage = null) {
+        Logger.error(`${operation} failed:`, error);
+        
+        const displayMessage = userMessage || error.message || `Failed to ${operation.toLowerCase()}`;
+        
+        if (errorElement) {
+            ModalUtils.showError(errorElement, displayMessage);
+        } else {
+            alert(`Error: ${displayMessage}`);
+        }
+    },
+
+    validateElements(elements, context) {
+        const missingElements = Object.entries(elements)
+            .filter(([key, element]) => !element)
+            .map(([key]) => key);
+
+        if (missingElements.length > 0) {
+            Logger.error(`${context}: Missing required elements:`, missingElements);
+            return false;
+        }
+        return true;
+    }
+};
+
+const ModalUtils = {
+    showError(errorElement, message) {
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    },
+
+    hideError(errorElement) {
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    },
+
+    showModal(modal) {
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    },
+
+    hideModal(modal) {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    },
+
+    setButtonLoading(button, isLoading, loadingText, normalText) {
+        if (!button) return;
+        
+        button.disabled = isLoading;
+        if (isLoading) {
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+        } else {
+            button.innerHTML = normalText;
+        }
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("sidebar-file-actions.js: DOMContentLoaded"); // Log DOMContentLoaded
 
-    // --- Rename File Modal Logic ---
-    const renameFileModal = document.getElementById('renameFileModal');
-    const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
-    const cancelRenameFileBtn = document.getElementById('cancelRenameFileButton');
-    const confirmRenameFileBtn = document.getElementById('confirmRenameFileButton');
-    const newFileNameInput = document.getElementById('newFileNameInput');
-    const renameErrorMessage = document.getElementById('rename-error-message');
-    let fileIdToRename = null;
+    console.log("sidebar-file-actions.js: DOMContentLoaded");
 
+    initializeFileDownloadHandler();
+    initializeRenameFileModal();
+    initializeDeleteFileModal();
+    initializeCreateBlankFileModal();
+    initializeImageUrlModal();
+    
+    Logger.info("All modal handlers initialized successfully");
+});
+
+
+function initializeFileDownloadHandler() {
     window.handleDownloadFileClick = async function(fileId, fileName) {
         try {
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-            if (sessionError || !session) {
+            const userInfo = await userManager.getUserInfo();
+            if (!userInfo.isLoggedIn) {
                 console.error("User not logged in, cannot download file.");
                 alert("You must be logged in to download files.");
                 return;
             }
-            const userId = session.user.id;
-            const filePath = `${userId}/${fileId}.json`;
 
-            const { data: blob, error: downloadError } = await supabaseClient
-                .storage
-                .from('storage')
-                .download(filePath);
+            const filePath = `${userInfo.id}/${fileId}.json`;
+            const result = await userManager.downloadFile(filePath);
 
-            if (downloadError) {
-                throw downloadError;
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to download file');
             }
 
-            if (!blob) {
+            if (!result.data) {
                 throw new Error("File not found or empty.");
             }
 
             const link = document.createElement('a');
-            const url = window.URL.createObjectURL(blob);
+            const url = window.URL.createObjectURL(result.data);
             link.href = url;
             link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
             document.body.appendChild(link);
@@ -50,63 +133,82 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error downloading file:", error);
             alert(`Error downloading file: ${error.message}`);
         }
-    }
+    };
+}
+
+function initializeRenameFileModal() {
+    const renameFileModal = document.getElementById('renameFileModal');
+    const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
+    const cancelRenameFileBtn = document.getElementById('cancelRenameFileButton');
+    const confirmRenameFileBtn = document.getElementById('confirmRenameFileButton');
+    const newFileNameInput = document.getElementById('newFileNameInput');
+    const renameErrorMessage = document.getElementById('rename-error-message');
+    let fileIdToRename = null;
 
     window.handleRenameFileClick = function(fileId, currentName) {
         fileIdToRename = fileId;
-        if (newFileNameInput) newFileNameInput.value = currentName;
-        if (renameErrorMessage) renameErrorMessage.style.display = 'none';
-        if (renameFileModal) renameFileModal.style.display = 'block';
-        if (newFileNameInput) newFileNameInput.focus();
-    }
+        if (newFileNameInput) {
+            newFileNameInput.value = currentName;
+            newFileNameInput.focus();
+        }
+        ModalUtils.hideError(renameErrorMessage);
+        ModalUtils.showModal(renameFileModal);
+    };
 
     if (closeRenameFileModalBtn) {
         closeRenameFileModalBtn.addEventListener('click', () => {
-            if (renameFileModal) renameFileModal.style.display = 'none';
+            ModalUtils.hideModal(renameFileModal);
         });
     }
+
     if (cancelRenameFileBtn) {
         cancelRenameFileBtn.addEventListener('click', () => {
-            if (renameFileModal) renameFileModal.style.display = 'none';
+            ModalUtils.hideModal(renameFileModal);
         });
     }
 
     if (confirmRenameFileBtn) {
         confirmRenameFileBtn.addEventListener('click', async () => {
             const newName = newFileNameInput ? newFileNameInput.value.trim() : '';
+            
             if (!newName) {
-                if (renameErrorMessage) {
-                    renameErrorMessage.textContent = 'File name cannot be empty.';
-                    renameErrorMessage.style.display = 'block';
-                }
+                ModalUtils.showError(renameErrorMessage, 'File name cannot be empty.');
                 return;
             }
-            if (renameErrorMessage) renameErrorMessage.style.display = 'none';
+
+            ModalUtils.hideError(renameErrorMessage);
 
             try {
-                confirmRenameFileBtn.disabled = true;
-                confirmRenameFileBtn.textContent = 'Renaming...';
-                if (window.App?.mathBoard && window.App.mathBoard.fileManager) {
-                    await window.App.mathBoard.fileManager.renameFile(fileIdToRename, newName);
-                } else {
-                    throw new Error("FileManager not available.");
+                ModalUtils.setButtonLoading(confirmRenameFileBtn, true, 'Renaming...', 'Rename');
+                
+                const result = await userManager.renameFile(fileIdToRename, newName);
+                
+                if (!result.success) {
+                    ModalUtils.showError(renameErrorMessage, result.error);
+                    return;
                 }
-                if (renameFileModal) renameFileModal.style.display = 'none';
-                if (typeof window.loadUserFiles === 'function') window.loadUserFiles(); 
+                
+                ModalUtils.hideModal(renameFileModal);
+                if (typeof window.loadUserFiles === 'function') {
+                    window.loadUserFiles();
+                }
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentFileId = urlParams.get('fileId');
+                if (currentFileId === fileIdToRename) {
+                    await userManager.updateFileTitle(fileIdToRename);
+                }
             } catch (error) {
                 console.error('Error renaming file:', error);
-                if (renameErrorMessage) {
-                    renameErrorMessage.textContent = error.message || 'Failed to rename file.';
-                    renameErrorMessage.style.display = 'block';
-                }
+                ModalUtils.showError(renameErrorMessage, error.message || 'Failed to rename file.');
             } finally {
-                confirmRenameFileBtn.disabled = false;
-                confirmRenameFileBtn.textContent = 'Rename';
+                ModalUtils.setButtonLoading(confirmRenameFileBtn, false, 'Renaming...', 'Rename');
             }
         });
     }
+}
 
-    // --- Delete File Confirmation Modal Logic (Sidebar) ---
+function initializeDeleteFileModal() {
     const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
     const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
     const cancelDeleteSidebarFileBtn = document.getElementById('cancelDeleteSidebarFileButton');
@@ -116,65 +218,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteSidebarFileErrorMessage = document.getElementById('delete-sidebar-file-error-message');
     let fileIdToDeleteFromSidebar = null;
 
+
     window.handleDeleteFileClick = function(fileId, fileName) {
         fileIdToDeleteFromSidebar = fileId;
-        if (fileNameToDeleteSidebarElement) fileNameToDeleteSidebarElement.textContent = fileName;
-        if (deleteSidebarFileErrorMessage) deleteSidebarFileErrorMessage.style.display = 'none';
-        if (doNotAskAgainDeleteFileCheckbox) doNotAskAgainDeleteFileCheckbox.checked = false;
+        if (fileNameToDeleteSidebarElement) {
+            fileNameToDeleteSidebarElement.textContent = fileName;
+        }
+        ModalUtils.hideError(deleteSidebarFileErrorMessage);
+        if (doNotAskAgainDeleteFileCheckbox) {
+            doNotAskAgainDeleteFileCheckbox.checked = false;
+        }
 
         if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
-            confirmActualFileDelete(); 
+            confirmActualFileDelete();
         } else {
-            if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'block';
+            ModalUtils.showModal(deleteSidebarFileModal);
         }
-    }
+    };
 
     async function confirmActualFileDelete() {
         if (!fileIdToDeleteFromSidebar) return;
+        
         try {
-            if (confirmDeleteSidebarFileBtn) {
-                confirmDeleteSidebarFileBtn.disabled = true;
-                confirmDeleteSidebarFileBtn.textContent = 'Deleting...';
-            }
-            if (window.App?.mathBoard && window.App.mathBoard.fileManager) {
-                await window.App.mathBoard.fileManager.deleteFile(fileIdToDeleteFromSidebar);
-            } else {
-                throw new Error("FileManager not available.");
+            ModalUtils.setButtonLoading(confirmDeleteSidebarFileBtn, true, 'Deleting...', 'Delete File');
+            
+            const result = await userManager.deleteFileRecord(fileIdToDeleteFromSidebar);
+            
+            if (!result.success) {
+                throw new Error(result.error);
             }
             
-            if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
-            if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
+            ModalUtils.hideModal(deleteSidebarFileModal);
+            if (typeof window.loadUserFiles === 'function') {
+                window.loadUserFiles();
+            }
 
             const urlParams = new URLSearchParams(window.location.search);
             const currentFileId = urlParams.get('fileId');
             if (currentFileId === fileIdToDeleteFromSidebar) {
-                window.location.href = '/app.html'; 
+                await userManager.updateFileTitle(null); // "Untitled"
+                window.location.href = '/app.html';
             }
 
         } catch (error) {
             console.error('Error deleting file from sidebar:', error);
-            if (deleteSidebarFileErrorMessage) {
-                deleteSidebarFileErrorMessage.textContent = error.message || 'Failed to delete file.';
-                deleteSidebarFileErrorMessage.style.display = 'block';
-            }
+            ModalUtils.showError(deleteSidebarFileErrorMessage, error.message || 'Failed to delete file.');
         } finally {
-            if (confirmDeleteSidebarFileBtn) {
-                confirmDeleteSidebarFileBtn.disabled = false;
-                confirmDeleteSidebarFileBtn.textContent = 'Delete File';
-            }
+            ModalUtils.setButtonLoading(confirmDeleteSidebarFileBtn, false, 'Deleting...', 'Delete File');
         }
     }
-    
+
     if (closeDeleteSidebarFileModalBtn) {
         closeDeleteSidebarFileModalBtn.addEventListener('click', () => {
-            if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
+            ModalUtils.hideModal(deleteSidebarFileModal);
         });
     }
+
     if (cancelDeleteSidebarFileBtn) {
         cancelDeleteSidebarFileBtn.addEventListener('click', () => {
-            if (deleteSidebarFileModal) deleteSidebarFileModal.style.display = 'none';
+            ModalUtils.hideModal(deleteSidebarFileModal);
         });
     }
+
     if (confirmDeleteSidebarFileBtn) {
         confirmDeleteSidebarFileBtn.addEventListener('click', async () => {
             if (doNotAskAgainDeleteFileCheckbox && doNotAskAgainDeleteFileCheckbox.checked) {
@@ -183,8 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
             await confirmActualFileDelete();
         });
     }
+}
 
-    // --- Create Blank File Modal Elements & Logic ---
+
+function initializeCreateBlankFileModal() {
     const createBlankFileModal = document.getElementById('createBlankFileModal');
     const closeCreateBlankFileModalBtn = document.getElementById('closeCreateBlankFileModal');
     const cancelCreateBlankFileBtn = document.getElementById('cancelCreateBlankFileButton');
@@ -192,118 +299,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const newBlankFileNameInput = document.getElementById('newBlankFileNameInput');
     const createBlankFileErrorMsg = document.getElementById('createBlankFile-error-message');
 
-    console.log("sidebar-file-actions.js: confirmCreateBlankFileBtn element:", confirmCreateBlankFileBtn); // Log if button is found
+    console.log("sidebar-file-actions.js: confirmCreateBlankFileBtn element:", confirmCreateBlankFileBtn);
 
-    // Note: generateUUID is expected to be globally available from sidebar.js
     window.handleCreateBlankFile = async function() {
-        console.log("sidebar-file-actions.js: handleCreateBlankFile invoked."); // Log function invocation
+        Logger.debug("handleCreateBlankFile invoked");
 
-        if (!newBlankFileNameInput || !createBlankFileErrorMsg || !confirmCreateBlankFileBtn || !createBlankFileModal) {
-            console.error("sidebar-file-actions.js: Create blank file modal elements not found within handleCreateBlankFile.");
+        const elements = {
+            nameInput: newBlankFileNameInput,
+            errorMessage: createBlankFileErrorMsg,
+            confirmButton: confirmCreateBlankFileBtn,
+            modal: createBlankFileModal
+        };
+
+        if (!ErrorHandler.validateElements(elements, "Create blank file modal")) {
             return;
         }
 
-        const fileName = newBlankFileNameInput.value.trim();
+        const fileName = elements.nameInput.value.trim();
 
         if (!fileName) {
-            createBlankFileErrorMsg.textContent = 'File name cannot be empty.';
-            createBlankFileErrorMsg.style.display = 'block';
-            newBlankFileNameInput.focus();
+            ErrorHandler.handleAsyncError(
+                new Error('File name cannot be empty.'), 
+                "Create blank file",
+                elements.errorMessage
+            );
+            elements.nameInput.focus();
             return;
         }
-        createBlankFileErrorMsg.style.display = 'none';
+        
+        ModalUtils.hideError(elements.errorMessage);
 
-        confirmCreateBlankFileBtn.disabled = true;
-        confirmCreateBlankFileBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-
-        let currentUserId;
         try {
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-            if (sessionError || !session) {
-                throw new Error("User session not found. Please log in again.");
-            }
-            currentUserId = session.user.id;
+            ModalUtils.setButtonLoading(elements.confirmButton, true, 'Creating...', 'Create File');
 
-            const { data: existingFiles, error: checkError } = await supabaseClient
-                .from('files')
-                .select('id')
-                .eq('user_id', currentUserId)
-                .eq('file_name', fileName)
-                .limit(1);
+            const result = await userManager.createBlankFile(fileName);
 
-            if (checkError) throw new Error(`Error checking for existing file: ${checkError.message}`);
-            if (existingFiles && existingFiles.length > 0) {
-                createBlankFileErrorMsg.textContent = `File named "${fileName}" already exists.`;
-                createBlankFileErrorMsg.style.display = 'block';
-                newBlankFileNameInput.focus();
-                confirmCreateBlankFileBtn.disabled = false;
-                confirmCreateBlankFileBtn.innerHTML = 'Create File';
-                return;
+            if (!result.success) {
+                throw new Error(result.error);
             }
 
-            const fileId = generateUUID(); // generateUUID() is global from sidebar.js
-            const filePath = `${currentUserId}/${fileId}.json`;
-            const initialContent = JSON.stringify({}); 
-            const initialBlob = new Blob([initialContent], { type: 'application/json' });
-            const initialFileSize = initialBlob.size;
-
-            const { error: storageError } = await supabaseClient.storage.from('storage').upload(filePath, initialBlob);
-            if (storageError) throw new Error(`Storage error: ${storageError.message}`);
-
-            const now = new Date().toISOString();
-            const { error: dbError } = await supabaseClient
-                .from('files')
-                .insert({
-                    id: fileId,
-                    user_id: currentUserId,
-                    file_name: fileName,
-                    created_at: now,
-                    last_modified: now,
-                    file_size: initialFileSize
-                });
-
-            if (dbError) {
-                await supabaseClient.storage.from('storage').remove([filePath]);
-                throw new Error(`Database error: ${dbError.message}`);
-            }
-
-            createBlankFileModal.style.display = 'none';
-            window.location.href = `/app.html?fileId=${fileId}`;
+            Logger.info("Blank file created successfully:", fileName);
+            ModalUtils.hideModal(elements.modal);
+            window.location.href = `/app.html?fileId=${result.fileId}`;
 
         } catch (error) {
-            console.error('Error creating blank file:', error);
-            createBlankFileErrorMsg.textContent = error.message || 'Failed to create file. Please try again.';
-            createBlankFileErrorMsg.style.display = 'block';
+            ErrorHandler.handleAsyncError(error, "Create blank file", elements.errorMessage);
+            elements.nameInput.focus();
         } finally {
-            if (confirmCreateBlankFileBtn) {
-                 confirmCreateBlankFileBtn.disabled = false;
-                 confirmCreateBlankFileBtn.innerHTML = 'Create File';
-            }
+            ModalUtils.setButtonLoading(elements.confirmButton, false, 'Creating...', 'Create File');
         }
-    }
+    };
 
     if (closeCreateBlankFileModalBtn) {
         closeCreateBlankFileModalBtn.addEventListener('click', () => {
-            if (createBlankFileModal) createBlankFileModal.style.display = 'none';
+            ModalUtils.hideModal(createBlankFileModal);
         });
     }
+
     if (cancelCreateBlankFileBtn) {
         cancelCreateBlankFileBtn.addEventListener('click', () => {
-            if (createBlankFileModal) createBlankFileModal.style.display = 'none';
+            ModalUtils.hideModal(createBlankFileModal);
         });
     }
 
     if (confirmCreateBlankFileBtn) {
-        console.log("sidebar-file-actions.js: Attaching click listener to confirmCreateBlankFileButton."); // Log listener attachment
+        console.log("sidebar-file-actions.js: Attaching click listener to confirmCreateBlankFileButton.");
         confirmCreateBlankFileBtn.addEventListener('click', () => {
-            console.log("sidebar-file-actions.js: confirmCreateBlankFileButton clicked!"); // Log click event
+            console.log("sidebar-file-actions.js: confirmCreateBlankFileButton clicked!");
             window.handleCreateBlankFile();
         });
     } else {
-        console.error("sidebar-file-actions.js: confirmCreateBlankFileButton NOT FOUND in DOMContentLoaded. Listener not attached."); // Log if button not found
+        console.error("sidebar-file-actions.js: confirmCreateBlankFileButton NOT FOUND in DOMContentLoaded. Listener not attached.");
     }
+}
 
-    // --- Image URL Modal Logic ---
+
+function initializeImageUrlModal() {
     const imageUrlModal = document.getElementById('imageUrlModal');
     const closeImageUrlModalBtn = document.getElementById('closeImageUrlModal');
     const cancelImageUrlBtn = document.getElementById('cancelImageUrlButton');
@@ -312,79 +383,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageUrlErrorMessage = document.getElementById('imageUrl-error-message');
     let imageUrlCallback = null;
 
-    // Global function to show the image URL modal
+
     window.showImageUrlModal = function(callback) {
         imageUrlCallback = callback;
-        if (imageUrlInput) imageUrlInput.value = '';
-        if (imageUrlErrorMessage) {
-            imageUrlErrorMessage.textContent = '';
-            imageUrlErrorMessage.style.display = 'none';
+        if (imageUrlInput) {
+            imageUrlInput.value = '';
+            imageUrlInput.focus();
         }
-        if (imageUrlModal) imageUrlModal.style.display = 'block';
-        if (imageUrlInput) imageUrlInput.focus();
+        ModalUtils.hideError(imageUrlErrorMessage);
+        ModalUtils.showModal(imageUrlModal);
     };
+
+    function isValidUrl(url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
 
     if (closeImageUrlModalBtn) {
         closeImageUrlModalBtn.addEventListener('click', () => {
-            imageUrlModal.style.display = 'none';
+            ModalUtils.hideModal(imageUrlModal);
             imageUrlCallback = null;
         });
     }
+
     if (cancelImageUrlBtn) {
         cancelImageUrlBtn.addEventListener('click', () => {
-            imageUrlModal.style.display = 'none';
+            ModalUtils.hideModal(imageUrlModal);
             imageUrlCallback = null;
         });
     }
+
     if (confirmImageUrlBtn) {
         confirmImageUrlBtn.addEventListener('click', () => {
             const url = imageUrlInput.value.trim();
+            
             if (!url) {
-                imageUrlErrorMessage.textContent = 'Please enter a URL.';
-                imageUrlErrorMessage.style.display = 'block';
+                ModalUtils.showError(imageUrlErrorMessage, 'Please enter a URL.');
                 return;
             }
             
-            // Basic URL validation
-            try {
-                new URL(url);
-            } catch (e) {
-                imageUrlErrorMessage.textContent = 'Please enter a valid URL.';
-                imageUrlErrorMessage.style.display = 'block';
+            if (!isValidUrl(url)) {
+                ModalUtils.showError(imageUrlErrorMessage, 'Please enter a valid URL.');
                 return;
             }
 
             if (imageUrlCallback) {
                 imageUrlCallback(url);
             }
-            imageUrlModal.style.display = 'none';
+            ModalUtils.hideModal(imageUrlModal);
             imageUrlCallback = null;
         });
     }
 
-    // Handle Enter key in image URL input
     if (imageUrlInput) {
         imageUrlInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (confirmImageUrlBtn) confirmImageUrlBtn.click();
-            }
-            // Allow Ctrl+V paste
-            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-                // Let the default paste behavior happen
-                return;
+                if (confirmImageUrlBtn) {
+                    confirmImageUrlBtn.click();
+                }
             }
         });
         
-        // Handle paste events explicitly
-        imageUrlInput.addEventListener('paste', (e) => {
-            // Allow default paste behavior
+        imageUrlInput.addEventListener('paste', () => {
             setTimeout(() => {
-                // Clear any existing error messages when user pastes
-                if (imageUrlErrorMessage) {
-                    imageUrlErrorMessage.style.display = 'none';
-                }
+                ModalUtils.hideError(imageUrlErrorMessage);
             }, 0);
         });
     }
-});
+}
