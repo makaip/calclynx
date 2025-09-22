@@ -13,8 +13,8 @@ function initializeImageUrlModal() {
             imageUrlInput.value = '';
             imageUrlInput.focus();
         }
-        ModalUtils.hideError(imageUrlErrorMessage);
-        ModalUtils.showModal(imageUrlModal);
+        hideError(imageUrlErrorMessage);
+        showModal(imageUrlModal);
     };
 
     function isValidUrl(url) {
@@ -26,56 +26,46 @@ function initializeImageUrlModal() {
         }
     }
 
-    if (closeImageUrlModalBtn) {
-        closeImageUrlModalBtn.addEventListener('click', () => {
-            ModalUtils.hideModal(imageUrlModal);
-            imageUrlCallback = null;
-        });
-    }
+    closeImageUrlModalBtn?.addEventListener('click', () => {
+        hideModal(imageUrlModal);
+        imageUrlCallback = null;
+    });
 
-    if (cancelImageUrlBtn) {
-        cancelImageUrlBtn.addEventListener('click', () => {
-            ModalUtils.hideModal(imageUrlModal);
-            imageUrlCallback = null;
-        });
-    }
+    cancelImageUrlBtn?.addEventListener('click', () => {
+        hideModal(imageUrlModal);
+        imageUrlCallback = null;
+    });
 
-    if (confirmImageUrlBtn) {
-        confirmImageUrlBtn.addEventListener('click', () => {
+    confirmImageUrlBtn?.addEventListener('click', () => {
             const url = imageUrlInput.value.trim();
             
             if (!url) {
-                ModalUtils.showError(imageUrlErrorMessage, 'Please enter a URL.');
+                showError(imageUrlErrorMessage, 'Please enter a URL.');
                 return;
             }
             
             if (!isValidUrl(url)) {
-                ModalUtils.showError(imageUrlErrorMessage, 'Please enter a valid URL.');
+                showError(imageUrlErrorMessage, 'Please enter a valid URL.');
                 return;
             }
 
             if (imageUrlCallback) {
                 imageUrlCallback(url);
             }
-            ModalUtils.hideModal(imageUrlModal);
+            hideModal(imageUrlModal);
             imageUrlCallback = null;
         });
-    }
 
-    if (imageUrlInput) {
-        imageUrlInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (confirmImageUrlBtn) {
-                    confirmImageUrlBtn.click();
-                }
-            }
-        });
-        
-        imageUrlInput.addEventListener('paste', () => {
-            setTimeout(() => {
-                ModalUtils.hideError(imageUrlErrorMessage);
-            }, 0);
-        });
-    }
+    imageUrlInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            confirmImageUrlBtn?.click();
+        }
+    });
+    
+    imageUrlInput?.addEventListener('paste', () => {
+        setTimeout(() => {
+            hideError(imageUrlErrorMessage);
+        }, 0);
+    });
 }

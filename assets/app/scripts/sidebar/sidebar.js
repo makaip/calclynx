@@ -42,165 +42,55 @@ const SidebarUtils = {
     }
 };
 
-const FileListManager = {
-    createFileLinkContent(file) {
-        const fileLinkContent = document.createElement('div');
-        fileLinkContent.classList.add('file-link-content');
-        const titleSpan = document.createElement('span');
-        titleSpan.classList.add('file-title');
-        titleSpan.textContent = file.file_name || 'Untitled';
-        fileLinkContent.appendChild(titleSpan);
-        const metadataDiv = document.createElement('div');
-        metadataDiv.classList.add('file-metadata');
-        const lastModifiedSpan = document.createElement('span');
-        lastModifiedSpan.classList.add('file-last-modified');
-        lastModifiedSpan.textContent = SidebarUtils.formatDate(file.last_modified);
-        const separatorSpan = document.createElement('span');
-        separatorSpan.classList.add('metadata-separator');
-        separatorSpan.textContent = ' • ';
-        const fileSizeSpan = document.createElement('span');
-        fileSizeSpan.classList.add('file-size');
-        fileSizeSpan.textContent = SidebarUtils.formatFileSize(file.file_size || 0);
-        metadataDiv.appendChild(lastModifiedSpan);
-        metadataDiv.appendChild(separatorSpan);
-        metadataDiv.appendChild(fileSizeSpan);
-        fileLinkContent.appendChild(metadataDiv);
-        return fileLinkContent;
-    },
-
-    createActionMenu(file) {
-        const actionMenu = document.createElement('div');
-        actionMenu.classList.add('file-actions-menu');
-        actionMenu.innerHTML = `
-            <ul>
-                <li><a href="#" class="rename-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Rename</a></li>
-                <li><a href="#" class="download-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Download as JSON</a></li>
-                <li><a href="#" class="delete-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Delete</a></li>
-            </ul>
-        `;
-        return actionMenu;
-    },
-
-    attachActionMenuListeners(actionMenu, actionButton) {
-        actionButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            document.querySelectorAll('.file-actions-menu').forEach(menu => {
-                if (menu !== actionMenu) {
-                    menu.style.display = 'none';
-                }
-            });
-            actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
-        });
-        this.attachActionHandlers(actionMenu);
-    },
-
-    attachActionHandlers(actionMenu) {
-        const downloadLink = actionMenu.querySelector('.download-file-link');
-        const renameLink = actionMenu.querySelector('.rename-file-link');
-        const deleteLink = actionMenu.querySelector('.delete-file-link');
-        if (downloadLink) {
-            downloadLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                actionMenu.style.display = 'none';
-                const fileId = e.target.dataset.fileId;
-                const fileName = e.target.dataset.fileName;
-                if (typeof window.handleDownloadFileClick === 'function') {
-                    window.handleDownloadFileClick(fileId, fileName);
-                } else {
-                    console.error('handleDownloadFileClick function not found');
-                }
-            });
-        }
-
-        if (renameLink) {
-            renameLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                actionMenu.style.display = 'none';
-                const fileId = e.target.dataset.fileId;
-                const fileName = e.target.dataset.fileName;
-                if (typeof window.handleRenameFileClick === 'function') {
-                    window.handleRenameFileClick(fileId, fileName);
-                } else {
-                    console.error('handleRenameFileClick function not found');
-                }
-            });
-        }
-
-        if (deleteLink) {
-            deleteLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                actionMenu.style.display = 'none';
-                const fileId = e.target.dataset.fileId;
-                const fileName = e.target.dataset.fileName;
-                if (typeof window.handleDeleteFileClick === 'function') {
-                    window.handleDeleteFileClick(fileId, fileName);
-                } else {
-                    console.error('handleDeleteFileClick function not found');
-                }
-            });
-        }
-    },
-
-    createFileListItem(file, currentFileId) {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = `/app.html?fileId=${file.id}`;
-        a.title = file.file_name || 'Untitled';
-        const fileLinkContent = this.createFileLinkContent(file);
-        a.appendChild(fileLinkContent);
-        li.appendChild(a);
-        if (file.id === currentFileId) {
-            li.classList.add('active');
-        }
-        const actionButton = document.createElement('button');
-        actionButton.classList.add('file-actions-button');
-        actionButton.innerHTML = '&#x22EE;';
-        actionButton.title = 'File actions';
-        li.appendChild(actionButton);
-        const actionMenu = this.createActionMenu(file);
-        li.appendChild(actionMenu);
-        this.attachActionMenuListeners(actionMenu, actionButton);
-        return li;
-    }
-};
+function createFileItem(file, isActive = false) {
+    return `
+        <li class="${isActive ? 'active' : ''}">
+            <a href="/app.html?fileId=${file.id}" title="${file.file_name || 'Untitled'}">
+                <div class="file-link-content">
+                    <span class="file-title">${file.file_name || 'Untitled'}</span>
+                    <div class="file-metadata">
+                        <span class="file-last-modified">${SidebarUtils.formatDate(file.last_modified)}</span>
+                        <span class="metadata-separator"> • </span>
+                        <span class="file-size">${SidebarUtils.formatFileSize(file.file_size || 0)}</span>
+                    </div>
+                </div>
+            </a>
+            <button class="file-actions-button" title="File actions">&#x22EE;</button>
+            <div class="file-actions-menu">
+                <ul>
+                    <li><a href="#" class="rename-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Rename</a></li>
+                    <li><a href="#" class="download-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Download as JSON</a></li>
+                    <li><a href="#" class="delete-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Delete</a></li>
+                </ul>
+            </div>
+        </li>
+    `;
+}
 
 window.loadUserFiles = async function() {
-    const sidebarFileList = document.getElementById('sidebar-file-list');
-    if (!sidebarFileList) {
-        console.error("Sidebar file list element not found");
-        return;
-    }
-    console.debug("Loading user files");
-    sidebarFileList.innerHTML = SidebarUtils.createLoadingIndicator();
+    const fileList = document.getElementById('sidebar-file-list');
+    if (!fileList) return;
+    
+    fileList.innerHTML = '<li><span class="loading-text">Loading files...</span></li>';
+    
     try {
         const result = await userManager.listUserFiles();
-        if (!result.success) {
-            console.error("Failed to load files:", result.error);
-            sidebarFileList.innerHTML = SidebarUtils.createErrorIndicator('Failed to load files.');
-            return;
-        }
-        const files = result.files;
-        sidebarFileList.innerHTML = '';
-        if (!files || files.length === 0) {
-            console.log("No files found");
-            sidebarFileList.innerHTML = SidebarUtils.createInfoIndicator();
-            return;
-        }
+        if (!result.success) throw new Error(result.error);
+        
         const currentFileId = SidebarUtils.getCurrentFileId();
-        console.log(`Loading ${files.length} files`, { currentFileId });
-        files.forEach(file => {
-            const listItem = FileListManager.createFileListItem(file, currentFileId);
-            sidebarFileList.appendChild(listItem);
-        });
-        initializeActionMenuClickHandler();
-        console.debug("User files loaded successfully");
+        
+        if (!result.files?.length) {
+            fileList.innerHTML = '<li><span class="info-text">No files found.</span></li>';
+            return;
+        }
+        
+        fileList.innerHTML = result.files
+            .map(file => createFileItem(file, file.id === currentFileId))
+            .join('');
+            
     } catch (error) {
-        console.error("Error loading user files:", error);
-        sidebarFileList.innerHTML = SidebarUtils.createErrorIndicator();
+        console.error('Error loading files:', error);
+        fileList.innerHTML = '<li><span class="error-text">Error loading files.</span></li>';
     }
 };
 

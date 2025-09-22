@@ -24,9 +24,9 @@
     <div class="sidebar-section-header">
       <h3 class="sidebar-heading">Your Files</h3>
       <div class="dropdown" id="newFileDropdownContainerSidebar">
-        <button id="newFileBtnSidebar" class="btn-new-file-sidebar">New File <i class="fas fa-caret-down"></i></button>
+        <button id="newFileBtnSidebar" class="btn-new-file-sidebar" onclick="toggleNewFileDropdown()">New File <i class="fas fa-caret-down"></i></button>
         <div id="newFileDropdownSidebar" class="dropdown-content">
-          <a href="#" id="createBlankFileSidebarOpt">Blank File</a>
+          <a href="#" id="createBlankFileSidebarOpt" onclick="showCreateBlankModal()">Blank File</a>
           <a href="#" id="createFromJsonSidebarOpt">From JSON</a>
         </div>
       </div>
@@ -37,11 +37,10 @@
     </ul>
 
     <div id="sidebar-footer">
-        <a href="#" id="settings-link" title="Settings"> <!-- Changed href to # -->
+        <a href="#" id="settings-link" title="Settings">
             <i class="fas fa-cog" id="settings-icon"></i>
         </a>
-        <span id="user-status-text"></span> <!-- Added user status span -->
-        <!-- Replace icon button with text button -->
+        <span id="user-status-text"></span>
         <button id="auth-button" class="auth-button">Sign In</button>
     </div>
   </div>
@@ -124,7 +123,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Create New Blank File</h2>
-        <span class="close-button" id="closeCreateBlankFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeCreateBlankFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Enter the name for your new blank file:</p>
@@ -132,7 +131,7 @@
         <div id="createBlankFile-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelCreateBlankFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelCreateBlankFileButton">Cancel</button>
         <button class="action-button" id="confirmCreateBlankFileButton">Create File</button>
       </div>
     </div>
@@ -142,7 +141,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Rename File</h2>
-        <span class="close-button" id="closeRenameFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeRenameFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Enter the new name for the file:</p>
@@ -150,7 +149,7 @@
         <div id="rename-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelRenameFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelRenameFileButton">Cancel</button>
         <button class="action-button" id="confirmRenameFileButton">Rename</button>
       </div>
     </div>
@@ -160,7 +159,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Confirm File Deletion</h2>
-        <span class="close-button" id="closeDeleteSidebarFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeDeleteSidebarFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
@@ -173,7 +172,7 @@
         <div id="delete-sidebar-file-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelDeleteSidebarFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelDeleteSidebarFileButton">Cancel</button>
         <button class="danger-button" id="confirmDeleteSidebarFileButton">Delete File</button>
       </div>
     </div>
@@ -183,7 +182,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Add Image from URL</h2>
-        <span class="close-button" id="closeImageUrlModal">&times;</span>
+        <span class="close-button modal-close" id="closeImageUrlModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Enter the URL of the image you want to add:</p>
@@ -191,7 +190,7 @@
         <div id="imageUrl-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelImageUrlButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelImageUrlButton">Cancel</button>
         <button class="action-button" id="confirmImageUrlButton">Add Image</button>
       </div>
     </div>

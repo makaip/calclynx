@@ -1,58 +1,32 @@
-const ErrorHandler = {
-    handleAsyncError(error, operation, errorElement = null, userMessage = null) {
-        console.error(`${operation} failed:`, error);
-        
-        const displayMessage = userMessage || error.message || `Failed to ${operation.toLowerCase()}`;
-        
-        if (errorElement) {
-            ModalUtils.showError(errorElement, displayMessage);
-        } else {
-            alert(`Error: ${displayMessage}`);
-        }
-    },
-
-    validateElements(elements, context) {
-        const missingElements = Object.entries(elements)
-            .filter(([key, element]) => !element)
-            .map(([key]) => key);
-
-        if (missingElements.length > 0) {
-            console.error(`${context}: Missing required elements:`, missingElements);
-            return false;
-        }
-        return true;
+function showError(element, message) {
+    if (element) {
+        element.textContent = message;
+        element.style.display = 'block';
     }
-};
+}
 
-const ModalUtils = {
-    showError(errorElement, message) {
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-    },
+function hideError(element) {
+    if (element) element.style.display = 'none';
+}
 
-    hideError(errorElement) {
-        errorElement.style.display = 'none';
-    },
+function showModal(modal) {
+    if (modal) modal.style.display = 'block';
+}
 
-    showModal(modal) {
-        modal.style.display = 'block';
-    },
+function hideModal(modal) {
+    if (modal) modal.style.display = 'none';
+}
 
-    hideModal(modal) {
-        modal.style.display = 'none';
-    },
-
-    setButtonLoading(button, isLoading, loadingText, normalText) {
-        if (!button) return;
-        
-        button.disabled = isLoading;
-        if (isLoading) {
-            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
-        } else {
-            button.innerHTML = normalText;
-        }
+function setButtonLoading(button, isLoading, loadingText, normalText) {
+    if (!button) return;
+    
+    button.disabled = isLoading;
+    if (isLoading) {
+        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+    } else {
+        button.innerHTML = normalText;
     }
-};
+}
 
 function initializeFileDownloadHandler() {
     window.handleDownloadFileClick = async function(fileId, fileName) {

@@ -108,7 +108,11 @@ class MathBoard {
     const isImageUrlInputFocused = document.activeElement && 
       document.activeElement.closest('.image-url-input');
     
-    return isTextEditorFocused || isMathFieldFocused || isImageUrlInputFocused;
+    const isModalInputFocused = document.activeElement && 
+      (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') &&
+      document.activeElement.closest('.modal');
+    
+    return isTextEditorFocused || isMathFieldFocused || isImageUrlInputFocused || isModalInputFocused;
   }
 
   deleteSelectedGroups(groups) {

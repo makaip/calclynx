@@ -7,33 +7,18 @@ function initializeCreateBlankFileModal() {
     const createBlankFileErrorMsg = document.getElementById('createBlankFile-error-message');
 
     window.handleCreateBlankFile = async function() {
-        const elements = {
-            nameInput: newBlankFileNameInput,
-            errorMessage: createBlankFileErrorMsg,
-            confirmButton: confirmCreateBlankFileBtn,
-            modal: createBlankFileModal
-        };
-
-        if (!ErrorHandler.validateElements(elements, "Create blank file modal")) {
-            return;
-        }
-
-        const fileName = elements.nameInput.value.trim();
+        const fileName = newBlankFileNameInput?.value.trim() || '';
 
         if (!fileName) {
-            ErrorHandler.handleAsyncError(
-                new Error('File name cannot be empty.'), 
-                "Create blank file",
-                elements.errorMessage
-            );
-            elements.nameInput.focus();
+            showError(createBlankFileErrorMsg, 'File name cannot be empty.');
+            newBlankFileNameInput?.focus();
             return;
         }
         
-        ModalUtils.hideError(elements.errorMessage);
+        hideError(createBlankFileErrorMsg);
 
         try {
-            ModalUtils.setButtonLoading(elements.confirmButton, true, 'Creating...', 'Create File');
+            setButtonLoading(confirmCreateBlankFileBtn, true, 'Creating...', 'Create File');
 
             const result = await userManager.createBlankFile(fileName);
 
@@ -42,32 +27,27 @@ function initializeCreateBlankFileModal() {
             }
 
             console.log("Blank file created successfully:", fileName);
-            ModalUtils.hideModal(elements.modal);
+            hideModal(createBlankFileModal);
             window.location.href = `/app.html?fileId=${result.fileId}`;
 
         } catch (error) {
-            ErrorHandler.handleAsyncError(error, "Create blank file", elements.errorMessage);
-            elements.nameInput.focus();
+            console.error('Create blank file failed:', error);
+            showError(createBlankFileErrorMsg, error.message || 'Failed to create blank file');
+            newBlankFileNameInput?.focus();
         } finally {
-            ModalUtils.setButtonLoading(elements.confirmButton, false, 'Creating...', 'Create File');
+            setButtonLoading(confirmCreateBlankFileBtn, false, 'Creating...', 'Create File');
         }
     };
 
-    if (closeCreateBlankFileModalBtn) {
-        closeCreateBlankFileModalBtn.addEventListener('click', () => {
-            ModalUtils.hideModal(createBlankFileModal);
-        });
-    }
+    closeCreateBlankFileModalBtn?.addEventListener('click', () => {
+        hideModal(createBlankFileModal);
+    });
 
-    if (cancelCreateBlankFileBtn) {
-        cancelCreateBlankFileBtn.addEventListener('click', () => {
-            ModalUtils.hideModal(createBlankFileModal);
-        });
-    }
+    cancelCreateBlankFileBtn?.addEventListener('click', () => {
+        hideModal(createBlankFileModal);
+    });
 
-    if (confirmCreateBlankFileBtn) {
-        confirmCreateBlankFileBtn.addEventListener('click', () => {
-            window.handleCreateBlankFile();
-        });
-    }
+    confirmCreateBlankFileBtn?.addEventListener('click', () => {
+        window.handleCreateBlankFile();
+    });
 }
