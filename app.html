@@ -196,6 +196,24 @@
     </div>
   </div>
 
+  <div id="createFromJsonModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create File from JSON</h2>
+        <span class="close-button modal-close" id="closeCreateFromJsonModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Enter a name for the new file:</p>
+        <input type="text" id="newJsonFileNameInput" class="modal-input" placeholder="File name">
+        <div id="createFromJson-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button modal-cancel" id="cancelCreateFromJsonButton">Cancel</button>
+        <button class="action-button" id="confirmCreateFromJsonButton">Create File</button>
+      </div>
+    </div>
+  </div>
+
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>

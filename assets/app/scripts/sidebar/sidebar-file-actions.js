@@ -1,3 +1,22 @@
+function sanitizeFileName(fileName) {
+    if (!fileName || typeof fileName !== 'string') {
+        return 'untitled';
+    }
+
+    return fileName.trim()
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/_{2,}/g, '_')
+        .replace(/^_+|_+$/g, '') || 'untitled';
+}
+
+function ensureJsonExt(fileName) {
+    if (!fileName || typeof fileName !== 'string') {
+        return 'untitled.json';
+    }
+    return fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+}
+
 function showError(element, message) {
     if (element) {
         element.textContent = message;

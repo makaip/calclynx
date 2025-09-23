@@ -202,6 +202,66 @@ class User {
         }
     }
 
+    async createFileFromJson(fileName, jsonContent) {
+        try {
+            const { session } = await this.getSession();
+            if (!session) {
+                throw new Error('User not authenticated');
+            }
+
+            const { exists } = await this.checkFileExists(fileName);
+            if (exists) {
+                return { 
+                    success: false, 
+                    error: `File named "${fileName}" already exists.` 
+                };
+            }
+
+            let parsedContent;
+            try {
+                parsedContent = JSON.parse(jsonContent);
+            } catch (parseError) {
+                return {
+                    success: false,
+                    error: 'Invalid JSON content. Please ensure the file contains valid JSON.'
+                };
+            }
+
+            const fileId = this.generateUUID();
+            const filePath = `${session.user.id}/${fileId}.json`;
+            const contentBlob = new Blob([jsonContent], { type: 'application/json' });
+            const fileSize = contentBlob.size;
+
+            const { error: storageError } = await this.client.storage
+                .from('storage')
+                .upload(filePath, contentBlob);
+
+            if (storageError) throw storageError;
+
+            const now = new Date().toISOString();
+            const { error: dbError } = await this.client
+                .from('files')
+                .insert({
+                    id: fileId,
+                    user_id: session.user.id,
+                    file_name: fileName,
+                    created_at: now,
+                    last_modified: now,
+                    file_size: fileSize
+                });
+
+            if (dbError) {
+                await this.client.storage.from('storage').remove([filePath]);
+                throw dbError;
+            }
+
+            return { success: true, fileId };
+        } catch (error) {
+            console.error('Error creating file from JSON:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     generateUUID() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             const r = Math.random() * 16 | 0;

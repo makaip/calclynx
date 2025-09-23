@@ -8,7 +8,7 @@
 
   const readFileAsText = (file) =>
     new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new window.FileReader();
       reader.onload = (e) => resolve(e.target.result);
       reader.onerror = reject;
       reader.readAsText(file);
@@ -31,9 +31,42 @@
       if (file) {
         try {
           const jsonData = await readFileAsText(file);
-          App.mathBoard?.fileManager?.importData(jsonData);
+          
+          // Basic JSON validation
+          try {
+            JSON.parse(jsonData);
+          } catch (parseError) {
+            alert('The selected file does not contain valid JSON. Please check the file format and try again.');
+            return;
+          }
+          
+          // Check if this is being used for "From JSON" functionality
+          if (window.isCreateFromJsonMode) {
+            window.pendingJsonData = jsonData;
+            window.isCreateFromJsonMode = false;
+            
+            const modal = document.getElementById('createFromJsonModal');
+            const input = document.getElementById('newJsonFileNameInput');
+            const errorMsg = document.getElementById('createFromJson-error-message');
+            
+            if (modal) {
+              modal.style.display = 'block';
+              if (input) {
+                input.value = '';
+                input.focus();
+              }
+              if (errorMsg) {
+                errorMsg.style.display = 'none';
+                errorMsg.textContent = '';
+              }
+            }
+          } else {
+            // Original behavior - import into current board
+            App.mathBoard?.fileManager?.importData(jsonData);
+          }
         } catch (err) {
           console.error('Error reading JSON file:', err);
+          alert('Error reading the file. Please ensure it\'s a valid JSON file.');
         }
       }
       // reset to allow re-uploading same file

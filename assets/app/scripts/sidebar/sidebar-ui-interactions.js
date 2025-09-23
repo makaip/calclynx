@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeImageUrlModal();
     initializeRenameFileModal();
     initializeFileDownloadHandler();
+    initializeCreateFromJsonModal();
     initializeEventDelegation();
 });
 
@@ -87,6 +88,13 @@ function initializeEventDelegation() {
             showCreateBlankModal();
             return;
         }
+
+        const createFromJsonLink = target.closest('#createFromJsonSidebarOpt');
+        if (createFromJsonLink) {
+            e.preventDefault();
+            showCreateFromJsonDialog();
+            return;
+        }
         
         if (!target.closest('.dropdown, .file-actions-menu')) {
             document.querySelectorAll('.dropdown-content, .file-actions-menu').forEach(menu => {
@@ -110,6 +118,17 @@ function showCreateBlankModal() {
     UIStateManager.resetFormElements(modal);
     showModal(modal);
     input?.focus();
+}
+
+function showCreateFromJsonDialog() {
+    const dropdown = document.getElementById('newFileDropdownSidebar');
+    const importInput = document.getElementById('importInput');
+    
+    UIStateManager.toggleVisibility(dropdown, false);
+    if (importInput) {
+        window.isCreateFromJsonMode = true;
+        importInput.click();
+    }
 }
 
 function toggleFileActionMenu(button) {
@@ -174,5 +193,67 @@ function initializeSettingsHandler() {
         e.preventDefault();
         showModal(settingsModal);
         console.debug("Settings modal opened");
+    });
+}
+
+function initializeCreateFromJsonModal() {
+    const createFromJsonModal = document.getElementById('createFromJsonModal');
+    const closeCreateFromJsonModalBtn = document.getElementById('closeCreateFromJsonModal');
+    const cancelCreateFromJsonBtn = document.getElementById('cancelCreateFromJsonButton');
+    const confirmCreateFromJsonBtn = document.getElementById('confirmCreateFromJsonButton');
+    const newJsonFileNameInput = document.getElementById('newJsonFileNameInput');
+    const createFromJsonErrorMsg = document.getElementById('createFromJson-error-message');
+
+    window.handleCreateFromJson = async function() {
+        const fileName = newJsonFileNameInput?.value.trim() || '';
+
+        if (!fileName) {
+            showError(createFromJsonErrorMsg, 'File name cannot be empty.');
+            newJsonFileNameInput?.focus();
+            return;
+        }
+
+        if (!window.pendingJsonData) {
+            showError(createFromJsonErrorMsg, 'No JSON data available. Please try again.');
+            return;
+        }
+        
+        hideError(createFromJsonErrorMsg);
+
+        try {
+            setButtonLoading(confirmCreateFromJsonBtn, true, 'Creating...', 'Create File');
+
+            const result = await userManager.createFileFromJson(fileName, window.pendingJsonData);
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            console.log("File created from JSON successfully:", fileName);
+            hideModal(createFromJsonModal);
+            window.pendingJsonData = null;
+            window.location.href = `/app.html?fileId=${result.fileId}`;
+
+        } catch (error) {
+            console.error('Create from JSON failed:', error);
+            showError(createFromJsonErrorMsg, error.message || 'Failed to create file from JSON');
+            newJsonFileNameInput?.focus();
+        } finally {
+            setButtonLoading(confirmCreateFromJsonBtn, false, 'Creating...', 'Create File');
+        }
+    };
+
+    closeCreateFromJsonModalBtn?.addEventListener('click', () => {
+        hideModal(createFromJsonModal);
+        window.pendingJsonData = null;
+    });
+
+    cancelCreateFromJsonBtn?.addEventListener('click', () => {
+        hideModal(createFromJsonModal);
+        window.pendingJsonData = null;
+    });
+
+    confirmCreateFromJsonBtn?.addEventListener('click', () => {
+        window.handleCreateFromJson();
     });
 }

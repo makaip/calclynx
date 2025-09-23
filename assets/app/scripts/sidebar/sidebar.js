@@ -116,12 +116,17 @@ const ModalManager = {
             'renameFileModal',
             'deleteSidebarFileModal', 
             'createBlankFileModal',
+            'createFromJsonModal',
             'imageUrlModal'
         ];
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal && event.target === modal) {
                 modal.style.display = 'none';
+                // Clean up pending JSON data if closing the createFromJsonModal
+                if (modalId === 'createFromJsonModal') {
+                    window.pendingJsonData = null;
+                }
             }
         });
     }

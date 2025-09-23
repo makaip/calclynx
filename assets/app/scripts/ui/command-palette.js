@@ -1,8 +1,3 @@
-/**
- * CommandPalette - A consolidated command palette implementation using BaseModal
- * Combines all the functionality from the multiple files into one clean implementation
- */
-
 class CommandPalette extends BaseModal {
   constructor(options = {}) {
     super({
@@ -556,15 +551,10 @@ class CommandPalette extends BaseModal {
   }
 }
 
-// Initialize command palette after DOM loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Small delay to ensure other scripts are loaded
-  setTimeout(() => {
     try {
       window.commandPalette = new CommandPalette();
-      console.log('Command palette initialized');
     } catch (error) {
       console.error('Error initializing command palette:', error);
     }
-  }, 50);
 });
