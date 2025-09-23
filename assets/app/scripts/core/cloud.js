@@ -151,31 +151,6 @@ class User {
         }
     }
 
-    async saveFileRecord(fileName, fileData) {
-        try {
-            const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
-
-            const { error } = await this.client
-                .from('files')
-                .insert({
-                    name: fileName,
-                    user_id: session.user.id,
-                    content: fileData,
-                    created_at: new Date()
-                });
-
-            if (error) throw error;
-
-            return { success: true };
-        } catch (error) {
-            console.error('Error saving file record:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
     async createBlankFile(fileName) {
         try {
             const { session } = await this.getSession();

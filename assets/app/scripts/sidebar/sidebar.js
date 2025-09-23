@@ -183,6 +183,16 @@ const SidebarResizer = {
         this.applyWidthImmediate(newWidth);
     },
 
+    applyWidthImmediate(width) {
+        const { sidebar } = this.elements;
+        if (!sidebar) return;
+        const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
+        sidebar.style.transition = 'none';
+        sidebar.style.width = `${clampedWidth}px`;
+        sidebar.style.left = document.body.classList.contains('sidebar-open') ? '0px' : `-${clampedWidth}px`;
+        this.currentWidth = clampedWidth;
+    },
+
     handleResizeEnd() {
         if (this.isResizing) {
             this.isResizing = false;

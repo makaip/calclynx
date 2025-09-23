@@ -260,10 +260,10 @@ class MathBoard {
       if (this.drag.active && this.selectedGroups) {
         const screenDeltaX = event.clientX - this.dragStart.x;
         const screenDeltaY = event.clientY - this.dragStart.y;
-        
+
         const canvasDeltaX = screenDeltaX / this.canvasState.scale;
         const canvasDeltaY = screenDeltaY / this.canvasState.scale;
-        
+
         const snapToGrid = event.ctrlKey || event.metaKey;
 
         this.initialPositions.forEach((item) => {
@@ -276,8 +276,8 @@ class MathBoard {
           }
           
           const screenCoords = this.canvasToScreen(newCanvasX, newCanvasY);
-          item.group.style.left = screenCoords.x + 'px';
-          item.group.style.top = screenCoords.y + 'px';
+          item.group.style.left = `${screenCoords.x}px`;
+          item.group.style.top = `${screenCoords.y}px`;
         });
       }
     });
@@ -317,7 +317,10 @@ class MathBoard {
 
   updateTransform() {
     const scale = this.canvasState.scale || 1;
-    this.canvas.style.transform = `translate(${this.canvasState.offset.x}px, ${this.canvasState.offset.y}px) scale(${scale})`;
+    const tx = (this.canvasState.initialOffset.x + this.canvasState.offset.x);
+    const ty = (this.canvasState.initialOffset.y + this.canvasState.offset.y);
+    this.canvas.style.transformOrigin = '0 0';
+    this.canvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
   }
 
   screenToCanvas(x, y) {
