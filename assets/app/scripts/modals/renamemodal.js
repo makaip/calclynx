@@ -11,10 +11,13 @@ function initializeRenameFileModal() {
         fileIdToRename = fileId;
         if (newFileNameInput) {
             newFileNameInput.value = currentName;
-            newFileNameInput.focus();
         }
         hideError(renameErrorMessage);
         showModal(renameFileModal);
+
+        if (newFileNameInput) {
+            newFileNameInput.focus();
+        }
     };
 
     closeRenameFileModalBtn?.addEventListener('click', () => {

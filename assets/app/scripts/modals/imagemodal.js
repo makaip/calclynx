@@ -11,10 +11,13 @@ function initializeImageUrlModal() {
         imageUrlCallback = callback;
         if (imageUrlInput) {
             imageUrlInput.value = '';
-            imageUrlInput.focus();
         }
         hideError(imageUrlErrorMessage);
         showModal(imageUrlModal);
+        
+        if (imageUrlInput) {
+            imageUrlInput.focus();
+        }
     };
 
     function isValidUrl(url) {
