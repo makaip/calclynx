@@ -51,12 +51,8 @@
   const showImageUrlInput = () => {
     if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
       window.showImageUrlModal((url) => {
-        const coords = App.mathBoard
-          ? App.mathBoard.screenToCanvas(
-              App.mathBoard.mouseX ?? window.innerWidth / 2,
-              App.mathBoard.mouseY ?? window.innerHeight / 2
-            )
-          : { x: 100, y: 100 };
+        const { x: mx, y: my } = App.mathBoard?.mouse ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const coords = App.mathBoard ? App.mathBoard.screenToCanvas(mx, my) : { x: 100, y: 100 };
         const imageGroup = new ImageGroup(App.mathBoard, coords.x, coords.y);
         imageGroup.setImageUrl(url);
         App.mathBoard.fileManager.saveState();

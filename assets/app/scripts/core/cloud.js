@@ -151,32 +151,6 @@ class User {
         }
     }
 
-    async checkFileExists(fileName) {
-        try {
-            const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
-
-            const { data: existingFiles, error } = await this.client
-                .from('files')
-                .select('id')
-                .eq('user_id', session.user.id)
-                .eq('file_name', fileName)
-                .limit(1);
-
-            if (error) throw error;
-
-            return { 
-                success: true, 
-                exists: existingFiles && existingFiles.length > 0 
-            };
-        } catch (error) {
-            console.error('Error checking file existence:', error);
-            return { success: false, error: error.message, exists: false };
-        }
-    }
-
     async saveFileRecord(fileName, fileData) {
         try {
             const { session } = await this.getSession();

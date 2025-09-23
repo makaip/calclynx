@@ -8,7 +8,8 @@ class ImageGroupResizeHandler {
 
   createResizeHandles(container) {
     const handles = ['nw', 'ne', 'sw', 'se']; 
-    
+
+    container.querySelectorAll('.resize-handle').forEach(h => h.remove());
     handles.forEach(position => {
       const handle = document.createElement('div');
       handle.className = `resize-handle resize-handle-${position}`;

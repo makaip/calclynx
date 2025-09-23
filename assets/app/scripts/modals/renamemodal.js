@@ -31,38 +31,51 @@ function initializeRenameFileModal() {
     confirmRenameFileBtn?.addEventListener('click', async () => {
         const newName = newFileNameInput?.value.trim() || '';
         
+        if (!fileIdToRename) {
+            showError(renameErrorMessage, 'No file selected to rename.');
+            return;
+        }
+
         if (!newName) {
             showError(renameErrorMessage, 'File name cannot be empty.');
             return;
         }
 
-            hideError(renameErrorMessage);
+        const nameValidation = userManager.validateFileName?.(newName);
+        if (nameValidation?.error) {
+            showError(renameErrorMessage, nameValidation.error);
+            return;
+        }
 
-            try {
-                setButtonLoading(confirmRenameFileBtn, true, 'Renaming...', 'Rename');
-                
-                const result = await userManager.renameFile(fileIdToRename, newName);
-                
-                if (!result.success) {
-                    showError(renameErrorMessage, result.error);
-                    return;
-                }
-                
-                hideModal(renameFileModal);
-                if (typeof window.loadUserFiles === 'function') {
-                    window.loadUserFiles();
-                }
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentFileId = urlParams.get('fileId');
-                if (currentFileId === fileIdToRename) {
-                    await userManager.updateFileTitle(fileIdToRename);
-                }
-            } catch (error) {
-                console.error('Error renaming file:', error);
-                showError(renameErrorMessage, error.message || 'Failed to rename file.');
-            } finally {
-                setButtonLoading(confirmRenameFileBtn, false, 'Renaming...', 'Rename');
+        hideError(renameErrorMessage);
+
+        try {
+            confirmRenameFileBtn.disabled = true;
+            setButtonLoading(confirmRenameFileBtn, true, 'Renaming...', 'Rename');
+            
+            const result = await userManager.renameFile(fileIdToRename, newName);
+            
+            if (!result.success) {
+                showError(renameErrorMessage, result.error);
+                return;
             }
+            
+            hideModal(renameFileModal);
+            if (typeof window.loadUserFiles === 'function') {
+                window.loadUserFiles();
+            }
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFileId = urlParams.get('fileId');
+            if (currentFileId === fileIdToRename) {
+                await userManager.updateFileTitle(fileIdToRename);
+            }
+        } catch (error) {
+            console.error('Error renaming file:', error);
+            showError(renameErrorMessage, error.message || 'Failed to rename file.');
+        } finally {
+            setButtonLoading(confirmRenameFileBtn, false, 'Renaming...', 'Rename');
+            confirmRenameFileBtn.disabled = false;
+        }
     });
 }

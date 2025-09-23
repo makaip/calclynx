@@ -149,44 +149,44 @@ class MathFieldEditor {
 
   static handleStaticCtrlBackspace(event, container) {
     event.preventDefault();
+    const group = container.parentElement;
     if (event.shiftKey) {
-      container.parentElement.remove();
-    } else {
-      container.remove();
-      const group = container.parentElement;
-      if (group && !group.querySelector('.math-field-container')) {
-        group.remove();
-      }
+      group?.remove();
+      return;
+    }
+    container.remove();
+    if (group && !group.querySelector('.math-field-container')) {
+      group.remove();
     }
   }
 
   static handleStaticEmptyBackspace(event, container) {
     const previousContainer = container.previousElementSibling;
+    const group = container.parentElement;
+    const wasLast = group?.querySelectorAll('.math-field-container').length === 1;
     if (previousContainer && previousContainer.classList.contains('math-field-container')) {
       event.preventDefault();
       const currentLatex = container.dataset.latex;
       container.remove();
       MathFieldEditor.edit(previousContainer);
-      if (currentLatex && container.parentElement.mathGroup) {
-        container.parentElement.mathGroup.board.fileManager.saveState();
+      if (currentLatex && group?.mathGroup) {
+        group.mathGroup.board.fileManager.saveState();
       }
-    } else if (container.parentElement.mathGroup && container.parentElement.children.length === 1) {
+    } else if (group?.mathGroup && wasLast) {
       event.preventDefault();
-      container.parentElement.mathGroup.remove();
+      group.mathGroup.remove();
     }
   }
-
+  
   static handleStaticEnter(event, mathField, container) {
     event.preventDefault();
     const latex = mathField.latex().trim();
     
+    const group = container.parentElement;
     if (!latex) {
+      const wasLast = (group?.querySelectorAll('.math-field-container')?.length ?? 0) === 1;
       container.remove();
-      const group = container.parentElement;
-      if (group && !group.querySelector('.math-field-container')) {
-        group.remove();
-      }
-
+      if (group && wasLast) group.remove();
       return;
     }
     
@@ -220,8 +220,8 @@ class MathFieldEditor {
   }
 
   static handleStaticEmptyBlur(container) {
-    container.remove();
     const group = container.parentElement;
+    container.remove();
     if (group && !group.querySelector('.math-field-container')) {
       group.remove();
     }

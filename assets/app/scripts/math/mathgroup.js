@@ -52,6 +52,14 @@ class MathGroup extends ObjectGroup {
   }
 
   remove() {
+    if (this.boundHandleFieldDragMove) {
+      document.removeEventListener('mousemove', this.boundHandleFieldDragMove);
+      this.boundHandleFieldDragMove = null;
+    }
+    if (this.boundHandleFieldDragEnd) {
+      document.removeEventListener('mouseup', this.boundHandleFieldDragEnd);
+      this.boundHandleFieldDragEnd = null;
+    }
     super.remove();
   }
 

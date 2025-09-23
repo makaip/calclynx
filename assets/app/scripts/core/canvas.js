@@ -153,7 +153,7 @@ class MathBoard {
     const containers = [
       { 
         selector: '.math-field-container', 
-        action: (container) => MathField.edit(container) 
+        action: (container) => MathFieldEditor.edit(container) 
       },
       { 
         selector: '.text-field-container', 
@@ -232,11 +232,17 @@ class MathBoard {
         this.drag.active = true;
         this.selectedGroups = groups;
         this.dragStart = { x: event.clientX, y: event.clientY };
-        this.initialPositions = groups.map((group) => ({
-          group: group,
-          left: parseInt(group.style.left, 10),
-          top: parseInt(group.style.top, 10)
-        }));
+        this.initialPositions = groups.map((group) => {
+          const screenPos = { x: parseInt(group.style.left, 10), y: parseInt(group.style.top, 10) };
+          const canvasPos = this.screenToCanvas(screenPos.x, screenPos.y);
+          return {
+            group: group,
+            left: screenPos.x,
+            top: screenPos.y,
+            canvasLeft: canvasPos.x,
+            canvasTop: canvasPos.y
+          };
+        });
 
         groups.forEach((group) => group.classList.add('dragging'));
         event.stopPropagation();
@@ -252,29 +258,26 @@ class MathBoard {
       this.mouse.y = event.clientY;
 
       if (this.drag.active && this.selectedGroups) {
-        const deltaX = event.clientX - this.dragStart.x;
-        const deltaY = event.clientY - this.dragStart.y;
-        const snapToGrid = event.ctrlKey || event.metaKey; // Check for Ctrl/Cmd key
+        const screenDeltaX = event.clientX - this.dragStart.x;
+        const screenDeltaY = event.clientY - this.dragStart.y;
+        
+        const canvasDeltaX = screenDeltaX / this.canvasState.scale;
+        const canvasDeltaY = screenDeltaY / this.canvasState.scale;
+        
+        const snapToGrid = event.ctrlKey || event.metaKey;
 
         this.initialPositions.forEach((item) => {
-          let newLeft = item.left + deltaX;
-          let newTop = item.top + deltaY;
+          let newCanvasX = item.canvasLeft + canvasDeltaX;
+          let newCanvasY = item.canvasTop + canvasDeltaY;
 
           if (snapToGrid) {
-            const canvasCoords = this.screenToCanvas(item.group.offsetLeft + deltaX, item.group.offsetTop + deltaY);
-            const initialCanvasCoords = this.screenToCanvas(item.left, item.top);
-            const canvasDeltaX = canvasCoords.x - initialCanvasCoords.x;
-            const canvasDeltaY = canvasCoords.y - initialCanvasCoords.y;
-
-            const snappedCanvasX = Math.round((initialCanvasCoords.x + canvasDeltaX) / this.drag.gridSize) * this.drag.gridSize;
-            const snappedCanvasY = Math.round((initialCanvasCoords.y + canvasDeltaY) / this.drag.gridSize) * this.drag.gridSize;
-
-            newLeft = Math.round(newLeft / this.drag.gridSize) * this.drag.gridSize;
-            newTop = Math.round(newTop / this.drag.gridSize) * this.drag.gridSize;
+            newCanvasX = Math.round(newCanvasX / this.drag.gridSize) * this.drag.gridSize;
+            newCanvasY = Math.round(newCanvasY / this.drag.gridSize) * this.drag.gridSize;
           }
-
-          item.group.style.left = newLeft + 'px';
-          item.group.style.top = newTop + 'px';
+          
+          const screenCoords = this.canvasToScreen(newCanvasX, newCanvasY);
+          item.group.style.left = screenCoords.x + 'px';
+          item.group.style.top = screenCoords.y + 'px';
         });
       }
     });
@@ -313,13 +316,21 @@ class MathBoard {
   }
 
   updateTransform() {
-    this.canvas.style.transform = `translate(${this.canvasState.offset.x}px, ${this.canvasState.offset.y}px)`;
+    const scale = this.canvasState.scale || 1;
+    this.canvas.style.transform = `translate(${this.canvasState.offset.x}px, ${this.canvasState.offset.y}px) scale(${scale})`;
   }
 
   screenToCanvas(x, y) {
     return {
       x: (x - (this.canvasState.initialOffset.x + this.canvasState.offset.x)) / this.canvasState.scale,
       y: (y - (this.canvasState.initialOffset.y + this.canvasState.offset.y)) / this.canvasState.scale,
+    };
+  }
+
+  canvasToScreen(x, y) {
+    return {
+      x: (x * this.canvasState.scale) + (this.canvasState.initialOffset.x + this.canvasState.offset.x),
+      y: (y * this.canvasState.scale) + (this.canvasState.initialOffset.y + this.canvasState.offset.y),
     };
   }
 }

@@ -7,8 +7,10 @@ class MathFieldStateManager {
   }
 
   finalize() {
-    const latex = this.editor.getMathField().latex().trim();
-    if (!latex) {
+    const mf = this.editor?.getMathField ? this.editor.getMathField() : null;
+    if (!mf) return;
+    const latex = mf.latex().trim();
+    if (!this.isValidLatex(latex)) {
       this.handleEmptyField();
       return;
     }

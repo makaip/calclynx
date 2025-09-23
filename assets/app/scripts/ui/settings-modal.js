@@ -1,5 +1,3 @@
-// Settings Modal Functionality
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const settingsModal = document.getElementById('settings-modal');
@@ -101,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Check authentication and initialize settings
+    let deleteListenerAttached = false;
     async function checkAuthAndInitSettings() {
         try {
             const userInfo = await userManager.getUserInfo();
@@ -116,15 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (userEmailElement) userEmailElement.textContent = currentUserEmail;
             if (confirmUserEmailElement) confirmUserEmailElement.textContent = currentUserEmail;
-            if (confirmDeleteAccountButton) {
+            if (confirmDeleteAccountButton && !deleteListenerAttached) {
                 confirmDeleteAccountButton.addEventListener('click', handleDeleteAccount);
+                deleteListenerAttached = true;
             }
         } catch (error) {
             console.error("Error initializing settings:", error);
         }
     }
 
-    // Initialize settings whenever the modal is opened
     if (settingsModal) {
         settingsModal.addEventListener('click', (e) => {
             // Prevent clicks inside the modal content from closing the modal

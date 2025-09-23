@@ -18,60 +18,73 @@ function initializeEventDelegation() {
             return;
         }
         
-        if (target.matches('#newFileBtnSidebar')) {
+        const newFileBtn = target.closest('#newFileBtnSidebar');
+        if (newFileBtn) {
             e.preventDefault();
             toggleNewFileDropdown();
             return;
         }
         
-        if (target.matches('.file-actions-button')) {
+        const actionsBtn = target.closest('.file-actions-button');
+        if (actionsBtn) {
             e.preventDefault();
-            toggleFileActionMenu(target);
+            toggleFileActionMenu(actionsBtn);
             return;
         }
         
-        if (target.matches('#settings-link')) {
+        const settingsLink = target.closest('#settings-link');
+        if (settingsLink) {
             e.preventDefault();
             showModal(document.getElementById('settings-modal'));
             return;
         }
         
-        if (target.matches('.rename-file-link')) {
+        const renameLink = target.closest('.rename-file-link');
+        if (renameLink) {
             e.preventDefault();
-            const fileId = target.dataset.fileId;
-            const fileName = target.dataset.fileName;
+            const fileId = renameLink.dataset.fileId;
+            const fileName = renameLink.dataset.fileName;
             if (fileId && fileName && typeof window.handleRenameFileClick === 'function') {
                 window.handleRenameFileClick(fileId, fileName);
             }
 
-            const menu = target.closest('.file-actions-menu');
+            const menu = renameLink.closest('.file-actions-menu');
             if (menu) UIStateManager.toggleVisibility(menu, false);
             return;
         }
         
-        if (target.matches('.download-file-link')) {
+        const downloadLink = target.closest('.download-file-link');
+        if (downloadLink) {
             e.preventDefault();
-            const fileId = target.dataset.fileId;
-            const fileName = target.dataset.fileName;
+            const fileId = downloadLink.dataset.fileId;
+            const fileName = downloadLink.dataset.fileName;
             if (fileId && fileName && typeof window.handleDownloadFileClick === 'function') {
                 window.handleDownloadFileClick(fileId, fileName);
             }
 
-            const menu = target.closest('.file-actions-menu');
+            const menu = downloadLink.closest('.file-actions-menu');
             if (menu) UIStateManager.toggleVisibility(menu, false);
             return;
         }
         
-        if (target.matches('.delete-file-link')) {
+        const deleteLink = target.closest('.delete-file-link');
+        if (deleteLink) {
             e.preventDefault();
-            const fileId = target.dataset.fileId;
-            const fileName = target.dataset.fileName;
+            const fileId = deleteLink.dataset.fileId;
+            const fileName = deleteLink.dataset.fileName;
             if (fileId && fileName && typeof window.handleDeleteFileClick === 'function') {
                 window.handleDeleteFileClick(fileId, fileName);
             }
 
-            const menu = target.closest('.file-actions-menu');
+            const menu = deleteLink.closest('.file-actions-menu');
             if (menu) UIStateManager.toggleVisibility(menu, false);
+            return;
+        }
+
+        const createBlankLink = target.closest('#createBlankFileSidebarOpt');
+        if (createBlankLink) {
+            e.preventDefault();
+            showCreateBlankModal();
             return;
         }
         

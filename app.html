@@ -24,9 +24,9 @@
     <div class="sidebar-section-header">
       <h3 class="sidebar-heading">Your Files</h3>
       <div class="dropdown" id="newFileDropdownContainerSidebar">
-        <button id="newFileBtnSidebar" class="btn-new-file-sidebar" onclick="toggleNewFileDropdown()">New File <i class="fas fa-caret-down"></i></button>
+        <button id="newFileBtnSidebar" class="btn-new-file-sidebar">New File <i class="fas fa-caret-down"></i></button>
         <div id="newFileDropdownSidebar" class="dropdown-content">
-          <a href="#" id="createBlankFileSidebarOpt" onclick="showCreateBlankModal()">Blank File</a>
+          <a href="#" id="createBlankFileSidebarOpt">Blank File</a>
           <a href="#" id="createFromJsonSidebarOpt">From JSON</a>
         </div>
       </div>
@@ -75,7 +75,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Settings</h2>
-        <span class="close-button" id="close-settings-modal">&times;</span>
+        <span class="close-button modal-close" id="close-settings-modal">&times;</span>
       </div>
 
       <div class="modal-body">
@@ -247,8 +247,8 @@
   <script src="assets/app/scripts/text/textfield.js"></script>
   
   <!-- Image Scripts -->
-  <script src="assets/app/scripts/image/imagegroup.js"></script>
   <script src="assets/app/scripts/image/imagegroup-resize-handler.js"></script>
+  <script src="assets/app/scripts/image/imagegroup.js"></script>
   
   <!-- worker script MUST be after MathGene scripts and equivalence.js -->
   <script src="assets/app/scripts/utils/mathgene-worker.js"></script>

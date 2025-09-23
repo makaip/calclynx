@@ -29,6 +29,16 @@ const SidebarUtils = {
         return urlParams.get('fileId');
     },
 
+    escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    },
+
     createLoadingIndicator(message = 'Loading files...') {
         return `<li><span class="loading-text">${message}</span></li>`;
     },
@@ -43,24 +53,27 @@ const SidebarUtils = {
 };
 
 function createFileItem(file, isActive = false) {
+    const safeName = SidebarUtils.escapeHtml(file?.file_name ?? 'Untitled');
+    const safeIdAttr = SidebarUtils.escapeHtml(String(file?.id ?? ''));
+    const safeIdUrl = encodeURIComponent(String(file?.id ?? ''));
     return `
         <li class="${isActive ? 'active' : ''}">
-            <a href="/app.html?fileId=${file.id}" title="${file.file_name || 'Untitled'}">
+            <a href="/app.html?fileId=${safeIdUrl}" title="${safeName}">
                 <div class="file-link-content">
-                    <span class="file-title">${file.file_name || 'Untitled'}</span>
+                    <span class="file-title">${safeName}</span>
                     <div class="file-metadata">
                         <span class="file-last-modified">${SidebarUtils.formatDate(file.last_modified)}</span>
                         <span class="metadata-separator"> • </span>
-                        <span class="file-size">${SidebarUtils.formatFileSize(file.file_size || 0)}</span>
+                        <span class="file-size">${SidebarUtils.formatFileSize(file.file_size ?? 0)}</span>
                     </div>
                 </div>
             </a>
-            <button class="file-actions-button" title="File actions">&#x22EE;</button>
-            <div class="file-actions-menu">
+            <button type="button" class="file-actions-button" title="File actions" aria-haspopup="true" aria-expanded="false">&#x22EE;</button>
+            <div class="file-actions-menu" role="menu" aria-hidden="true">
                 <ul>
-                    <li><a href="#" class="rename-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Rename</a></li>
-                    <li><a href="#" class="download-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Download as JSON</a></li>
-                    <li><a href="#" class="delete-file-link" data-file-id="${file.id}" data-file-name="${file.file_name || 'Untitled'}">Delete</a></li>
+                    <li><a href="#" class="rename-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Rename</a></li>
+                    <li><a href="#" class="download-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Download as JSON</a></li>
+                    <li><a href="#" class="delete-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Delete</a></li>
                 </ul>
             </div>
         </li>
@@ -93,19 +106,6 @@ window.loadUserFiles = async function() {
         fileList.innerHTML = '<li><span class="error-text">Error loading files.</span></li>';
     }
 };
-
-function initializeActionMenuClickHandler() {
-    document.removeEventListener('click', handleActionMenuClose);
-    document.addEventListener('click', handleActionMenuClose);
-}
-
-function handleActionMenuClose(e) {
-    if (!e.target.closest('.file-actions-button') && !e.target.closest('.file-actions-menu')) {
-        document.querySelectorAll('.file-actions-menu').forEach(menu => {
-            menu.style.display = 'none';
-        });
-    }
-}
 
 const ModalManager = {
     init() {
@@ -171,8 +171,10 @@ const SidebarResizer = {
     handleResizeStart(e) {
         this.isResizing = true;
         document.body.classList.add('no-select');
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleResizeEnd.bind(this));
+        this._onMouseMove ||= this.handleMouseMove.bind(this);
+        this._onMouseUp   ||= this.handleResizeEnd.bind(this);
+        document.addEventListener('mousemove', this._onMouseMove);
+        document.addEventListener('mouseup', this._onMouseUp);
     },
 
     handleMouseMove(e) {
@@ -185,27 +187,10 @@ const SidebarResizer = {
         if (this.isResizing) {
             this.isResizing = false;
             document.body.classList.remove('no-select');
-            document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-            document.removeEventListener('mouseup', this.handleResizeEnd.bind(this));
+            if (this._onMouseMove) document.removeEventListener('mousemove', this._onMouseMove);
+            if (this._onMouseUp)   document.removeEventListener('mouseup', this._onMouseUp);
             this.applyWidthWithTransition(this.currentWidth);
         }
-    },
-
-    applyWidthImmediate(width) {
-        const { sidebar } = this.elements;
-        if (!sidebar) return;
-
-        const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
-        sidebar.style.transition = 'none';
-        sidebar.style.width = `${clampedWidth}px`;
-        
-        if (document.body.classList.contains('sidebar-open')) {
-            sidebar.style.left = '0px';
-        } else {
-            sidebar.style.left = `-${clampedWidth}px`;
-        }
-        
-        this.currentWidth = clampedWidth;
     },
 
     applyWidthWithTransition(width) {
@@ -225,7 +210,6 @@ const SidebarResizer = {
         this.currentWidth = clampedWidth;
     }
 };
-
 
 document.addEventListener('DOMContentLoaded', () => {
     ModalManager.init();

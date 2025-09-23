@@ -48,12 +48,13 @@ class MathFieldEventHandler {
 
   handleCtrlBackspace(event) {
     event.preventDefault();
+    const board = this.mathGroup?.board;
     if (event.shiftKey) {
       this.mathGroup.remove();
     } else {
       this.removeCurrentField();
     }
-    this.mathGroup.board.fileManager.saveState();
+    board?.fileManager?.saveState();
   }
 
   handleEnter(event) {
