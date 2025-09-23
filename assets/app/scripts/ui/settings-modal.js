@@ -1,5 +1,3 @@
-// Settings Modal Functionality
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const settingsModal = document.getElementById('settings-modal');
@@ -83,17 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmDeleteAccountButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Deleting...`;
 
         try {
-            // Call the Supabase RPC function to delete the user account
-            const { error } = await supabaseClient.rpc('delete_user_account');
+            const result = await userManager.deleteAccount();
 
-            if (error) {
-                throw new Error(`Failed to delete account: ${error.message}`);
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to delete account');
             }
 
             alert('Account deleted successfully.');
             
-            // Force sign out locally and redirect
-            await supabaseClient.auth.signOut();
             window.location.href = '/login.html?deleted=true';
 
         } catch (error) {
@@ -104,31 +99,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Check authentication and initialize settings
+    let deleteListenerAttached = false;
     async function checkAuthAndInitSettings() {
-        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        try {
+            const userInfo = await userManager.getUserInfo();
 
-        if (sessionError || !session) {
-            console.error("No session found or error getting session:", sessionError);
-            // Don't redirect - we're in a modal in the app, not a separate page
-            return;
-        }
+            if (!userInfo.isLoggedIn) {
+                console.error("No session found or user not logged in");
+                return;
+            }
 
-        // User is logged in
-        currentUserId = session.user.id;
-        currentUserEmail = session.user.email;
+            currentUserId = userInfo.id;
+            currentUserEmail = userInfo.email;
 
-        // Display user email
-        if (userEmailElement) userEmailElement.textContent = currentUserEmail;
-        if (confirmUserEmailElement) confirmUserEmailElement.textContent = currentUserEmail;
-
-        // Add delete confirmation event listener
-        if (confirmDeleteAccountButton) {
-            confirmDeleteAccountButton.addEventListener('click', handleDeleteAccount);
+            if (userEmailElement) userEmailElement.textContent = currentUserEmail;
+            if (confirmUserEmailElement) confirmUserEmailElement.textContent = currentUserEmail;
+            if (confirmDeleteAccountButton && !deleteListenerAttached) {
+                confirmDeleteAccountButton.addEventListener('click', handleDeleteAccount);
+                deleteListenerAttached = true;
+            }
+        } catch (error) {
+            console.error("Error initializing settings:", error);
         }
     }
 
-    // Initialize settings whenever the modal is opened
     if (settingsModal) {
         settingsModal.addEventListener('click', (e) => {
             // Prevent clicks inside the modal content from closing the modal

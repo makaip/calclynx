@@ -1,8 +1,6 @@
-/* Import all component stylesheets */
 @import 'reset.css';
 @import 'canvas.css';
-@import 'object-group.css'; /* Common styles for all group types */
-@import 'math-group.css';
+@import 'object-group.css';
 @import 'math-field.css';
 @import 'text-field.css';
 @import 'image-group.css';
@@ -13,3 +11,4 @@
 @import 'context-menu.css';
 @import 'settings-modal.css';
 @import 'zoom-controls.css';
+@import 'modular-modal.css'; 

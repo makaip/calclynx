@@ -1,13 +1,11 @@
 class ContextMenu {
     constructor(menuElement) {
       this.menuElement = menuElement;
-      // Hide the menu if clicking anywhere outside or on window resize.
       document.addEventListener('click', () => this.hide());
       window.addEventListener('resize', () => this.hide());
     }
   
     show(x, y, items) {
-      // Clear any existing menu items.
       this.menuElement.innerHTML = '';
   
       items.forEach(item => {
@@ -64,11 +62,11 @@ class ContextMenu {
     const targetGroupElement = targetMathGroupElement || targetTextGroupElement || targetImageGroupElement;
     const isAnythingSelected = ObjectGroup.getSelectedGroups().length > 0;
     const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
-    const canPaste = window.mathBoard && window.mathBoard.clipboard;
+    const canPaste = window.App?.mathBoard && window.App.mathBoard.clipboard;
   
     // Convert the screen coordinates to canvas coordinates.
-    const canvasCoords = window.mathBoard
-      ? window.mathBoard.screenToCanvas(e.pageX, e.pageY)
+    const canvasCoords = window.App?.mathBoard
+      ? window.App.mathBoard.screenToCanvas(e.pageX, e.pageY)
       : { x: e.pageX, y: e.pageY };
   
     // Build the menu items array.
@@ -76,23 +74,24 @@ class ContextMenu {
       {
         label: 'New Math Stack',
         action: () => {
-          new MathGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.mathBoard.fileManager.saveState();
+          new MathGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
+          window.App.mathBoard.fileManager.saveState();
         }
       },
       {
         label: 'New Text Stack',
         action: () => {
-          new TextGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.mathBoard.fileManager.saveState();
+          new TextGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
+          window.App.mathBoard.fileManager.saveState();
         }
       },
       {
         label: 'New Image from URL',
         action: () => {
-          window.imageUrlInput.show((url) => {
-            const imageGroup = new ImageGroup(window.mathBoard, canvasCoords.x, canvasCoords.y);
+          window.showImageUrlModal((url) => {
+            const imageGroup = new ImageGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
             imageGroup.setImageUrl(url);
+            window.App.mathBoard.fileManager.saveState();
           });
         }
       },
@@ -106,7 +105,7 @@ class ContextMenu {
             ObjectGroup.clearAllSelections();
             targetGroupElement.classList.add('selected');
           }
-          window.mathBoard.cutSelectedGroups();
+          window.App.mathBoard.cutSelectedGroups();
         }
       },
       {
@@ -118,14 +117,14 @@ class ContextMenu {
              ObjectGroup.clearAllSelections();
              targetGroupElement.classList.add('selected');
            }
-           window.mathBoard.copySelectedGroups();
+           window.App.mathBoard.copySelectedGroups();
         }
       },
       {
         label: 'Paste',
         disabled: !canPaste,
         action: () => {
-          window.mathBoard.pasteGroups(); // Paste uses internal mouse coords
+          window.App.mathBoard.pasteGroups(); 
         }
       },
       { separator: true },
@@ -141,7 +140,7 @@ class ContextMenu {
             const selectedGroups = ObjectGroup.getSelectedGroups();
             selectedGroups.forEach(group => group.remove());
           }
-          window.mathBoard.fileManager.saveState();
+          window.App.mathBoard.fileManager.saveState();
         }
       }
     ];

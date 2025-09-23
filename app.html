@@ -5,32 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CalcLynx</title>
   
-  <!-- MathQuill CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="assets/app/styles/main.css" /> 
-  <link rel="stylesheet" href="assets/app/styles/text-field.css" />
-  <link rel="stylesheet" href="assets/app/styles/modular-modal.css" /> 
-  
-  <!-- Command Palette Selection Style -->
-  <style>
 
-  </style>
+  <link rel="stylesheet" href="assets/app/styles/main.css" /> 
 </head>
 <body>
-  <!-- Hamburger Menu -->
   <div id="menu-container">
     <button id="hamburgerBtn">☰</button>
-    <div id="file-title">Untitled</div> <!-- Add file title display -->
+    <div id="file-title">Untitled</div>
   </div>
 
-  <!-- Sidebar -->
   <div id="sidebar">
-    <div id="sidebar-resizer"></div> <!-- Add this line -->
+    <div id="sidebar-resizer"></div>
     <h2>Calclynx</h2>
-    <!-- User email display under logo -->
     <div id="user-email-display" class="user-email-display"></div>
     
     <div class="sidebar-section-header">
@@ -48,20 +36,17 @@
         <li><span class="loading-text">Loading files...</span></li>
     </ul>
 
-    <!-- Sidebar Footer -->
     <div id="sidebar-footer">
-        <a href="#" id="settings-link" title="Settings"> <!-- Changed href to # -->
+        <a href="#" id="settings-link" title="Settings">
             <i class="fas fa-cog" id="settings-icon"></i>
         </a>
-        <span id="user-status-text"></span> <!-- Added user status span -->
-        <!-- Replace icon button with text button -->
+        <span id="user-status-text"></span>
         <button id="auth-button" class="auth-button">Sign In</button>
     </div>
   </div>
 
   <!-- Main Content Area -->
   <div id="main-content">
-    <!-- Sync Indicator -->
     <div id="sync-indicator">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud">
         <polyline points="16 16 12 12 8 16"></polyline>
@@ -81,25 +66,19 @@
       <button id="reset-zoom-btn" class="reset-zoom-btn">Reset Zoom</button>
     </div>
 
-    <!-- The huge canvas holds all math groups -->
     <div id="canvas"></div>
-
-    <!-- Right-Click Context Menu -->
     <div id="context-menu" class="context-menu"></div>
-
-    <!-- Hidden file input for importing JSON -->
     <input type="file" id="importInput" accept=".json" style="display: none;">
   </div>
 
-  <!-- Settings Modal -->
   <div id="settings-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Settings</h2>
-        <span class="close-button" id="close-settings-modal">&times;</span>
+        <span class="close-button modal-close" id="close-settings-modal">&times;</span>
       </div>
+
       <div class="modal-body">
-        <!-- Account Management Section -->
         <div class="settings-section">
           <h3>Account Management</h3>
           <div class="settings-info">
@@ -107,7 +86,6 @@
           </div>
         </div>
 
-        <!-- Danger Zone Section -->
         <div class="settings-section danger-zone">
           <h3>Danger Zone</h3>
           <div class="settings-info">
@@ -119,7 +97,6 @@
     </div>
   </div>
 
-  <!-- Delete Account Confirmation Modal -->
   <div id="deleteAccountModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -142,12 +119,11 @@
     </div>
   </div>
 
-  <!-- Create New Blank File Modal -->
   <div id="createBlankFileModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Create New Blank File</h2>
-        <span class="close-button" id="closeCreateBlankFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeCreateBlankFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Enter the name for your new blank file:</p>
@@ -155,18 +131,17 @@
         <div id="createBlankFile-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelCreateBlankFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelCreateBlankFileButton">Cancel</button>
         <button class="action-button" id="confirmCreateBlankFileButton">Create File</button>
       </div>
     </div>
   </div>
 
-  <!-- Rename File Modal -->
   <div id="renameFileModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Rename File</h2>
-        <span class="close-button" id="closeRenameFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeRenameFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Enter the new name for the file:</p>
@@ -174,18 +149,17 @@
         <div id="rename-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelRenameFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelRenameFileButton">Cancel</button>
         <button class="action-button" id="confirmRenameFileButton">Rename</button>
       </div>
     </div>
   </div>
 
-  <!-- Delete File Confirmation Modal (Sidebar) -->
   <div id="deleteSidebarFileModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Confirm File Deletion</h2>
-        <span class="close-button" id="closeDeleteSidebarFileModal">&times;</span>
+        <span class="close-button modal-close" id="closeDeleteSidebarFileModal">&times;</span>
       </div>
       <div class="modal-body">
         <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
@@ -198,8 +172,44 @@
         <div id="delete-sidebar-file-error-message" class="error-message" style="display: none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" id="cancelDeleteSidebarFileButton">Cancel</button>
+        <button class="cancel-button modal-cancel" id="cancelDeleteSidebarFileButton">Cancel</button>
         <button class="danger-button" id="confirmDeleteSidebarFileButton">Delete File</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="imageUrlModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Image from URL</h2>
+        <span class="close-button modal-close" id="closeImageUrlModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Enter the URL of the image you want to add:</p>
+        <input type="url" id="imageUrlInput" class="modal-input" placeholder="https://example.com/image.jpg">
+        <div id="imageUrl-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button modal-cancel" id="cancelImageUrlButton">Cancel</button>
+        <button class="action-button" id="confirmImageUrlButton">Add Image</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="createFromJsonModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create File from JSON</h2>
+        <span class="close-button modal-close" id="closeCreateFromJsonModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Enter a name for the new file:</p>
+        <input type="text" id="newJsonFileNameInput" class="modal-input" placeholder="File name">
+        <div id="createFromJson-error-message" class="error-message" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-button modal-cancel" id="cancelCreateFromJsonButton">Cancel</button>
+        <button class="action-button" id="confirmCreateFromJsonButton">Create File</button>
       </div>
     </div>
   </div>
@@ -211,6 +221,9 @@
 
   <!-- Authentication Scripts -->
   <script src="assets/app/scripts/auth/initsupabaseapp.js"></script>
+  
+  <!-- Cloud and User Management -->
+  <script src="assets/app/scripts/core/cloud.js"></script>
 
   <!-- MathGene Library -->
   <script src="libs/mathgene/mg_translate.js"></script>
@@ -219,60 +232,66 @@
   <!-- Core Object Group (base class) -->
   <script src="assets/app/scripts/core/objectgroup.js"></script>
   
+  <!-- Utility Scripts -->
+  <script src="assets/app/scripts/utils/equivalence-utils.js"></script>
+  <script src="assets/app/scripts/utils/equivalence.js"></script>
+
   <!-- File Management Scripts -->
   <script src="assets/app/scripts/file/filereader.js"></script>
   <script src="assets/app/scripts/file/filewriter.js"></script>
   <script src="assets/app/scripts/file/filemanager.js"></script>
-
   
   <!-- Math Scripts -->
-  <script src="assets/app/scripts/math/navigation.js"></script>
-  <script src="assets/app/scripts/math/mathboard.js"></script>
+  <script src="assets/app/scripts/core/navigation.js"></script>
+  <script src="assets/app/scripts/core/selection.js"></script>
+  <script src="assets/app/scripts/core/clipboard.js"></script>
+  <script src="assets/app/scripts/core/canvas.js"></script>
+
   <script src="assets/app/scripts/math/mathgroup.js"></script>
+  <script src="assets/app/scripts/math/mathfield-container.js"></script>
+  <script src="assets/app/scripts/math/mathfield-editor.js"></script>
+  <script src="assets/app/scripts/math/mathfield-event-handler.js"></script>
+  <script src="assets/app/scripts/math/mathfield-state-manager.js"></script>
+  <script src="assets/app/scripts/math/mathfield-ui-manager.js"></script>
   <script src="assets/app/scripts/math/mathfield.js"></script>
-  <script src="assets/app/scripts/math/equivalence.js"></script>
+  <script src="assets/app/scripts/math/mathfield-utils.js"></script>
   
   <!-- Text Scripts -->
   <script src="assets/app/scripts/text/textgroup.js"></script>
-  <!-- TextField modules in dependency order -->
+  <!-- order dependent -->
   <script src="assets/app/scripts/text/textfield-content.js"></script>
   <script src="assets/app/scripts/text/textfield-utils.js"></script>
   <script src="assets/app/scripts/text/textfield-math.js"></script>
   <script src="assets/app/scripts/text/textfield.js"></script>
   
   <!-- Image Scripts -->
+  <script src="assets/app/scripts/image/imagegroup-resize-handler.js"></script>
   <script src="assets/app/scripts/image/imagegroup.js"></script>
   
-  <!-- Worker script MUST be after MathGene scripts and equivalence.js -->
+  <!-- worker script MUST be after MathGene scripts and equivalence.js -->
   <script src="assets/app/scripts/utils/mathgene-worker.js"></script>
 
   <!-- UI Scripts -->
   <script src="assets/app/scripts/ui/contextmenu.js"></script>
   
-  <!-- Modular Modal System -->
+  <!-- Modal System -->
   <script src="assets/app/scripts/ui/base-modal.js"></script>
-  <script src="assets/app/scripts/ui/variable-input-manager.js"></script>
-  <script src="assets/app/scripts/ui/command-template.js"></script>
-  <script src="assets/app/scripts/ui/text-input-modal.js"></script>
-  <script src="assets/app/scripts/ui/modular-command-palette.js"></script>
-  
+  <script src="assets/app/scripts/ui/command-palette.js"></script>
+
   <!-- Sidebar Scripts -->
-  <!-- sidebar.js contains helpers (like generateUUID), loadUserFiles and main sidebar DOM logic -->
-  <script src="assets/app/scripts/ui/sidebar.js"></script> 
-  <!-- sidebar-file-actions.js defines handlers like handleCreateBlankFile (uses generateUUID) and modal logic -->
-  <script src="assets/app/scripts/ui/sidebar-file-actions.js"></script>
-  <!-- sidebar-ui-interactions.js handles other UI like new file dropdown, settings -->
-  <script src="assets/app/scripts/ui/sidebar-ui-interactions.js"></script>
+  <script src="assets/app/scripts/sidebar/sidebar.js"></script> 
+  <script src="assets/app/scripts/sidebar/sidebar-file-actions.js"></script>
+  <script src="assets/app/scripts/sidebar/sidebar-ui-interactions.js"></script>
+
+  <script src="assets/app/scripts/modals/renamemodal.js"></script>
+  <script src="assets/app/scripts/modals/deletemodal.js"></script>
+  <script src="assets/app/scripts/modals/createmodal.js"></script>
+  <script src="assets/app/scripts/modals/imagemodal.js"></script>
   
   <!-- Settings Scripts -->
   <script src="assets/app/scripts/ui/settings-modal.js"></script>
 
-  <!-- Core initialization scripts -->
-  <script src="assets/app/scripts/core/app.js"></script>
   <!-- main.js initializes mathBoard etc. -->
   <script src="assets/app/scripts/core/main.js"></script>
-  
-  <!-- Initialize modular system -->
-  <script src="assets/app/scripts/ui/modular-init.js"></script>
 </body>
 </html>

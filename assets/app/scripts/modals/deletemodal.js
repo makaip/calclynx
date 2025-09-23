@@ -1,0 +1,74 @@
+function initializeDeleteFileModal() {
+    const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
+    const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
+    const cancelDeleteSidebarFileBtn = document.getElementById('cancelDeleteSidebarFileButton');
+    const confirmDeleteSidebarFileBtn = document.getElementById('confirmDeleteSidebarFileButton');
+    const fileNameToDeleteSidebarElement = document.getElementById('fileNameToDeleteSidebar');
+    const doNotAskAgainDeleteFileCheckbox = document.getElementById('doNotAskAgainDeleteFile');
+    const deleteSidebarFileErrorMessage = document.getElementById('delete-sidebar-file-error-message');
+    let fileIdToDeleteFromSidebar = null;
+
+    window.handleDeleteFileClick = function(fileId, fileName) {
+        fileIdToDeleteFromSidebar = fileId;
+        if (fileNameToDeleteSidebarElement) {
+            fileNameToDeleteSidebarElement.textContent = fileName;
+        }
+        hideError(deleteSidebarFileErrorMessage);
+        if (doNotAskAgainDeleteFileCheckbox) {
+            doNotAskAgainDeleteFileCheckbox.checked = false;
+        }
+
+        if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
+            confirmActualFileDelete();
+        } else {
+            showModal(deleteSidebarFileModal);
+        }
+    };
+
+    async function confirmActualFileDelete() {
+        if (!fileIdToDeleteFromSidebar) return;
+        
+        try {
+            setButtonLoading(confirmDeleteSidebarFileBtn, true, 'Deleting...', 'Delete File');
+            
+            const result = await userManager.deleteFileRecord(fileIdToDeleteFromSidebar);
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            hideModal(deleteSidebarFileModal);
+            if (typeof window.loadUserFiles === 'function') {
+                window.loadUserFiles();
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFileId = urlParams.get('fileId');
+            if (currentFileId === fileIdToDeleteFromSidebar) {
+                await userManager.updateFileTitle(null);
+                window.location.href = '/app.html';
+            }
+
+        } catch (error) {
+            console.error('Error deleting file from sidebar:', error);
+            showError(deleteSidebarFileErrorMessage, error.message || 'Failed to delete file.');
+        } finally {
+            setButtonLoading(confirmDeleteSidebarFileBtn, false, 'Deleting...', 'Delete File');
+        }
+    }
+
+    closeDeleteSidebarFileModalBtn?.addEventListener('click', () => {
+        hideModal(deleteSidebarFileModal);
+    });
+
+    cancelDeleteSidebarFileBtn?.addEventListener('click', () => {
+        hideModal(deleteSidebarFileModal);
+    });
+
+    confirmDeleteSidebarFileBtn?.addEventListener('click', async () => {
+        if (doNotAskAgainDeleteFileCheckbox?.checked) {
+            sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
+        }
+        await confirmActualFileDelete();
+    });
+}

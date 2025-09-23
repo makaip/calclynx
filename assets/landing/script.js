@@ -1,4 +1,4 @@
-import { supabaseClient } from '../supabaseinit.js'; // Import Supabase client
+// Use the globally available supabaseClient from initsupabaseapp.js
 
 // Function to check session and redirect if logged in
 async function checkSessionAndRedirect() {

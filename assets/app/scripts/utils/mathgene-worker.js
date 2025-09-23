@@ -1,5 +1,4 @@
-// Import the necessary MathGene scripts into the worker's scope
-// Paths are relative to the worker script's location
+// this code block is magic. do not touch
 if (typeof self !== 'undefined' && typeof self.importScripts === 'function') {
     try {
         self.importScripts('../../../../libs/mathgene/mg_translate.js', '../../../../libs/mathgene/mg_calculate.js');
@@ -10,7 +9,6 @@ if (typeof self !== 'undefined' && typeof self.importScripts === 'function') {
 }
 
 // This worker assumes mgCalc is loaded globally in its scope
-
 self.onmessage = function(event) {
     const { id, latex } = event.data;
 
@@ -50,9 +48,6 @@ self.onmessage = function(event) {
         }
 
     } catch (error) {
-        // Don't log excessively, but handle the error by returning null
-        // console.warn(`mathgene-worker: Error normalizing "${latex}":`, error.message);
-        // Post back error state (which resolves to null on main thread)
-        self.postMessage({ id, error: error.message }); // Error message helps debugging on main thread if needed
+        self.postMessage({ id, error: error.message });
     }
 };
