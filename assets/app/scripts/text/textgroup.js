@@ -1,18 +1,40 @@
 class TextGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
-    // Call parent constructor with groupType
     super(board, x, y, data, 'text');
     
-    // Create single text field
     let content = '';
     if (data && data.fields && data.fields.length > 0) {
       content = data.fields[0];
-      // Handle different content formats - ensure content is in expected format
-      if (typeof content !== 'string' && typeof content !== 'object') {
-        console.warn('Unexpected content format in TextGroup:', content);
-        content = '';
-      }
     }
-    this.textField = new TextField(this, !data, content);
+
+    try {
+      const proseMirrorAvailable = (window.proseMirrorReady || window.ProseMirror) && 
+                                   typeof TextFieldProseMirror !== 'undefined';
+      
+      if (proseMirrorAvailable) {
+        const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
+        this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
+        this.useProseMirror = true;
+        
+        if (data && TextFieldCompatibility.detectContentFormat(content) !== 'prosemirror-v3') {
+          console.log('Auto-upgrading legacy content to ProseMirror v3.0');
+        } else {
+          console.log('Using ProseMirror TextField v3.0');
+        }
+      } else {
+        if (typeof TextField !== 'undefined') {
+          const normalizedContent = TextFieldCompatibility.normalizeContent(content, '2.0');
+          this.textField = new TextField(this, !data, normalizedContent);
+          this.useProseMirror = false;
+          console.log('Using legacy TextField v2.0 (ProseMirror not available)');
+        } else {
+          throw new Error('No TextField implementation available');
+        }
+      }
+      
+    } catch (error) {
+      console.error('Failed to create TextField:', error);
+      this.textField = null;
+    }
   }
 }

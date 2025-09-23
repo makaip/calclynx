@@ -218,6 +218,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script>
+    window.proseMirrorReady = false;
+    document.addEventListener('DOMContentLoaded', function() {
+      import('./assets/app/scripts/text/prosemirror-imports.js')
+        .then(() => {
+          console.log('ProseMirror modules loaded successfully');
+        })
+        .catch(err => {
+          console.warn('ProseMirror modules failed to load, falling back to legacy TextField:', err);
+        });
+    });
+  </script>
 
   <!-- Authentication Scripts -->
   <script src="assets/app/scripts/auth/initsupabaseapp.js"></script>
@@ -258,11 +271,14 @@
   
   <!-- Text Scripts -->
   <script src="assets/app/scripts/text/textgroup.js"></script>
-  <!-- order dependent -->
-  <script src="assets/app/scripts/text/textfield-content.js"></script>
-  <script src="assets/app/scripts/text/textfield-utils.js"></script>
-  <script src="assets/app/scripts/text/textfield-math.js"></script>
-  <script src="assets/app/scripts/text/textfield.js"></script>
+  
+  <!-- Compatibility Handler (must load before ProseMirror scripts) -->
+  <script src="assets/app/scripts/text/textfield-compatibility.js"></script>
+  
+  <!-- ProseMirror-based Text Scripts (v3.0) -->
+  <script src="assets/app/scripts/text/textfield-prosemirror-content.js"></script>
+  <script src="assets/app/scripts/text/textfield-math-nodeview.js"></script>
+  <script src="assets/app/scripts/text/textfield-prosemirror.js"></script>
   
   <!-- Image Scripts -->
   <script src="assets/app/scripts/image/imagegroup-resize-handler.js"></script>

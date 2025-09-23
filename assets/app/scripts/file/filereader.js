@@ -62,12 +62,10 @@ class FileReader {
         this.board.canvas.innerHTML = '';
     }
 
-    // Modified importData to accept an optional flag to prevent immediate saving
     importData(jsonData, shouldSave = true) {
         try {
             let parsedData = JSON.parse(jsonData);
 
-            // Expect modern versioned format only
             if (!parsedData.version || !parsedData.groups) {
                 console.error("Invalid data format. Expected versioned format with groups array.");
                 this.board.canvas.innerHTML = '';
@@ -75,13 +73,18 @@ class FileReader {
             }
 
             console.log(`Loading data format version: ${parsedData.version}`);
-
-            // Clear the current canvas (remove all existing math and text groups).
             this.board.canvas.innerHTML = '';
             
             parsedData.groups.forEach((groupData) => {
                 if (groupData.type === 'text') {
-                    new TextGroup(this.board, 0, 0, groupData);
+                    if (parsedData.version === "3.0" && 
+                        !TextFieldCompatibility.shouldUseProseMirror(groupData.fields?.[0])) {
+                        console.warn("ProseMirror not available, converting v3.0 content to legacy format");
+                        const convertedGroupData = TextFieldCompatibility.convertV3ToV2(groupData);
+                        new TextGroup(this.board, 0, 0, convertedGroupData);
+                    } else {
+                        new TextGroup(this.board, 0, 0, groupData);
+                    }
                 } else if (groupData.type === 'math') {
                     new MathGroup(this.board, 0, 0, groupData);
                 } else if (groupData.type === 'image') {
