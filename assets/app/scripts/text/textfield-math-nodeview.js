@@ -35,6 +35,28 @@ class MathNodeView {
         enter: () => {
           this.exitMathField('right');
         },
+        moveOutOf: (dir) => {
+          const MQInterface = window.MathQuill.getInterface(2);
+          if (dir === MQInterface.L) {
+            this.exitMathField('left');
+          } else if (dir === MQInterface.R) {
+            this.exitMathField('right');
+          }
+        },
+        deleteOutOf: (dir) => {
+          const latex = this.mathField.latex();
+          const MQInterface = window.MathQuill.getInterface(2);
+          if (latex.length === 0) {
+            const pos = this.getPos();
+            const tr = this.view.state.tr.delete(pos, pos + 1);
+            this.view.dispatch(tr);
+            this.view.focus();
+          } else if (dir === MQInterface.L) {
+            this.exitMathField('left');
+          } else if (dir === MQInterface.R) {
+            this.exitMathField('right');
+          }
+        },
         upOutOf: () => {
           this.exitMathField('left');
         },
@@ -46,6 +68,10 @@ class MathNodeView {
 
     this.dom.mathquillObject = this.mathField;
     this.mathField.latex(this.node.attrs.latex);
+
+    this.dom.addEventListener('focus', () => {
+      this.blurOtherMathFields();
+    }, true);
 
     if (this.node.attrs.latex === '') {
       this.shouldFocus = true;
@@ -66,6 +92,15 @@ class MathNodeView {
     });
   }
 
+  blurOtherMathFields() {
+    const allMathFields = this.view.dom.querySelectorAll('.mathquill');
+    allMathFields.forEach(field => {
+      if (field !== this.dom && field.mathquillObject) {
+        field.mathquillObject.blur();
+      }
+    });
+  }
+
   updateNodeContent() {
     if (!this.mathField) return;
 
@@ -78,6 +113,10 @@ class MathNodeView {
   }
 
   exitMathField(direction) {
+    if (this.mathField) {
+      this.mathField.blur();
+    }
+    
     const pos = this.getPos();
     let targetPos;
     
@@ -135,6 +174,7 @@ class MathNodeView {
 
   handleClick(view, pos, event) {
     if (this.mathField) {
+      this.blurOtherMathFields();
       this.mathField.focus();
     }
     return false;

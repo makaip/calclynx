@@ -137,12 +137,7 @@ class TextFieldProseMirror {
         const mathField = target.closest('.mathquill');
         
         if (!mathField) {
-          const allMathFields = view.dom.querySelectorAll('.mathquill');
-          allMathFields.forEach(field => {
-            if (field.mathquillObject) {
-              field.mathquillObject.blur();
-            }
-          });
+          this.blurAllMathFields(view);
         }
         
         return false;
@@ -165,13 +160,18 @@ class TextFieldProseMirror {
       const beforeNode = $from.nodeBefore;
       
       if (beforeNode && beforeNode.type.name === 'math') {
-        const mathElements = view.dom.querySelectorAll('.mathquill');
-        for (const element of mathElements) {
-          if (element.mathquillObject && element.mathquillObject.latex() === beforeNode.attrs.latex) {
-            element.mathquillObject.focus();
-            element.mathquillObject.moveToRightEnd();
-            return true;
-          }
+        event.preventDefault();
+        this.blurAllMathFields(view);
+        
+        const targetPos = $from.pos - 1;
+        const mathField = this.findMathFieldForNode(view, beforeNode, targetPos);
+        
+        if (mathField && mathField.mathquillObject) {
+          setTimeout(() => {
+            mathField.mathquillObject.focus();
+            mathField.mathquillObject.moveToRightEnd();
+          }, 0);
+          return true;
         }
       }
     } else if (event.key === 'ArrowRight') {
@@ -179,13 +179,17 @@ class TextFieldProseMirror {
       const afterNode = $from.nodeAfter;
       
       if (afterNode && afterNode.type.name === 'math') {
-        const mathElements = view.dom.querySelectorAll('.mathquill');
-        for (const element of mathElements) {
-          if (element.mathquillObject && element.mathquillObject.latex() === afterNode.attrs.latex) {
-            element.mathquillObject.focus();
-            element.mathquillObject.moveToLeftEnd();
-            return true;
-          }
+        event.preventDefault();
+        this.blurAllMathFields(view);
+        
+        const mathField = this.findMathFieldForNode(view, afterNode, $from.pos);
+        
+        if (mathField && mathField.mathquillObject) {
+          setTimeout(() => {
+            mathField.mathquillObject.focus();
+            mathField.mathquillObject.moveToLeftEnd();
+          }, 0);
+          return true;
         }
       }
     } else if (event.key === 'Backspace') {
@@ -203,24 +207,24 @@ class TextFieldProseMirror {
     
     if (beforeNode && beforeNode.type.name === 'math' && view.state.selection.empty) {
       event.preventDefault();
-      // find the MQ field and delete last character
-      const mathElements = view.dom.querySelectorAll('.mathquill');
-      for (const element of mathElements) {
-        if (element.mathquillObject && element.mathquillObject.latex() === beforeNode.attrs.latex) {
-          const currentLatex = element.mathquillObject.latex();
-          if (currentLatex.length > 0) {
-            // MQ focus, move to end, delete last character
-            element.mathquillObject.focus();
-            element.mathquillObject.moveToRightEnd();
-            element.mathquillObject.keystroke('Backspace');
-          } else {
-            // if MQ empty, delete entire node
-            const pos = $from.pos - 1;
-            const tr = view.state.tr.delete(pos, pos + 1);
-            view.dispatch(tr);
-          }
-          return true;
+      // Find the MQ field by position
+      const targetPos = $from.pos - 1;
+      const mathField = this.findMathFieldAtPosition(view, targetPos);
+      
+      if (mathField && mathField.mathquillObject) {
+        const currentLatex = mathField.mathquillObject.latex();
+        if (currentLatex.length > 0) {
+          // MQ focus, move to end, delete last character
+          mathField.mathquillObject.focus();
+          mathField.mathquillObject.moveToRightEnd();
+          mathField.mathquillObject.keystroke('Backspace');
+        } else {
+          // if MQ empty, delete entire node
+          const pos = $from.pos - 1;
+          const tr = view.state.tr.delete(pos, pos + 1);
+          view.dispatch(tr);
         }
+        return true;
       }
     }
     return false;
@@ -232,27 +236,169 @@ class TextFieldProseMirror {
     
     if (afterNode && afterNode.type.name === 'math' && view.state.selection.empty) {
       event.preventDefault();
-      // find the MQ field and delete last character
-      const mathElements = view.dom.querySelectorAll('.mathquill');
-      for (const element of mathElements) {
-        if (element.mathquillObject && element.mathquillObject.latex() === afterNode.attrs.latex) {
-          const currentLatex = element.mathquillObject.latex();
-          if (currentLatex.length > 0) {
-            // MQ focus, move to end, delete last character
-            element.mathquillObject.focus();
-            element.mathquillObject.moveToLeftEnd();
-            element.mathquillObject.keystroke('Delete');
-          } else {
-            // if MQ empty, delete entire node
-            const pos = $from.pos;
-            const tr = view.state.tr.delete(pos, pos + 1);
-            view.dispatch(tr);
-          }
-          return true;
+      // Find the MQ field by position
+      const targetPos = $from.pos;
+      const mathField = this.findMathFieldAtPosition(view, targetPos);
+      
+      if (mathField && mathField.mathquillObject) {
+        const currentLatex = mathField.mathquillObject.latex();
+        if (currentLatex.length > 0) {
+          // MQ focus, move to end, delete last character
+          mathField.mathquillObject.focus();
+          mathField.mathquillObject.moveToLeftEnd();
+          mathField.mathquillObject.keystroke('Delete');
+        } else {
+          // if MQ empty, delete entire node
+          const pos = $from.pos;
+          const tr = view.state.tr.delete(pos, pos + 1);
+          view.dispatch(tr);
         }
+        return true;
       }
     }
     return false;
+  }
+
+  blurAllMathFields(view) {
+    const mathElements = view.dom.querySelectorAll('.mathquill');
+    mathElements.forEach(element => {
+      if (element.mathquillObject) {
+        element.mathquillObject.blur();
+      }
+    });
+  }
+
+  findMathFieldForNode(view, node, pos) {
+    const latex = node.attrs.latex;
+    
+    try {
+      const domNode = view.nodeDOM(pos);
+      if (domNode && domNode.classList && domNode.classList.contains('mathquill')) {
+        return domNode;
+      }
+    } catch (e) {
+      // nodeDOM might fail, continue with other approaches
+    }
+    
+    try {
+      const domPos = view.domAtPos(pos);
+      let element = domPos.node;
+      
+      if (element.nodeType === Node.TEXT_NODE) {
+        element = element.parentElement;
+      }
+      
+      const mathField = element.querySelector ? element.querySelector('.mathquill') : null;
+      if (mathField && mathField.mathquillObject) {
+        return mathField;
+      }
+      
+      let sibling = element.nextElementSibling;
+      while (sibling) {
+        if (sibling.classList && sibling.classList.contains('mathquill')) {
+          return sibling;
+        }
+        const childMathField = sibling.querySelector ? sibling.querySelector('.mathquill') : null;
+        if (childMathField) {
+          return childMathField;
+        }
+        sibling = sibling.nextElementSibling;
+      }
+    } catch (e) {
+
+    }
+    
+    const mathFields = view.dom.querySelectorAll('.mathquill');
+    let bestMatch = null;
+    let bestDistance = Infinity;
+    
+    for (const field of mathFields) {
+      if (field.mathquillObject) {
+        if (field.mathquillObject.latex() === latex) {
+          try {
+            const fieldPos = view.posAtDOM(field, 0);
+            const distance = Math.abs(fieldPos - pos);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestMatch = field;
+            }
+          } catch (e) {
+            if (!bestMatch) {
+              bestMatch = field;
+            }
+          }
+        }
+      }
+    }
+    
+    return bestMatch;
+  }
+
+  findMathFieldAtPosition(view, pos) {
+    try {
+      const node = view.state.doc.nodeAt(pos);
+      
+      if (node && node.type.name === 'math') {
+        try {
+          const nodeDom = view.nodeDOM(pos);
+          if (nodeDom && nodeDom.classList && nodeDom.classList.contains('mathquill')) {
+            return nodeDom;
+          }
+        } catch (e) {
+
+        }
+        
+        const domPos = view.domAtPos(pos);
+        let currentElement = domPos.node;
+        
+        if (currentElement.nodeType === Node.TEXT_NODE) {
+          currentElement = currentElement.parentElement;
+        }
+        
+        let searchDepth = 0;
+        while (currentElement && currentElement !== view.dom && searchDepth < 10) {
+          if (currentElement.classList && currentElement.classList.contains('mathquill')) {
+            return currentElement;
+          }
+          
+          const mathChild = currentElement.querySelector && currentElement.querySelector('.mathquill');
+          if (mathChild) {
+            return mathChild;
+          }
+          
+          if (currentElement.nextElementSibling) {
+            const mathInNext = currentElement.nextElementSibling.classList?.contains('mathquill') ? 
+              currentElement.nextElementSibling : 
+              currentElement.nextElementSibling.querySelector && currentElement.nextElementSibling.querySelector('.mathquill');
+            if (mathInNext) {
+              return mathInNext;
+            }
+          }
+          
+          currentElement = currentElement.parentElement;
+          searchDepth++;
+        }
+      }
+      
+      const mathElements = view.dom.querySelectorAll('.mathquill');
+      for (const element of mathElements) {
+        if (element.mathquillObject) {
+          try {
+            const elementPos = view.posAtDOM(element, 0);
+            if (Math.abs(elementPos - pos) <= 1) {
+              return element;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.warn('Error finding math field at position:', error);
+    }
+    
+    return null;
   }
 
   attachEventListeners() {
