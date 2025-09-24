@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ProseMirror + MathQuill Fix</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css">
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #editor { border: 1px solid #ccc; padding: 10px; min-height: 150px; }
+    .mathquill { padding: 2px; margin: 0 2px; background: #f9f9f9; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h2>ProseMirror + MathQuill Demo (fixed)</h2>
+  <div id="editor"></div>
+  <button id="export">Export to JSON</button>
+  <pre id="output"></pre>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
+
+  <script type="module">
+    import { Schema } from "https://esm.sh/prosemirror-model";
+    import { EditorState, TextSelection } from "https://esm.sh/prosemirror-state";
+    import { EditorView } from "https://esm.sh/prosemirror-view";
+    import { schema as basicSchema } from "https://esm.sh/prosemirror-schema-basic";
+    import { history } from "https://esm.sh/prosemirror-history";
+    import { keymap } from "https://esm.sh/prosemirror-keymap";
+    import { baseKeymap } from "https://esm.sh/prosemirror-commands";
+
+    const MQ = MathQuill.getInterface(2);
+
+    // Extend schema with math node
+    const mathNodeSpec = {
+      inline: true,
+      group: "inline",
+      atom: true,
+      attrs: { latex: { default: "" } },
+      toDOM: (node) => ["span", { class: "mathquill", "data-latex": node.attrs.latex }],
+      parseDOM: [{
+        tag: "span.mathquill",
+        getAttrs: dom => ({ latex: dom.getAttribute("data-latex") })
+      }]
+    };
+
+    const schema = new Schema({
+      nodes: basicSchema.spec.nodes.addToEnd("math", mathNodeSpec),
+      marks: basicSchema.spec.marks
+    });
+
+    // NodeView for math
+    class MathNodeView {
+      constructor(node, view, getPos) {
+        this.node = node;
+        this.view = view;
+        this.getPos = getPos;
+
+        this.dom = document.createElement("span");
+        this.dom.className = "mathquill";
+
+        // Create MathQuill field
+        this.mathField = MQ.MathField(this.dom, {
+          handlers: {
+            edit: () => {
+              const latex = this.mathField.latex();
+              const pos = this.getPos();
+              const tr = this.view.state.tr.setNodeMarkup(pos, null, { latex });
+              this.view.dispatch(tr);
+            },
+            enter: () => {
+              // Exit math field on Enter and move cursor to after the field
+              this.exitMathField('right');
+            },
+            moveOutOf: (dir) => {
+              // Handle arrow keys moving out of the math field
+              if (dir === MQ.L) {
+                this.exitMathField('left');
+              } else if (dir === MQ.R) {
+                this.exitMathField('right');
+              }
+            },
+            deleteOutOf: (dir) => {
+              // Handle delete/backspace at the edges of math fields
+              const latex = this.mathField.latex();
+              if (latex.length === 0) {
+                // If field is empty, delete the entire math node
+                const pos = this.getPos();
+                const tr = this.view.state.tr.delete(pos, pos + 1);
+                this.view.dispatch(tr);
+                this.view.focus();
+              } else if (dir === MQ.L) {
+                // Backspace at beginning - exit to left
+                this.exitMathField('left');
+              } else if (dir === MQ.R) {
+                // Delete at end - exit to right  
+                this.exitMathField('right');
+              }
+            }
+          }
+        });
+
+        // Store reference to MathQuill object on DOM element for easy access
+        this.dom.mathquillObject = this.mathField;
+
+        this.mathField.latex(node.attrs.latex);
+
+        // If this is a new empty field, mark it for focusing
+        if (node.attrs.latex === '') {
+          this.shouldFocus = true;
+          setTimeout(() => {
+            if (this.shouldFocus) {
+              this.mathField.focus();
+              this.shouldFocus = false;
+            }
+          }, 10);
+        }
+
+        // Add escape key handling
+        this.dom.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            // Exit math field and focus ProseMirror editor
+            this.exitMathField('right');
+          }
+        });
+      }
+
+      exitMathField(direction) {
+        const pos = this.getPos();
+        let targetPos;
+        
+        if (direction === 'left') {
+          targetPos = this.view.state.doc.resolve(pos);
+        } else {
+          targetPos = this.view.state.doc.resolve(pos + 1);
+        }
+        
+        const tr = this.view.state.tr.setSelection(
+          new TextSelection(targetPos)
+        );
+        this.view.dispatch(tr);
+        this.view.focus();
+      }
+
+      // Don't prevent all events - be more selective
+      stopEvent(event) {
+        // Only stop events that would interfere with math editing
+        if (event.type === 'keydown') {
+          // Let MathQuill handle its own key events
+          const key = event.key;
+          if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown' ||
+              key === 'Backspace' || key === 'Delete' || key === 'Enter' || key === 'Escape') {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      ignoreMutation() {
+        return true;
+      }
+
+      update(node) {
+        if (node.type.name !== "math") return false;
+        if (node.attrs.latex !== this.mathField.latex()) {
+          this.mathField.latex(node.attrs.latex);
+        }
+        this.node = node;
+        return true;
+      }
+
+      selectNode() {
+        // Don't automatically focus - this causes cursor jumping
+        // Focus will be handled by click events naturally
+      }
+
+      deselectNode() {
+        // Blur the math field when deselected
+        this.mathField.blur();
+      }
+
+      handleClick(view, pos, event) {
+        // Focus the math field and let MathQuill position cursor naturally
+        this.mathField.focus();
+        
+        // Let MathQuill handle the click positioning
+        return false;
+      }
+
+      // Override to handle proper cursor positioning on click
+      handleClick(view, pos, event) {
+        // Let MathQuill handle the click naturally
+        return false;
+      }
+    }
+
+    // Editor setup
+    const view = new EditorView(document.querySelector("#editor"), {
+      state: EditorState.create({
+        schema,
+        plugins: [
+          history(), 
+          keymap(baseKeymap)
+        ]
+      }),
+      nodeViews: {
+        math: (node, view, getPos) => new MathNodeView(node, view, getPos)
+      },
+      handleClick(view, pos, event) {
+        // Check if click is inside a math field
+        const target = event.target;
+        const mathField = target.closest('.mathquill');
+        
+        if (!mathField) {
+          // Clicking outside math fields - blur any focused math fields
+          const allMathFields = view.dom.querySelectorAll('.mathquill');
+          allMathFields.forEach(field => {
+            if (field.mathquillObject) {
+              field.mathquillObject.blur();
+            }
+          });
+        }
+        
+        return false;
+      },
+      handleKeyDown(view, event) {
+        // Handle arrow keys for entering math fields
+        if (event.key === 'ArrowLeft') {
+          const { $from } = view.state.selection;
+          const beforeNode = $from.nodeBefore;
+          
+          if (beforeNode && beforeNode.type.name === 'math') {
+            // Find the math field DOM element and focus it at the end
+            const mathElements = view.dom.querySelectorAll('.mathquill');
+            for (const element of mathElements) {
+              if (element.mathquillObject && element.mathquillObject.latex() === beforeNode.attrs.latex) {
+                element.mathquillObject.focus();
+                element.mathquillObject.moveToRightEnd();
+                return true;
+              }
+            }
+          }
+        } else if (event.key === 'ArrowRight') {
+          const { $from } = view.state.selection;
+          const afterNode = $from.nodeAfter;
+          
+          if (afterNode && afterNode.type.name === 'math') {
+            // Find the math field DOM element and focus it at the start
+            const mathElements = view.dom.querySelectorAll('.mathquill');
+            for (const element of mathElements) {
+              if (element.mathquillObject && element.mathquillObject.latex() === afterNode.attrs.latex) {
+                element.mathquillObject.focus();
+                element.mathquillObject.moveToLeftEnd();
+                return true;
+              }
+            }
+          }
+        } else if (event.key === 'Backspace') {
+          // Handle backspace when positioned after a math field
+          const { $from } = view.state.selection;
+          const beforeNode = $from.nodeBefore;
+          
+          if (beforeNode && beforeNode.type.name === 'math' && view.state.selection.empty) {
+            event.preventDefault();
+            // Find the math field and delete its last character
+            const mathElements = view.dom.querySelectorAll('.mathquill');
+            for (const element of mathElements) {
+              if (element.mathquillObject && element.mathquillObject.latex() === beforeNode.attrs.latex) {
+                const currentLatex = element.mathquillObject.latex();
+                if (currentLatex.length > 0) {
+                  // Focus the field, move to end, and delete last character
+                  element.mathquillObject.focus();
+                  element.mathquillObject.moveToRightEnd();
+                  element.mathquillObject.keystroke('Backspace');
+                  // Keep focus in the math field after deletion
+                } else {
+                  // If math field is empty, delete the entire node
+                  const pos = $from.pos - 1;
+                  const tr = view.state.tr.delete(pos, pos + 1);
+                  view.dispatch(tr);
+                }
+                return true;
+              }
+            }
+          }
+        } else if (event.key === 'Delete') {
+          // Handle delete when positioned before a math field
+          const { $from } = view.state.selection;
+          const afterNode = $from.nodeAfter;
+          
+          if (afterNode && afterNode.type.name === 'math' && view.state.selection.empty) {
+            event.preventDefault();
+            // Find the math field and delete its first character
+            const mathElements = view.dom.querySelectorAll('.mathquill');
+            for (const element of mathElements) {
+              if (element.mathquillObject && element.mathquillObject.latex() === afterNode.attrs.latex) {
+                const currentLatex = element.mathquillObject.latex();
+                if (currentLatex.length > 0) {
+                  // Focus the field, move to start, and delete first character
+                  element.mathquillObject.focus();
+                  element.mathquillObject.moveToLeftEnd();
+                  element.mathquillObject.keystroke('Delete');
+                  // Keep focus in the math field after deletion
+                } else {
+                  // If math field is empty, delete the entire node
+                  const pos = $from.pos;
+                  const tr = view.state.tr.delete(pos, pos + 1);
+                  view.dispatch(tr);
+                }
+                return true;
+              }
+            }
+          }
+        }
+        
+        return false;
+      }
+    });
+
+    // Insert blank math on "$"
+    view.dom.addEventListener("keypress", (e) => {
+      if (e.key === "$") {
+        e.preventDefault();
+        
+        const tr = view.state.tr.replaceSelectionWith(
+          schema.nodes.math.create({ latex: "" })
+        );
+        view.dispatch(tr);
+
+        // Focus new math field after it's been rendered
+        setTimeout(() => {
+          // Find all math fields and focus the one that's empty (just created)
+          const mathFields = view.dom.querySelectorAll('.mathquill');
+          for (const field of mathFields) {
+            if (field.mathquillObject && field.mathquillObject.latex() === '') {
+              field.mathquillObject.focus();
+              break;
+            }
+          }
+        }, 10);
+      }
+    });
+
+    // Export button
+    document.querySelector("#export").addEventListener("click", () => {
+      const json = view.state.doc.toJSON();
+      document.querySelector("#output").textContent = JSON.stringify(json, null, 2);
+    });
+  </script>
+</body>
+</html>
