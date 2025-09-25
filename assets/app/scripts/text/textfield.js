@@ -150,6 +150,25 @@ class TextFieldProseMirror {
 
     this.editorElement.addEventListener('blur', () => {
       this.textGroup.board.fileManager.saveState();
+      if (window.textFormatToolbar) {
+        setTimeout(() => {
+          if (!document.querySelector('.ProseMirror:focus-within')) {
+            window.textFormatToolbar.hide();
+          }
+        }, 100);
+      }
+    });
+
+    this.editorElement.addEventListener('focus', () => {
+      if (window.textFormatToolbar) {
+        window.textFormatToolbar.show(this);
+      }
+    });
+
+    this.editorElement.addEventListener('click', () => {
+      if (window.textFormatToolbar) {
+        window.textFormatToolbar.show(this);
+      }
     });
   }
 
