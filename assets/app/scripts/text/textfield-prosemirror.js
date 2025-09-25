@@ -70,6 +70,19 @@ class TextFieldProseMirror {
           keymap(baseKeymap),
           keymap({
             '$': (state, dispatch) => {
+              const mathFields = this.editorElement.querySelectorAll('.mathquill');
+              for (const field of mathFields) {
+                if (field.mathquillObject) {
+                  const hasFocus = (field.mathquillObject.hasFocus && field.mathquillObject.hasFocus()) ||
+                                  field.contains(document.activeElement) ||
+                                  field === document.activeElement;
+                  
+                  if (hasFocus) {
+                    return false;
+                  }
+                }
+              }
+
               if (dispatch) {
                 const tr = state.tr.replaceSelectionWith(
                   this.schemaManager.createMathNode("")

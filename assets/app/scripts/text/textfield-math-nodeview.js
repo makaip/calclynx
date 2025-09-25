@@ -88,6 +88,10 @@ class MathNodeView {
         e.preventDefault();
         e.stopPropagation();
         this.exitMathField('right');
+      } else if (e.key === '$') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.exitMathField('right');
       }
     });
   }
@@ -139,7 +143,7 @@ class MathNodeView {
       const key = event.key;
       if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown' ||
           key === 'Backspace' || key === 'Delete' || key === 'Enter' || key === 'Escape' ||
-          key === 'Tab') {
+          key === 'Tab' || key === '$') {
         return true;
       }
     }
