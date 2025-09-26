@@ -41,6 +41,11 @@ class TextFieldProseMirror {
     circleIndicator.className = 'circle-indicator';
     this.container.appendChild(circleIndicator);
 
+    this.container.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.focus();
+    });
+
     this.textGroup.element.appendChild(this.container);
   }
 
@@ -57,6 +62,7 @@ class TextFieldProseMirror {
     
     this.editorElement = document.createElement('div');
     this.editorElement.className = 'text-editor prosemirror-editor';
+    this.editorElement.tabIndex = 0;
     this.container.appendChild(this.editorElement);
 
     const initialDoc = this.schemaManager.createInitialDoc(content);
@@ -115,6 +121,7 @@ class TextFieldProseMirror {
           this.eventHandler.blurAllMathFields(view);
         }
         
+        ObjectGroup.clearAllSelections();
         return false;
       },
       handleKeyDown: (view, event) => {
@@ -160,12 +167,21 @@ class TextFieldProseMirror {
     });
 
     this.editorElement.addEventListener('focus', () => {
+      ObjectGroup.clearAllSelections();
+      
       if (window.textFormatToolbar) {
         window.textFormatToolbar.show(this);
       }
     });
 
-    this.editorElement.addEventListener('click', () => {
+    this.editorElement.addEventListener('click', (event) => {
+      event.stopPropagation();
+      ObjectGroup.clearAllSelections();
+      
+      if (!this.proseMirrorView.hasFocus()) {
+        this.proseMirrorView.focus();
+      }
+      
       if (window.textFormatToolbar) {
         window.textFormatToolbar.show(this);
       }
@@ -174,6 +190,7 @@ class TextFieldProseMirror {
 
   focus() {
     if (this.proseMirrorView) {
+      ObjectGroup.clearAllSelections();
       this.proseMirrorView.focus();
       
       if (this.proseMirrorView.state.doc.content.size <= 2) {
@@ -183,6 +200,7 @@ class TextFieldProseMirror {
         );
         this.proseMirrorView.dispatch(tr);
       }
+      
     }
   }
 

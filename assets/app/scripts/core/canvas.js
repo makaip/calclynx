@@ -157,7 +157,10 @@ class MathBoard {
       },
       { 
         selector: '.text-field-container', 
-        action: (container) => container.textFieldInstance?.focus() 
+        action: (container) => {
+
+          container.textFieldInstance?.focus();
+        }
       },
       { 
         selector: '.image-container', 
@@ -173,7 +176,9 @@ class MathBoard {
     for (const { selector, action } of containers) {
       const container = event.target.closest(selector);
       if (container) {
-        ObjectGroup.clearAllSelections();
+        if (!container.classList.contains('text-field-container')) {
+          ObjectGroup.clearAllSelections();
+        }
         event.stopPropagation();
         action(container);
         return true; 

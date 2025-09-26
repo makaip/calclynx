@@ -36,5 +36,24 @@ class TextGroup extends ObjectGroup {
       console.error('Failed to create TextField:', error);
       this.textField = null;
     }
+
+    this.setupClickHandler();
+  }
+
+  setupClickHandler() {
+    this.element.addEventListener('click', (event) => {
+      const isFromTextEditor = event.target.closest('.text-editor') || event.target.closest('.text-field-container');
+      
+      if (isFromTextEditor) {
+        return;
+      }
+      
+      if (this.element.classList.contains('selected')) {
+        event.stopPropagation();
+        if (this.textField && this.textField.focus) {
+          this.textField.focus();
+        }
+      }
+    });
   }
 }
