@@ -73,6 +73,21 @@ class MathNodeView {
       this.blurOtherMathFields();
     }, true);
 
+    this.dom.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+    });
+
+    this.dom.addEventListener('click', (event) => {
+      event.stopPropagation();
+      
+      if (this.mathField) {
+        this.blurOtherMathFields();
+          if (this.mathField) {
+            this.mathField.focus();
+          }
+      }
+    });
+
     if (this.node.attrs.latex === '') {
       this.shouldFocus = true;
       setTimeout(() => {
@@ -178,8 +193,16 @@ class MathNodeView {
 
   handleClick(view, pos, event) {
     if (this.mathField) {
+      event.preventDefault();
+      event.stopPropagation();
+      
       this.blurOtherMathFields();
-      this.mathField.focus();
+      
+        if (this.mathField) {
+          this.mathField.focus();
+        }
+      
+      return true;
     }
     return false;
   }

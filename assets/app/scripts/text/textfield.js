@@ -99,8 +99,7 @@ class TextFieldProseMirror {
               const mathFields = this.editorElement.querySelectorAll('.mathquill');
               for (const field of mathFields) {
                 if (field.mathquillObject) {
-                  const hasFocus = (field.mathquillObject.hasFocus && field.mathquillObject.hasFocus()) ||
-                                  field.contains(document.activeElement) ||
+                  const hasFocus = field.contains(document.activeElement) ||
                                   field === document.activeElement;
                   
                   if (hasFocus) {
@@ -137,7 +136,12 @@ class TextFieldProseMirror {
         const target = event.target;
         const mathField = target.closest('.mathquill');
         
-        if (!mathField && this.eventHandler) {
+        if (mathField) {
+          ObjectGroup.clearAllSelections();
+          return true;
+        }
+        
+        if (this.eventHandler) {
           this.eventHandler.blurAllMathFields(view);
         }
         
@@ -207,10 +211,14 @@ class TextFieldProseMirror {
 
     this.editorElement.addEventListener('click', (event) => {
       event.stopPropagation();
-      ObjectGroup.clearAllSelections();
+      const mathField = event.target.closest('.mathquill');
       
-      if (!this.proseMirrorView.hasFocus()) {
-        this.proseMirrorView.focus();
+      if (!mathField) {
+        ObjectGroup.clearAllSelections();
+        
+        if (!this.proseMirrorView.hasFocus()) {
+          this.proseMirrorView.focus();
+        }
       }
       
       if (window.textFormatToolbar) {
