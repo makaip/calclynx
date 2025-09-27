@@ -34,8 +34,9 @@ class MathBoard {
 
     this.fileManager = new FileManager(this);
     this.clipboard = new Clipboard(this);
-    this.fileManager.loadState();
     this.initEventListeners();
+    
+    this.fileManager.loadState();
     this.navigation = new Navigation(this);
     this.navigation.init();
   }
@@ -157,7 +158,10 @@ class MathBoard {
       },
       { 
         selector: '.text-field-container', 
-        action: (container) => container.textFieldInstance?.focus() 
+        action: (container) => {
+
+          container.textFieldInstance?.focus();
+        }
       },
       { 
         selector: '.image-container', 
@@ -173,7 +177,9 @@ class MathBoard {
     for (const { selector, action } of containers) {
       const container = event.target.closest(selector);
       if (container) {
-        ObjectGroup.clearAllSelections();
+        if (!container.classList.contains('text-field-container')) {
+          ObjectGroup.clearAllSelections();
+        }
         event.stopPropagation();
         action(container);
         return true; 

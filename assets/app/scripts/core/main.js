@@ -14,8 +14,7 @@
       reader.readAsText(file);
     });
 
-  const isModifierPressed = (e) =>
-    (navigator.platform.toUpperCase().includes('MAC') ? e.metaKey : e.ctrlKey);
+  const isModifierPressed = (e) => (navigator.platform.toUpperCase().includes('MAC') ? e.metaKey : e.ctrlKey);
 
   const isInInput = (target) =>
     Boolean(
@@ -114,9 +113,17 @@
 
   window.updateUserStatus = null;
 
+  const initializeApp = () => {
+    if (TextFieldCompatibility.shouldUseProseMirror()) {
+      App.mathBoard = new MathBoard();
+      App.expressionEquivalence = new ExpressionEquivalence();
+    } else {
+      setTimeout(initializeApp, 100);
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', () => {
-    App.mathBoard = new MathBoard();
-    App.expressionEquivalence = new ExpressionEquivalence();
+    initializeApp();
 
     window.App = App;
     window.mathBoard = App.mathBoard; // expose for backwards compatibility

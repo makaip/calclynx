@@ -48,6 +48,62 @@
     cursor: text; /* Add text cursor for the editor */
 }
 
+/* ProseMirror-specific styling */
+.prosemirror-editor {
+    font-family: inherit;
+}
+
+.prosemirror-editor .ProseMirror {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    outline: none;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: inherit;
+    padding: 0;
+    margin: 0;
+    caret-color: #ffffff;
+}
+
+.prosemirror-editor .ProseMirror p {
+    margin: 0;
+    padding: 0;
+}
+
+.prosemirror-editor .ProseMirror p + p {
+    margin-top: 0.5em;
+}
+
+/* ProseMirror selection styling */
+.prosemirror-editor .ProseMirror-selectednode {
+    outline: 2px solid #68CEF8;
+    outline-offset: 1px;
+}
+
+.prosemirror-editor .ProseMirror-textselection {
+    background: rgba(104, 206, 248, 0.3);
+}
+
+/* Math field styling within ProseMirror */
+.prosemirror-editor .mathquill {
+    display: inline-block;
+    margin: 0 2px;
+    padding: 2px 0px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    min-width: 20px;
+    min-height: 20px;
+    vertical-align: middle;
+}
+
+.prosemirror-editor .mathquill.mq-focused {
+    background: rgba(255, 255, 255, 0.2);
+    outline: 1px solid #68CEF8;
+}
+
 /* Focused text editor */
 .text-editor:focus {
     /* outline: 1px solid #00c59a !important; */

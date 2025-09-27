@@ -1,188 +1,280 @@
-/**
- * Main TextField class - orchestrates all text field functionality
- * Delegates specialized tasks to content, math, and utility modules
- */
-class TextField {
+class TextFieldProseMirror {
   constructor(textGroup, isNewField, content = '') {
     this.textGroup = textGroup;
+    this.proseMirrorView = null;
+    this.saveTimeout = null;
     
-    // Initialize helper modules
-    this.content = new TextFieldContent(this);
-    this.utils = new TextFieldUtils(this);
-    this.mathSupport = new TextFieldMath(this);
+    this.schemaManager = new TextFieldProseMirrorSchema();
+    this.eventHandler = null; // Will be initialized after proseMirrorView is created
+    this.content = new TextFieldProseMirrorContent(this);
     
-    // Initialize DOM and functionality
+    if (window.proseMirrorReady) {
+      this.initialize(isNewField, content);
+    } else {
+      window.addEventListener('prosemirror-ready', () => {
+        this.initialize(isNewField, content);
+      });
+    }
+  }
+
+  initialize(isNewField, content) {
+    if (!window.ProseMirror) {
+      console.error('ProseMirror not available, cannot initialize TextFieldProseMirror');
+      return;
+    }
+    
     this.createContainer();
-    this.createEditor(content);
+    this.createProseMirrorEditor(content);
     this.attachEventListeners();
     
-    // Initialize math support if MathQuill is available
-    if (window.MathQuill) {
-      setTimeout(() => {
-        this.mathSupport.initializeMathSupport();
-        // If content was loaded, reinitialize MathQuill fields after support is ready
-        if (content && (
-          (typeof content === 'string' && content.includes('mq-inline')) || 
-          (typeof content === 'object' && content.mathFields && content.mathFields.length > 0)
-        )) {
-          setTimeout(() => {
-            this.mathSupport.reinitializeMathFields();
-          }, 50); // Increased delay to ensure proper initialization
-        }
-      }, 100);
-    }
-    
     if (isNewField) {
-      // Focus the new field for immediate editing
       setTimeout(() => this.focus(), 10);
     }
+  }
+
+  getFormattingKeymap(schema) {
+    const { toggleMark } = window.ProseMirror;
+    const keymap = {};
+    
+    if (schema.marks.strong) {
+      keymap['Mod-b'] = toggleMark(schema.marks.strong);
+    }
+    
+    if (schema.marks.em) {
+      keymap['Mod-i'] = toggleMark(schema.marks.em);
+    }
+    
+    if (schema.marks.underline) {
+      keymap['Mod-u'] = toggleMark(schema.marks.underline);
+    }
+    
+    return keymap;
   }
 
   createContainer() {
     this.container = document.createElement('div');
     this.container.className = 'text-field-container';
-    this.container.textFieldInstance = this; // Add reference from DOM element back to the instance
+    this.container.textFieldInstance = this;
 
     const circleIndicator = document.createElement('div');
     circleIndicator.className = 'circle-indicator';
     this.container.appendChild(circleIndicator);
 
-    // No drag handle needed since there's only one field per group
-    // Group-level dragging is handled by the text group itself
+    this.container.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.focus();
+    });
 
     this.textGroup.element.appendChild(this.container);
   }
 
-  createEditor(content = '') {
-    this.editorElement = document.createElement('div');
-    this.editorElement.className = 'text-editor';
-    this.editorElement.contentEditable = true;
-    this.editorElement.spellcheck = false;
-    
-    // Set initial content
-    if (content) {
-      // Expect modern optimized format (object with text and mathFields)
-      if (typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
-        // Use setOptimizedContent for the new format
-        setTimeout(() => {
-          this.content.setOptimizedContent(content);
-        }, 10);
-      } else {
-        // Fallback for unexpected content types
-        console.warn('Unexpected content type in TextField. Expected optimized format with {text, mathFields}:', typeof content, content);
-        this.editorElement.appendChild(document.createTextNode(''));
-      }
-    } else {
-      // Ensure there's always a text node for cursor placement
-      this.editorElement.appendChild(document.createTextNode(''));
+  createProseMirrorEditor(content = '') {
+    if (!window.ProseMirror) {
+      console.error('ProseMirror not available');
+      return;
     }
 
+    const { EditorState, EditorView, TextSelection, history, keymap, baseKeymap } = window.ProseMirror;
+
+    const schema = this.schemaManager.createSchema();
+    this.content.schema = schema;
+    
+    this.editorElement = document.createElement('div');
+    this.editorElement.className = 'text-editor prosemirror-editor';
+    this.editorElement.tabIndex = 0;
     this.container.appendChild(this.editorElement);
+
+    const initialDoc = this.schemaManager.createInitialDoc(content);
+
+    this.proseMirrorView = new EditorView(this.editorElement, {
+      state: EditorState.create({
+        doc: initialDoc,
+        schema: schema,
+        plugins: [
+          history(),
+          keymap(baseKeymap),
+          keymap(this.getFormattingKeymap(schema)),
+          keymap({
+            '$': (state, dispatch) => {
+              const mathFields = this.editorElement.querySelectorAll('.mathquill');
+              for (const field of mathFields) {
+                if (field.mathquillObject) {
+                  const hasFocus = field.contains(document.activeElement) ||
+                                  field === document.activeElement;
+                  
+                  if (hasFocus) {
+                    return false;
+                  }
+                }
+              }
+
+              if (dispatch) {
+                const tr = state.tr.replaceSelectionWith(
+                  this.schemaManager.createMathNode("")
+                );
+                dispatch(tr);
+
+                setTimeout(() => {
+                  const mathFields = this.editorElement.querySelectorAll('.mathquill');
+                  for (const field of mathFields) {
+                    if (field.mathquillObject && field.mathquillObject.latex() === '') {
+                      field.mathquillObject.focus();
+                      break;
+                    }
+                  }
+                }, 10);
+              }
+              return true;
+            }
+          })
+        ]
+      }),
+      nodeViews: {
+        math: (node, view, getPos) => new MathNodeView(node, view, getPos)
+      },
+      handleClick: (view, pos, event) => {
+        const target = event.target;
+        const mathField = target.closest('.mathquill');
+        
+        if (mathField) {
+          ObjectGroup.clearAllSelections();
+          return true;
+        }
+        
+        if (this.eventHandler) {
+          this.eventHandler.blurAllMathFields(view);
+        }
+        
+        ObjectGroup.clearAllSelections();
+        return false;
+      },
+      handleKeyDown: (view, event) => {
+        return this.eventHandler ? this.eventHandler.handleKeyDown(view, event) : false;
+      }
+    });
+
+    this.eventHandler = new TextFieldProseMirrorEventHandler(this.proseMirrorView);
+
+    if (content && typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
+      setTimeout(() => {
+        this.content.setOptimizedContent(content);
+      }, 10);
+    }
   }
 
   attachEventListeners() {
-    if (!this.editorElement) return;
-    if (this.editorElement.dataset.listenersAttached === 'true') return;
-    this.editorElement.dataset.listenersAttached = 'true';
+    if (!this.proseMirrorView) return;
 
-    this.editorElement.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
-        // For single field text groups, Enter should just create a new line
-        // Don't prevent default behavior
-      } else if (event.key === 'Backspace') {
-        // For single field text groups, just allow normal backspace
-        // Don't remove the field or move between fields
-      } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-        // For single field text groups, allow normal up/down navigation within the text
-        // Don't prevent default behavior
+    this.proseMirrorView.setProps({
+      ...this.proseMirrorView.props,
+      dispatchTransaction: (tr) => {
+        const newState = this.proseMirrorView.state.apply(tr);
+        this.proseMirrorView.updateState(newState);
+        
+        if (window.textFormatToolbar && window.textFormatToolbar.activeTextField === this) {
+            window.textFormatToolbar.updateButtonStates();
+        }
+        
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(() => {
+          this.textGroup.board.fileManager.saveState();
+        }, 500);
       }
-    }, true);
+    });
 
     this.editorElement.addEventListener('blur', () => {
-      // Save state when field loses focus
       this.textGroup.board.fileManager.saveState();
+      if (window.textFormatToolbar) {
+        setTimeout(() => {
+          const focusedElement = document.activeElement;
+          const hasProseMirrorFocus = document.querySelector('.ProseMirror:focus-within');
+          const isFocusInTextEditor = focusedElement && (
+            focusedElement.closest('.text-editor') || 
+            focusedElement.closest('.prosemirror-editor') ||
+            focusedElement.classList.contains('ProseMirror')
+          );
+          
+          if (!hasProseMirrorFocus && !isFocusInTextEditor) {
+            window.textFormatToolbar.hide();
+          }
+        }, 50); 
+      }
     });
 
-    // Allow natural click positioning in the text editor
+    this.editorElement.addEventListener('focus', () => {
+      ObjectGroup.clearAllSelections();
+      
+      if (window.textFormatToolbar) {
+        window.textFormatToolbar.show(this);
+      }
+    });
+
     this.editorElement.addEventListener('click', (event) => {
-      // Don't interfere with natural cursor positioning
       event.stopPropagation();
-    });
-
-    this.editorElement.addEventListener('input', () => {
-      // Auto-save on input changes
-      clearTimeout(this.saveTimeout);
-      this.saveTimeout = setTimeout(() => {
-        this.textGroup.board.fileManager.saveState();
-      }, 500);
-    });
-
-    // Prevent the editor from losing focus when clicking on math inline elements
-    this.editorElement.addEventListener('mousedown', (event) => {
-      if (event.target.closest('.mq-inline')) {
-        event.preventDefault();
+      const mathField = event.target.closest('.mathquill');
+      
+      if (!mathField) {
+        ObjectGroup.clearAllSelections();
+        
+        if (!this.proseMirrorView.hasFocus()) {
+          this.proseMirrorView.focus();
+        }
+      }
+      
+      if (window.textFormatToolbar) {
+        window.textFormatToolbar.show(this);
       }
     });
   }
 
   focus() {
-    if (this.editorElement) {
-      this.editorElement.focus();
+    if (this.proseMirrorView) {
+      ObjectGroup.clearAllSelections();
+      this.proseMirrorView.focus();
       
-      // Only place cursor at end if field is empty
-      // Let natural click behavior handle cursor positioning
-      if (!this.editorElement.textContent.trim()) {
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(this.editorElement);
-        range.collapse(false); // Collapse to end
-        selection.removeAllRanges();
-        selection.addRange(range);
+      if (this.proseMirrorView.state.doc.content.size <= 2) {
+        const { TextSelection } = window.ProseMirror;
+        const tr = this.proseMirrorView.state.tr.setSelection(
+          new TextSelection(this.proseMirrorView.state.doc.resolve(1))
+        );
+        this.proseMirrorView.dispatch(tr);
+      }
+      
+      if (window.textFormatToolbar) {
+        setTimeout(() => {
+          if (this.proseMirrorView.hasFocus() || document.activeElement === this.editorElement) {
+            window.textFormatToolbar.show(this);
+          }
+        }, 50);
       }
     }
   }
 
   remove() {
-    // Clean up any pending saves
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
     }
     
-    // Clean up all module-specific resources
-    this.mathSupport.cleanup();
-    this.utils.cleanup();
+    if (this.proseMirrorView) {
+      this.proseMirrorView.destroy();
+    }
     
-    // Remove the entire text group since there's only one field per group
     this.textGroup.remove();
   }
 
   getContent() {
-    if (!this.editorElement) return '';
-    
-    // Return optimized content structure
-    return this.content.getOptimizedContent();
+    return this.content.getContent(); 
   }
 
   setContent(content) {
     this.content.setContent(content);
   }
 
-  // Legacy methods that delegate to content module for backward compatibility
   getOptimizedContent() {
     return this.content.getOptimizedContent();
   }
 
   setOptimizedContent(content) {
     return this.content.setOptimizedContent(content);
-  }
-
-  // Legacy method that delegates to math module for backward compatibility
-  reinitializeMathFields() {
-    return this.mathSupport.reinitializeMathFields();
-  }
-
-  // Legacy method that delegates to math module for backward compatibility
-  initializeMathSupport() {
-    return this.mathSupport.initializeMathSupport();
   }
 }

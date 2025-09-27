@@ -1,148 +1,90 @@
-/**
- * Content management functionality for TextField
- * Handles content serialization, deserialization, and format conversion
- */
-class TextFieldContent {
+class TextFieldProseMirrorContent {
   constructor(textField) {
     this.textField = textField;
+    this.schema = null;
+    this.initSchema();
   }
 
-  /**
-   * Get content in optimized format (object with text and mathFields)
-   */
+  initSchema() {
+    if (!window.ProseMirror) return;
+    const { Schema, basicSchema } = window.ProseMirror;
+
+    const mathNodeSpec = {
+      inline: true,
+      group: "inline",
+      atom: true,
+      attrs: { latex: { default: "" } },
+      toDOM: (node) => ["span", { 
+        class: "mathquill", 
+        "data-latex": node.attrs.latex 
+      }],
+      parseDOM: [{
+        tag: "span.mathquill",
+        getAttrs: dom => ({ latex: dom.getAttribute("data-latex") || "" })
+      }]
+    };
+
+    this.schema = new Schema({
+      nodes: basicSchema.spec.nodes.addToEnd("math", mathNodeSpec),
+      marks: basicSchema.spec.marks
+    });
+  }
+
+  getContent() {
+    if (!this.textField.proseMirrorView || !this.textField.proseMirrorView.state) {
+      return null;
+    }
+    return this.textField.proseMirrorView.state.doc.toJSON();
+  }
+
+  setContent(docJson) {
+    if (!this.textField.proseMirrorView || !this.schema || !docJson) return;
+
+    try {
+      const doc = this.schema.nodeFromJSON(docJson);
+      const tr = this.textField.proseMirrorView.state.tr.replaceWith(0, this.textField.proseMirrorView.state.doc.content.size, doc.content);
+      this.textField.proseMirrorView.dispatch(tr);
+    } catch (error) {
+      console.error('Error setting ProseMirror content:', error);
+    }
+  }
+
   getOptimizedContent() {
-    if (!this.textField.editorElement) return { text: '', mathFields: [] };
-    
+    if (!this.textField.proseMirrorView) return { text: '', mathFields: [] };
+
     const content = { text: '', mathFields: [] };
-    
-    // Simple recursive walk through all nodes to extract content
-    const walkAllNodes = (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        content.text += node.textContent;
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        if (node.classList.contains('mq-inline')) {
-          // Math field - record position and add placeholder
-          const latex = node.dataset.latex || '';
-          content.mathFields.push({
-            position: content.text.length,
-            latex: latex
-          });
-          content.text += '\uE000'; // Placeholder character
-        } else if (node.tagName === 'DIV') {
-          // DIV represents a line break
+    const doc = this.textField.proseMirrorView.state.doc;
+
+    doc.descendants((node, pos) => {
+      if (node.type.name === 'text') {
+        content.text += node.text;
+      } else if (node.type.name === 'math') {
+        content.mathFields.push({
+          position: content.text.length,
+          latex: node.attrs.latex || ''
+        });
+        content.text += '\uE000'; 
+      } else if (node.type.name === 'paragraph' && node.content.size === 0) {
+        if (content.text.length > 0) {
           content.text += '\n';
-          // Process children of this DIV
-          Array.from(node.childNodes).forEach(walkAllNodes);
-        } else if (node.tagName === 'BR') {
-          // Explicit line break
-          content.text += '\n';
-        } else {
-          // Other elements, process their children
-          Array.from(node.childNodes).forEach(walkAllNodes);
         }
       }
-    };
-    
-    Array.from(this.textField.editorElement.childNodes).forEach(walkAllNodes);
-    
+    });
+
     return content;
   }
 
-  /**
-   * Set content from optimized format
-   */
   setOptimizedContent(content) {
-    if (!this.textField.editorElement) return;
-    
-    // Clear existing content
-    this.textField.editorElement.innerHTML = '';
-    
-    const { text, mathFields } = content;
-    
-    // Create a map of math field positions for quick lookup
-    const mathFieldMap = new Map();
-    mathFields.forEach(field => {
-      mathFieldMap.set(field.position, field.latex);
-    });
-    
-    // Build content character by character
-    let currentContainer = this.textField.editorElement; // Start at root
-    let textBuffer = '';
-    
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      
-      if (char === '\uE000') {
-        // Math field placeholder
-        // First, add any buffered text
-        if (textBuffer) {
-          currentContainer.appendChild(document.createTextNode(textBuffer));
-          textBuffer = '';
-        }
-        
-        // Create math field
-        const mathLatex = mathFieldMap.get(i) || '';
-        const span = document.createElement('span');
-        span.className = 'mq-inline';
-        span.dataset.latex = mathLatex;
-        currentContainer.appendChild(span);
-        
-      } else if (char === '\n') {
-        // Line break
-        // First, add any buffered text to current container
-        if (textBuffer) {
-          currentContainer.appendChild(document.createTextNode(textBuffer));
-          textBuffer = '';
-        }
-        
-        // Create new line (DIV) and switch to it
-        const div = document.createElement('div');
-        this.textField.editorElement.appendChild(div);
-        currentContainer = div;
-        
-      } else {
-        // Regular character
-        textBuffer += char;
-      }
-    }
-    
-    // Add any remaining buffered text
-    if (textBuffer) {
-      currentContainer.appendChild(document.createTextNode(textBuffer));
-    }
-    
-    // Ensure there's always at least one text node if editor is empty
-    if (this.textField.editorElement.childNodes.length === 0) {
-      this.textField.editorElement.appendChild(document.createTextNode(''));
-    }
-    
-    // Reinitialize MathQuill fields if math support is available
-    if (this.textField.mathSupport) {
-      setTimeout(() => {
-        this.textField.mathSupport.reinitializeMathFields();
-      }, 10);
-    }
-  }
-  /**
-   * Set content with format validation
-   */
-  setContent(content) {
-    if (this.textField.editorElement) {
-      if (content) {
-        // Expect modern optimized format only
-        if (typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
-          this.setOptimizedContent(content);
-        } else {
-          // Fallback for unknown format
-          console.warn('Unexpected content format in setContent. Expected optimized format with {text, mathFields}:', typeof content, content);
-          this.textField.editorElement.innerHTML = '';
-          this.textField.editorElement.appendChild(document.createTextNode(''));
-        }
-      } else {
-        // Ensure there's always a text node for cursor placement
-        this.textField.editorElement.innerHTML = '';
-        this.textField.editorElement.appendChild(document.createTextNode(''));
-      }
+    if (!this.textField.proseMirrorView || !this.schema) return;
+
+    const doc = TextFieldCompatibility.convertV2ToV3(content, this.schema);
+    if (doc) {
+      const tr = this.textField.proseMirrorView.state.tr.replaceWith(
+        0, 
+        this.textField.proseMirrorView.state.doc.content.size, 
+        doc.content
+      );
+      this.textField.proseMirrorView.dispatch(tr);
     }
   }
 }

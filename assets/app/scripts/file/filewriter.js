@@ -2,7 +2,7 @@ class FileWriter {
     constructor(board, fileManager) {
         this.board = board;
         this.fileManager = fileManager;
-        this.syncIndicator = document.getElementById('sync-indicator'); // Get indicator element
+        this.syncIndicator = document.getElementById('sync-indicator');
     }
 
     saveMathGroups(saveData) {
@@ -26,12 +26,17 @@ class FileWriter {
             const left = group.style.left;
             const top = group.style.top;
             const fields = [];
-            const container = group.querySelector('.text-field-container');
-
-            if (container && container.textFieldInstance) {
-                const optimizedContent = container.textFieldInstance.getOptimizedContent();
-                fields.push(optimizedContent);
-            }
+            const containers = group.querySelectorAll('.text-field-container');
+            containers.forEach((container) => {
+                const field = container.textFieldInstance;
+                if (!field) return;
+                if (field.content && typeof field.content.getContent === 'function') {
+                    const pmContent = field.content.getContent();
+                    fields.push(pmContent ?? field.getOptimizedContent());
+                } else {
+                    fields.push(field.getOptimizedContent());
+                }
+            });
             
             saveData.groups.push({ type: 'text', left, top, fields });
         });
@@ -51,8 +56,17 @@ class FileWriter {
     }
 
     async saveState() {
+        let version = "3.0";
+        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
+                                       typeof TextFieldProseMirror !== 'undefined';
+        
+        if (!hasProseMirrorCapability) {
+            version = "2.0";
+            console.warn("ProseMirror not available, saving as v2.0 format");
+        }
+        
         const saveData = {
-            version: "2.0", 
+            version: version, 
             groups: []
         };
         
@@ -71,7 +85,7 @@ class FileWriter {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error || !session) {
             console.error("User session not found, cannot save to cloud.");
-            return; // Stop if not logged in
+            return;
         }
 
         const userId = session.user.id;
@@ -79,13 +93,12 @@ class FileWriter {
         const filePath = `${userId}/${fileId}.json`;
         const fileBlob = new Blob([stateString], { type: 'application/json' });
         
-        // Show indicator before starting the async operation
         if (this.syncIndicator) {
             this.syncIndicator.classList.add('syncing');
         }
 
         try {
-            console.log(`Starting cloud save for fileId: ${fileId}...`); 
+            console.log(`Starting cloud save for fileId: ${fileId} (version ${version})...`); 
             const { error: uploadError } = await supabaseClient.storage
                 .from('storage')
                 .upload(filePath, fileBlob, { upsert: true }); // upsert to overwrite
@@ -97,14 +110,18 @@ class FileWriter {
             const now = new Date().toISOString();
             const { error: dbError } = await supabaseClient
                 .from('files')
-                .update({ last_modified: now, file_size: fileBlob.size })
+                .update({ 
+                    last_modified: now, 
+                    file_size: fileBlob.size,
+                    version: parseInt(version)
+                })
                 .eq('id', fileId)
                 .eq('user_id', userId);
 
             if (dbError) {
                 console.error("Error updating file metadata in database:", dbError);
             } else {
-                console.log(`Successfully finished cloud save for fileId: ${fileId}.`);
+                console.log(`Successfully finished cloud save for fileId: ${fileId} (version ${version}).`);
             }
 
         } catch (err) {
@@ -119,8 +136,17 @@ class FileWriter {
     }
 
     exportData() {
+        let version = "3.0";
+        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
+                                       typeof TextFieldProseMirror !== 'undefined';
+        
+        if (!hasProseMirrorCapability) {
+            version = "2.0";
+            console.warn("ProseMirror not available, exporting as v2.0 format");
+        }
+        
         const exportData = {
-            version: "2.0",
+            version: version,
             groups: []
         };
         
@@ -133,7 +159,7 @@ class FileWriter {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = "mathboard-data.json";
+        a.download = `mathboard-data-v${version}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

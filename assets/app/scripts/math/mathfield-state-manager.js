@@ -52,9 +52,11 @@ class MathFieldStateManager {
     return MathFieldUtils.isEmpty(latex);
   }
 
-  hasTextContent(latex) {
+  hasTextContent(latex) { // most useless function ever
     return MathFieldUtils.hasTextContent(latex);
   }
+
+  // TODO: find more vestigial usueless functions to delete
 
   getLatexData() {
     return this.container.dataset.latex || '';

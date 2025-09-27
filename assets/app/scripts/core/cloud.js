@@ -40,11 +40,7 @@ class User {
 
     async getUserInfo() {
         const { user } = await this.getSession();
-        return {
-            id: user?.id || null,
-            email: user?.email || null,
-            isLoggedIn: !!user
-        };
+        return { id: user?.id || null, email: user?.email || null, isLoggedIn: !!user };
     }
 
     async deleteAccount() {
@@ -68,6 +64,8 @@ class User {
             return { success: false, error: error.message };
         }
     }
+
+    // TODO: Move file management back to the filemanager
 
     async uploadFile(filePath, fileData) {
         try {
@@ -132,9 +130,7 @@ class User {
     async listUserFiles() {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const { data: files, error } = await this.client
                 .from('files')
@@ -154,9 +150,7 @@ class User {
     async createBlankFile(fileName) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const { exists } = await this.checkFileExists(fileName);
             if (exists) {
@@ -164,6 +158,13 @@ class User {
                     success: false, 
                     error: `File named "${fileName}" already exists.` 
                 };
+            }
+
+            let initialVersion = 3;
+            let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
+                                           typeof TextFieldProseMirror !== 'undefined';
+            if (!hasProseMirrorCapability) {
+                initialVersion = 2;
             }
 
             const fileId = this.generateUUID();
@@ -187,7 +188,8 @@ class User {
                     file_name: fileName,
                     created_at: now,
                     last_modified: now,
-                    file_size: initialFileSize
+                    file_size: initialFileSize,
+                    version: initialVersion
                 });
 
             if (dbError) {
@@ -227,6 +229,15 @@ class User {
                 };
             }
 
+            let fileVersion = 2;
+            if (parsedContent.version) {
+                if (parsedContent.version === "3.0") {
+                    fileVersion = 3;
+                } else if (parsedContent.version === "2.0") {
+                    fileVersion = 2;
+                }
+            }
+
             const fileId = this.generateUUID();
             const filePath = `${session.user.id}/${fileId}.json`;
             const contentBlob = new Blob([jsonContent], { type: 'application/json' });
@@ -247,7 +258,8 @@ class User {
                     file_name: fileName,
                     created_at: now,
                     last_modified: now,
-                    file_size: fileSize
+                    file_size: fileSize,
+                    version: fileVersion
                 });
 
             if (dbError) {
@@ -273,9 +285,7 @@ class User {
     async checkFileExists(fileName) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const { data: existingFiles, error } = await this.client
                 .from('files')
@@ -286,10 +296,7 @@ class User {
 
             if (error) throw error;
 
-            return { 
-                success: true, 
-                exists: existingFiles && existingFiles.length > 0 
-            };
+            return { success: true, exists: existingFiles && existingFiles.length > 0 };
         } catch (error) {
             console.error('Error checking file existence:', error);
             return { success: false, error: error.message, exists: false };
@@ -299,14 +306,10 @@ class User {
     async renameFile(fileId, newName) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const validationResult = await this.validateFileName(fileId, newName);
-            if (!validationResult.success) {
-                return validationResult;
-            }
+            if (!validationResult.success) return validationResult;
 
             const validatedName = validationResult.name;
             const now = new Date().toISOString();
@@ -336,9 +339,7 @@ class User {
     async deleteFileRecord(fileId) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const userId = session.user.id;
             const filePath = `${userId}/${fileId}.json`;
@@ -373,18 +374,11 @@ class User {
     async validateFileName(fileId, newName) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
-
-            if (!fileId || !newName) {
-                throw new Error('File ID and new name are required');
-            }
+            if (!session) throw new Error('User not authenticated');
+            if (!fileId || !newName) throw new Error('File ID and new name are required');
 
             const trimmedName = newName.trim();
-            if (!trimmedName) {
-                throw new Error('File name cannot be empty');
-            }
+            if (!trimmedName) throw new Error('File name cannot be empty');
 
             const { data: existingFiles, error } = await this.client
                 .from('files')
@@ -396,9 +390,7 @@ class User {
 
             if (error) throw error;
 
-            if (existingFiles && existingFiles.length > 0) {
-                throw new Error(`A file named "${trimmedName}" already exists`);
-            }
+            if (existingFiles && existingFiles.length > 0) throw new Error(`A file named "${trimmedName}" already exists`);
 
             return { success: true, name: trimmedName };
         } catch (error) {
@@ -410,9 +402,7 @@ class User {
     async getFileInfo(fileId) {
         try {
             const { session } = await this.getSession();
-            if (!session) {
-                throw new Error('User not authenticated');
-            }
+            if (!session) throw new Error('User not authenticated');
 
             const { data, error } = await this.client
                 .from('files')
