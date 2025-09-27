@@ -246,15 +246,16 @@
   
   <script>
     window.proseMirrorReady = false;
-    document.addEventListener('DOMContentLoaded', function() {
-      import('./assets/app/scripts/text/prosemirror-imports.js')
-        .then(() => {
-          console.log('ProseMirror modules loaded successfully');
-        })
-        .catch(err => {
-          console.warn('ProseMirror modules failed to load, falling back to legacy TextField:', err);
-        });
-    });
+    
+    (async function loadProseMirror() {
+      try {
+        await import('./assets/app/scripts/text/prosemirror-imports.js');
+        console.log('ProseMirror modules loaded successfully');
+      } catch (err) {
+        console.warn('ProseMirror modules failed to load, falling back to legacy TextField:', err);
+        window.proseMirrorLoadFailed = true;
+      }
+    })();
   </script>
 
   <!-- Authentication Scripts -->

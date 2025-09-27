@@ -28,4 +28,8 @@ window.ProseMirror = {
 };
 
 window.proseMirrorReady = true;
-window.dispatchEvent(new Event('prosemirror-ready'));
+console.log('ProseMirror ready flag set');
+
+if (typeof window !== 'undefined' && window.dispatchEvent) {
+  window.dispatchEvent(new Event('prosemirror-ready'));
+}

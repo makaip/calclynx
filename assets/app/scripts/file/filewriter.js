@@ -26,22 +26,17 @@ class FileWriter {
             const left = group.style.left;
             const top = group.style.top;
             const fields = [];
-            const container = group.querySelector('.text-field-container');
-
-            if (container && container.textFieldInstance) {
-                const fieldInstance = container.textFieldInstance;
-                if (fieldInstance.constructor.name === 'TextFieldProseMirror' && fieldInstance.content) {
-                    const proseMirrorContent = fieldInstance.content.getContent();
-                    if (proseMirrorContent) {
-                        fields.push(proseMirrorContent);
-                    } else {
-                        fields.push(fieldInstance.getOptimizedContent());
-                    }
+            const containers = group.querySelectorAll('.text-field-container');
+            containers.forEach((container) => {
+                const field = container.textFieldInstance;
+                if (!field) return;
+                if (field.content && typeof field.content.getContent === 'function') {
+                    const pmContent = field.content.getContent();
+                    fields.push(pmContent ?? field.getOptimizedContent());
                 } else {
-                    const optimizedContent = fieldInstance.getOptimizedContent();
-                    fields.push(optimizedContent);
+                    fields.push(field.getOptimizedContent());
                 }
-            }
+            });
             
             saveData.groups.push({ type: 'text', left, top, fields });
         });
