@@ -34,7 +34,6 @@
     cursor: pointer;
     border-radius: 4px;
     box-sizing: border-box;
-    border: none;
 }
 
 .format-btn:hover {
