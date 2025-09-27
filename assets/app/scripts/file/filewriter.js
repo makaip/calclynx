@@ -31,7 +31,7 @@ class FileWriter {
             if (container && container.textFieldInstance) {
                 const fieldInstance = container.textFieldInstance;
                 if (fieldInstance.constructor.name === 'TextFieldProseMirror' && fieldInstance.content) {
-                    const proseMirrorContent = fieldInstance.content.getProseMirrorContent();
+                    const proseMirrorContent = fieldInstance.content.getContent();
                     if (proseMirrorContent) {
                         fields.push(proseMirrorContent);
                     } else {

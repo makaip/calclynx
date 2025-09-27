@@ -157,7 +157,7 @@ class TextFieldProseMirror {
 
     if (content && typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
       setTimeout(() => {
-        this.content.setLegacyOptimizedContent(content);
+        this.content.setOptimizedContent(content);
       }, 10);
     }
   }
@@ -263,7 +263,7 @@ class TextFieldProseMirror {
   }
 
   getContent() {
-    return this.content.getContent();
+    return this.content.getContent(); 
   }
 
   setContent(content) {

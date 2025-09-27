@@ -8,8 +8,7 @@ class TextGroup extends ObjectGroup {
     }
 
     try {
-      const proseMirrorAvailable = (window.proseMirrorReady || window.ProseMirror) && 
-                                   typeof TextFieldProseMirror !== 'undefined';
+      const proseMirrorAvailable = (window.proseMirrorReady || window.ProseMirror) && typeof TextFieldProseMirror !== 'undefined';
       
       if (proseMirrorAvailable) {
         const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
@@ -21,6 +20,7 @@ class TextGroup extends ObjectGroup {
         } else {
           console.log('Using ProseMirror TextField v3.0');
         }
+
       } else {
         if (typeof TextField !== 'undefined') {
           const normalizedContent = TextFieldCompatibility.normalizeContent(content, '2.0');
@@ -43,10 +43,7 @@ class TextGroup extends ObjectGroup {
   setupClickHandler() {
     this.element.addEventListener('click', (event) => {
       const isFromTextEditor = event.target.closest('.text-editor') || event.target.closest('.text-field-container');
-      
-      if (isFromTextEditor) {
-        return;
-      }
+      if (isFromTextEditor) return;
       
       if (this.element.classList.contains('selected')) {
         event.stopPropagation();

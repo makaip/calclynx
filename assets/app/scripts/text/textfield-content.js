@@ -30,14 +30,14 @@ class TextFieldProseMirrorContent {
     });
   }
 
-  getProseMirrorContent() {
+  getContent() {
     if (!this.textField.proseMirrorView || !this.textField.proseMirrorView.state) {
       return null;
     }
     return this.textField.proseMirrorView.state.doc.toJSON();
   }
 
-  setProseMirrorContent(docJson) {
+  setContent(docJson) {
     if (!this.textField.proseMirrorView || !this.schema || !docJson) return;
 
     try {
@@ -49,7 +49,7 @@ class TextFieldProseMirrorContent {
     }
   }
 
-  getLegacyOptimizedContent() {
+  getOptimizedContent() {
     if (!this.textField.proseMirrorView) return { text: '', mathFields: [] };
 
     const content = { text: '', mathFields: [] };
@@ -74,7 +74,7 @@ class TextFieldProseMirrorContent {
     return content;
   }
 
-  setLegacyOptimizedContent(content) {
+  setOptimizedContent(content) {
     if (!this.textField.proseMirrorView || !this.schema) return;
 
     const doc = TextFieldCompatibility.convertV2ToV3(content, this.schema);
@@ -86,17 +86,5 @@ class TextFieldProseMirrorContent {
       );
       this.textField.proseMirrorView.dispatch(tr);
     }
-  }
-
-  getContent() {
-    return this.getProseMirrorContent();
-  }
-
-  getOptimizedContent() {
-    return this.getLegacyOptimizedContent();
-  }
-
-  setOptimizedContent(content) {
-    return this.setLegacyOptimizedContent(content);
   }
 }
