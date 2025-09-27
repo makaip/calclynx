@@ -46,8 +46,7 @@
 }
 
 .format-btn.active {
-
-    color: #000;
+    background-color: #00b38a;
 }
 
 .format-btn.active:hover {

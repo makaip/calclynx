@@ -129,7 +129,6 @@ class TextFieldProseMirror {
       }
     });
 
-    // Initialize event handler now that proseMirrorView exists
     this.eventHandler = new TextFieldProseMirrorEventHandler(this.proseMirrorView);
 
     if (content && typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
@@ -159,10 +158,18 @@ class TextFieldProseMirror {
       this.textGroup.board.fileManager.saveState();
       if (window.textFormatToolbar) {
         setTimeout(() => {
-          if (!document.querySelector('.ProseMirror:focus-within')) {
+          const focusedElement = document.activeElement;
+          const hasProseMirrorFocus = document.querySelector('.ProseMirror:focus-within');
+          const isFocusInTextEditor = focusedElement && (
+            focusedElement.closest('.text-editor') || 
+            focusedElement.closest('.prosemirror-editor') ||
+            focusedElement.classList.contains('ProseMirror')
+          );
+          
+          if (!hasProseMirrorFocus && !isFocusInTextEditor) {
             window.textFormatToolbar.hide();
           }
-        }, 100);
+        }, 50); 
       }
     });
 
@@ -201,6 +208,13 @@ class TextFieldProseMirror {
         this.proseMirrorView.dispatch(tr);
       }
       
+      if (window.textFormatToolbar) {
+        setTimeout(() => {
+          if (this.proseMirrorView.hasFocus() || document.activeElement === this.editorElement) {
+            window.textFormatToolbar.show(this);
+          }
+        }, 50);
+      }
     }
   }
 
