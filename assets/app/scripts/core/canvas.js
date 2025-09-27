@@ -34,8 +34,9 @@ class MathBoard {
 
     this.fileManager = new FileManager(this);
     this.clipboard = new Clipboard(this);
-    this.fileManager.loadState();
     this.initEventListeners();
+    
+    this.fileManager.loadState();
     this.navigation = new Navigation(this);
     this.navigation.init();
   }

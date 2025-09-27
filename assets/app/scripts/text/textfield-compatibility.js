@@ -129,8 +129,10 @@ class TextFieldCompatibility {
   }
 
   static shouldUseProseMirror() {
-    return (window.proseMirrorReady || window.ProseMirror) && 
-           typeof TextFieldProseMirror !== 'undefined';
+    const proseMirrorModulesReady = window.proseMirrorReady && window.ProseMirror;
+    const textFieldClassReady = typeof TextFieldProseMirror !== 'undefined';
+    
+    return proseMirrorModulesReady && textFieldClassReady;
   }
 
   static getTextFieldClass() {
@@ -139,12 +141,6 @@ class TextFieldCompatibility {
         class: TextFieldProseMirror,
         version: '3.0',
         useProseMirror: true
-      };
-    } else if (typeof TextField !== 'undefined') {
-      return {
-        class: TextField,
-        version: '2.0',
-        useProseMirror: false
       };
     } else {
       throw new Error('No TextField implementation available');

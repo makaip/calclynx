@@ -8,28 +8,18 @@ class TextGroup extends ObjectGroup {
     }
 
     try {
-      const proseMirrorAvailable = (window.proseMirrorReady || window.ProseMirror) && typeof TextFieldProseMirror !== 'undefined';
-      
-      if (proseMirrorAvailable) {
-        const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
-        this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
-        this.useProseMirror = true;
-        
-        if (data && TextFieldCompatibility.detectContentFormat(content) !== 'prosemirror-v3') {
-          console.log('Auto-upgrading legacy content to ProseMirror v3.0');
-        } else {
-          console.log('Using ProseMirror TextField v3.0');
-        }
+      if (!TextFieldCompatibility.shouldUseProseMirror()) {
+        throw new Error('ProseMirror components not fully loaded yet. TextFieldProseMirror class is required.');
+      }
 
+      const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
+      this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
+      this.useProseMirror = true;
+      
+      if (data && TextFieldCompatibility.detectContentFormat(content) !== 'prosemirror-v3') {
+        console.log('Auto-upgrading legacy content to ProseMirror v3.0');
       } else {
-        if (typeof TextField !== 'undefined') {
-          const normalizedContent = TextFieldCompatibility.normalizeContent(content, '2.0');
-          this.textField = new TextField(this, !data, normalizedContent);
-          this.useProseMirror = false;
-          console.log('Using legacy TextField v2.0 (ProseMirror not available)');
-        } else {
-          throw new Error('No TextField implementation available');
-        }
+        console.log('Using ProseMirror TextField v3.0');
       }
       
     } catch (error) {

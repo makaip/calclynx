@@ -77,14 +77,7 @@ class FileReader {
             
             parsedData.groups.forEach((groupData) => {
                 if (groupData.type === 'text') {
-                    if (parsedData.version === "3.0" && 
-                        !TextFieldCompatibility.shouldUseProseMirror(groupData.fields?.[0])) {
-                        console.warn("ProseMirror not available, converting v3.0 content to legacy format");
-                        const convertedGroupData = TextFieldCompatibility.convertV3ToV2(groupData);
-                        new TextGroup(this.board, 0, 0, convertedGroupData);
-                    } else {
-                        new TextGroup(this.board, 0, 0, groupData);
-                    }
+                    new TextGroup(this.board, 0, 0, groupData);
                 } else if (groupData.type === 'math') {
                     new MathGroup(this.board, 0, 0, groupData);
                 } else if (groupData.type === 'image') {
