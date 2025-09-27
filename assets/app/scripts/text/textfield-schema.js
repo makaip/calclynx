@@ -22,11 +22,21 @@ class TextFieldProseMirrorSchema {
       throw new Error('ProseMirror not available');
     }
 
-    const { Schema, basicSchema } = window.ProseMirror;
+    const { Schema, basicSchema, addListNodes } = window.ProseMirror;
+
+    const underlineMarkSpec = {
+      toDOM() { return ["u", 0]; },
+      parseDOM: [{ tag: "u" }]
+    };
+
+    const nodes = addListNodes(basicSchema.spec.nodes, "paragraph block*", "block")
+                    .addToEnd("math", this.mathNodeSpec);
+
+    const marks = basicSchema.spec.marks.addToEnd("underline", underlineMarkSpec);
 
     this.schema = new Schema({
-      nodes: basicSchema.spec.nodes.addToEnd("math", this.mathNodeSpec),
-      marks: basicSchema.spec.marks
+      nodes: nodes,
+      marks: marks
     });
 
     return this.schema;

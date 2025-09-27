@@ -1,4 +1,4 @@
-class BaseModal {
+class BaseModal { //TODO: make this simpler bc rn its cooked
   constructor(options = {}) {
     if (this.constructor === BaseModal) {
       throw new Error("BaseModal is abstract and cannot be instantiated directly");

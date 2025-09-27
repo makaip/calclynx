@@ -10,7 +10,7 @@
     display: flex;
     gap: 2px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
+    z-index: 10;
     backdrop-filter: blur(4px);
 }
 

@@ -18,11 +18,9 @@ class TextFormatToolbar {
         });
         
         document.addEventListener('click', (e) => {
-            setTimeout(() => {
-                if (!this.toolbar.contains(e.target) && !this.isTextFieldTarget(e.target)) {
-                    this.hide();
-                }
-            }, 50);
+            if (!this.toolbar.contains(e.target) && !this.isTextFieldTarget(e.target)) {
+                this.hide();
+            }
         });
     }
     
@@ -43,11 +41,9 @@ class TextFormatToolbar {
         this.isVisible = false;
         this.activeTextField = null;
         
-        setTimeout(() => {
             if (!this.isVisible) {
                 this.toolbar.style.display = 'none';
             }
-        }, 200);
     }
     
     toggle(textField = null) {
@@ -59,32 +55,39 @@ class TextFormatToolbar {
     }
     
     handleFormatAction(format) {
-        console.log(`Format action: ${format}`);
+        if (!this.activeTextField || !this.activeTextField.proseMirrorView) {
+            console.warn('No active text field for formatting');
+            return;
+        }
         
-        // TODO: implement actual formatting logic based on active text field        
+        const view = this.activeTextField.proseMirrorView;
+        const { state, dispatch } = view;
+        
         switch (format) {
             case 'bold':
-                this.toggleButtonState('bold');
+                this.toggleMarkFormat(view, 'strong');
                 break;
             case 'italic':
-                this.toggleButtonState('italic');
+                this.toggleMarkFormat(view, 'em');
                 break;
             case 'underline':
-                this.toggleButtonState('underline');
+                this.toggleMarkFormat(view, 'underline');
                 break;
             case 'heading':
-                this.toggleButtonState('heading');
+                this.toggleBlockType(view, 'heading', { level: 1 });
                 break;
             case 'equation':
-
+                this.insertMathField(view);
                 break;
             case 'bullet-list':
-                this.toggleButtonState('bullet-list');
+                this.toggleList(view, 'bullet_list');
                 break;
             case 'number-list':
-                this.toggleButtonState('number-list');
+                this.toggleList(view, 'ordered_list');
                 break;
         }
+        
+        this.updateButtonStates();
     }
     
     toggleButtonState(format) {
@@ -94,8 +97,136 @@ class TextFormatToolbar {
         }
     }
     
+    toggleMarkFormat(view, markType) {
+        const { state, dispatch } = view;
+        const { toggleMark } = window.ProseMirror;
+        const markTypeObj = state.schema.marks[markType];
+        
+        if (markTypeObj) {
+            const command = toggleMark(markTypeObj);
+            command(state, dispatch);
+            view.focus();
+            
+        } else {
+            console.warn(`Mark type ${markType} not found in schema`);
+        }
+    }
+    
+    toggleBlockType(view, nodeType, attrs = {}) {
+        const { state, dispatch } = view;
+        const { setBlockType } = window.ProseMirror;
+        const nodeTypeObj = state.schema.nodes[nodeType];
+        
+        if (nodeTypeObj) {
+            const command = setBlockType(nodeTypeObj, attrs);
+            const canApply = command(state);
+            
+            if (canApply) {
+                command(state, dispatch);
+                
+            } else {
+                const paragraphType = state.schema.nodes.paragraph;
+                const paragraphCommand = setBlockType(paragraphType);
+                paragraphCommand(state, dispatch);
+                
+            }
+            view.focus();
+        } else {
+            console.warn(`${nodeType} not found in schema`);
+        }
+    }
+    
+    toggleList(view, listType) {
+        const { state, dispatch } = view;
+        const { wrapInList, liftListItem } = window.ProseMirror;
+        const listTypeObj = state.schema.nodes[listType];
+        const listItemType = state.schema.nodes.list_item;
+        
+        if (!listTypeObj || !listItemType) {
+            console.warn(`List type ${listType} or list_item not found in schema`);
+            return;
+        }
+        
+        const wrapCommand = wrapInList(listTypeObj);
+        if (wrapCommand(state)) {
+            wrapCommand(state, dispatch);
+        } else {
+            const liftCommand = liftListItem(listItemType);
+            if (liftCommand(state)) {
+                liftCommand(state, dispatch);
+            }
+        }
+        
+        view.focus();
+    }
+    
+    insertMathField(view) {
+        const { state, dispatch } = view;
+        const mathNode = state.schema.nodes.math;
+        
+        if (mathNode) {
+            const tr = state.tr.replaceSelectionWith(mathNode.create({ latex: '' }));
+            dispatch(tr);
+            
+            setTimeout(() => {
+                const mathFields = view.dom.querySelectorAll('.mathquill');
+                const lastMathField = mathFields[mathFields.length - 1];
+                if (lastMathField && lastMathField.mathquillObject) {
+                    lastMathField.mathquillObject.focus();
+                }
+            }, 10);
+        }
+    }
+    
     updateButtonStates() {
-        // TODO: update button states based on current selection
+        if (!this.activeTextField || !this.activeTextField.proseMirrorView) {
+            return;
+        }
+        
+        const view = this.activeTextField.proseMirrorView;
+        const { state } = view;
+        const { from, to } = state.selection;
+        
+        this.toolbar.querySelectorAll('.format-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        if (state.schema.marks.strong && state.doc.rangeHasMark(from, to, state.schema.marks.strong)) {
+            this.setButtonActive('bold');
+        }
+        
+        if (state.schema.marks.em && state.doc.rangeHasMark(from, to, state.schema.marks.em)) {
+            this.setButtonActive('italic');
+        }
+        
+        if (state.schema.marks.underline && state.doc.rangeHasMark(from, to, state.schema.marks.underline)) {
+            this.setButtonActive('underline');
+        }
+        
+        const { $from } = state.selection;
+        const currentNode = $from.parent;
+        
+        if (currentNode.type === state.schema.nodes.heading) {
+            this.setButtonActive('heading');
+        }
+        
+        for (let d = $from.depth; d >= 0; d--) {
+            const node = $from.node(d);
+            if (node.type === state.schema.nodes.bullet_list) {
+                this.setButtonActive('bullet-list');
+                break;
+            } else if (node.type === state.schema.nodes.ordered_list) {
+                this.setButtonActive('number-list');
+                break;
+            }
+        }
+    }
+    
+    setButtonActive(format) {
+        const button = this.toolbar.querySelector(`[data-format="${format}"]`);
+        if (button) {
+            button.classList.add('active');
+        }
     }
     
     isTextFieldTarget(element) {
@@ -106,9 +237,10 @@ class TextFormatToolbar {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+
+// TODO: find all the DOMContentLoaded's and put them all together
+document.addEventListener('DOMContentLoaded', () => { 
     window.textFormatToolbar = new TextFormatToolbar();
-    console.log('Text Format Toolbar initialized');
 });
 
 window.TextFormatToolbar = TextFormatToolbar;

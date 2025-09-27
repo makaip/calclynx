@@ -65,6 +65,8 @@ class User {
         }
     }
 
+    // TODO: Move file management back to the filemanager
+
     async uploadFile(filePath, fileData) {
         try {
             const { session } = await this.getSession();

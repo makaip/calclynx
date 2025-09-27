@@ -32,6 +32,25 @@ class TextFieldProseMirror {
     }
   }
 
+  getFormattingKeymap(schema) {
+    const { toggleMark } = window.ProseMirror;
+    const keymap = {};
+    
+    if (schema.marks.strong) {
+      keymap['Mod-b'] = toggleMark(schema.marks.strong);
+    }
+    
+    if (schema.marks.em) {
+      keymap['Mod-i'] = toggleMark(schema.marks.em);
+    }
+    
+    if (schema.marks.underline) {
+      keymap['Mod-u'] = toggleMark(schema.marks.underline);
+    }
+    
+    return keymap;
+  }
+
   createContainer() {
     this.container = document.createElement('div');
     this.container.className = 'text-field-container';
@@ -74,6 +93,7 @@ class TextFieldProseMirror {
         plugins: [
           history(),
           keymap(baseKeymap),
+          keymap(this.getFormattingKeymap(schema)),
           keymap({
             '$': (state, dispatch) => {
               const mathFields = this.editorElement.querySelectorAll('.mathquill');
@@ -146,6 +166,10 @@ class TextFieldProseMirror {
       dispatchTransaction: (tr) => {
         const newState = this.proseMirrorView.state.apply(tr);
         this.proseMirrorView.updateState(newState);
+        
+        if (window.textFormatToolbar && window.textFormatToolbar.activeTextField === this) {
+            window.textFormatToolbar.updateButtonStates();
+        }
         
         clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(() => {
