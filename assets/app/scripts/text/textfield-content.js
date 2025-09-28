@@ -1,3 +1,5 @@
+import { TextFieldCompatibility } from './textfield-compatibility.js';
+
 class TextFieldProseMirrorContent {
   constructor(textField) {
     this.textField = textField;
@@ -88,3 +90,5 @@ class TextFieldProseMirrorContent {
     }
   }
 }
+
+export { TextFieldProseMirrorContent };

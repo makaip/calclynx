@@ -1,4 +1,13 @@
-const MQ = MathQuill.getInterface(2);
+import { FileManager } from '../file/filemanager.js';
+import { ObjectGroup } from './objectgroup.js';
+import { BoxSelection } from './selection.js';
+import { Clipboard } from './clipboard.js';
+import { Navigation } from './navigation.js';
+import { MathFieldEditor } from '../math/mathfield-editor.js';
+import { TextGroup } from '../text/textgroup.js';
+import { MathGroup } from '../math/mathgroup.js';
+
+const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
 
 class MathBoard {
   constructor() {
@@ -344,3 +353,4 @@ class MathBoard {
   }
 }
 
+export { MathBoard };

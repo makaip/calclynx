@@ -1,3 +1,8 @@
+import { MathFieldUtils } from './mathfield-utils.js';
+import { MathFieldUIManager } from './mathfield-ui-manager.js';
+
+const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
+
 class MathFieldEditor {
   constructor(container, mathGroup) {
     this.container = container;
@@ -8,7 +13,12 @@ class MathFieldEditor {
 
   createMathField() {
     if (this.hasMathField()) return;
+    if (!window.MathQuill) {
+      console.warn('MathQuill not loaded, cannot create math field');
+      return;
+    }
 
+    const MQ = window.MathQuill.getInterface(2);
     this.mathFieldElement = MathFieldUtils.createMathFieldElement();
     MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
     this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig()); 
@@ -104,6 +114,11 @@ class MathFieldEditor {
   }
 
   static initializeEditableMathField(mathFieldElement, existingLatex, container) {
+    if (!window.MathQuill) {
+      console.warn('MathQuill not loaded, cannot initialize editable math field');
+      return null;
+    }
+    const MQ = window.MathQuill.getInterface(2);
     const baseConfig = MathFieldUtils.getEditMathQuillConfig();
     const mathField = MQ.MathField(mathFieldElement, {
       ...baseConfig,
@@ -240,3 +255,5 @@ class MathFieldEditor {
     }
   }
 }
+
+export { MathFieldEditor };

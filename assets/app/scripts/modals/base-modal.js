@@ -101,3 +101,5 @@ class BaseModal { //TODO: make this simpler bc rn its cooked
   onShow(data) {}
   onHide() {}
 }
+
+export { BaseModal };

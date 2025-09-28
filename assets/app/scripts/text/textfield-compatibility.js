@@ -130,13 +130,13 @@ class TextFieldCompatibility {
 
   static shouldUseProseMirror() {
     const proseMirrorModulesReady = window.proseMirrorReady && window.ProseMirror;
-    const textFieldClassReady = typeof TextFieldProseMirror !== 'undefined';
     
-    return proseMirrorModulesReady && textFieldClassReady;
+    return proseMirrorModulesReady;
   }
 
-  static getTextFieldClass() {
+  static async getTextFieldClass() {
     if (this.shouldUseProseMirror()) {
+      const { TextFieldProseMirror } = await import('./textfield.js');
       return {
         class: TextFieldProseMirror,
         version: '3.0',
@@ -179,3 +179,5 @@ class TextFieldCompatibility {
     return content;
   }
 }
+
+export { TextFieldCompatibility };

@@ -1,3 +1,8 @@
+import { TextGroup } from '../text/textgroup.js';
+import { MathGroup } from '../math/mathgroup.js';
+import { ImageGroup } from '../image/imagegroup.js';
+import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+
 class FileReader {
     constructor(board, fileManager) {
         this.board = board;
@@ -98,3 +103,5 @@ class FileReader {
         }
     }
 }
+
+export { FileReader };

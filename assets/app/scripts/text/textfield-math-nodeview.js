@@ -214,3 +214,5 @@ class MathNodeView {
     }
   }
 }
+
+export { MathNodeView };

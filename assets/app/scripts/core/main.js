@@ -1,204 +1,212 @@
-(() => {
-  const App = {
-    mathBoard: null,
-    expressionEquivalence: null,
-  };
+import { MathBoard } from './canvas.js';
+import { ExpressionEquivalence } from '../utils/equivalence.js';
+import { TextFieldCompatibility } from '../text/textfield-compatibility.js';
+import { ImageGroup } from '../image/imagegroup.js';
+import { supabaseClient } from '../auth/initsupabaseapp.js';
 
-  const getById = (id) => document.getElementById(id);
+const App = {
+  mathBoard: null,
+  expressionEquivalence: null,
+};
 
-  const readFileAsText = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new window.FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
+const getById = (id) => document.getElementById(id);
 
-  const isModifierPressed = (e) => (navigator.platform.toUpperCase().includes('MAC') ? e.metaKey : e.ctrlKey);
+const initializeApp = () => {
+  if (TextFieldCompatibility.shouldUseProseMirror()) {
+    App.mathBoard = new MathBoard();
+    App.expressionEquivalence = new ExpressionEquivalence();
+  } else {
+    setTimeout(initializeApp, 100);
+  }
+};
 
-  const isInInput = (target) =>
-    Boolean(
-      target.closest('.image-url-input') ||
-      target.closest('.command-palette-input') ||
-      target.closest('.text-editor')
-    );
+async function updateUserStatus() {
+  const userEmailDisplay = getById('user-email-display');
+  const authButton = getById('auth-button');
 
-  const setupImportInput = (el) => {
-    if (!el) return;
-    el.addEventListener('change', async (evt) => {
-      const file = evt.target.files?.[0];
-      if (file) {
-        try {
-          const jsonData = await readFileAsText(file);
-          
-          // Basic JSON validation
-          try {
-            JSON.parse(jsonData);
-          } catch (parseError) {
-            alert('The selected file does not contain valid JSON. Please check the file format and try again.');
-            return;
-          }
-          
-          // Check if this is being used for "From JSON" functionality
-          if (window.isCreateFromJsonMode) {
-            window.pendingJsonData = jsonData;
-            window.isCreateFromJsonMode = false;
-            
-            const modal = document.getElementById('createFromJsonModal');
-            const input = document.getElementById('newJsonFileNameInput');
-            const errorMsg = document.getElementById('createFromJson-error-message');
-            
-            if (modal) {
-              modal.style.display = 'block';
-              if (input) {
-                input.value = '';
-                input.focus();
-              }
-              if (errorMsg) {
-                errorMsg.style.display = 'none';
-                errorMsg.textContent = '';
-              }
-            }
-          } else {
-            // Original behavior - import into current board
-            App.mathBoard?.fileManager?.importData(jsonData);
-          }
-        } catch (err) {
-          console.error('Error reading JSON file:', err);
-          alert('Error reading the file. Please ensure it\'s a valid JSON file.');
-        }
-      }
-      // reset to allow re-uploading same file
-      evt.target.value = '';
-    });
-  };
+  if (!userEmailDisplay || !authButton) return;
 
-  const showCommandPalette = () => {
-    if (window.commandPalette && typeof window.commandPalette.show === 'function') {
-      const refElement = document.activeElement?.closest('.math-field-container');
-      window.commandPalette.show(refElement);
-    }
-  }; 
+  if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
 
-  const showImageUrlInput = () => {
-    if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
-      window.showImageUrlModal((url) => {
-        const { x: mx, y: my } = App.mathBoard?.mouse ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        const coords = App.mathBoard ? App.mathBoard.screenToCanvas(mx, my) : { x: 100, y: 100 };
-        const imageGroup = new ImageGroup(App.mathBoard, coords.x, coords.y);
-        imageGroup.setImageUrl(url);
-        App.mathBoard.fileManager.saveState();
-      });
-    }
-  };
+  try {
+    const { data: { session } = {}, error } =
+      (await supabaseClient.auth.getSession()) || {};
 
-  const onKeyDown = (e) => {
-    const modifier = isModifierPressed(e);
-    if (!modifier) return;
-
-    if (isInInput(e.target)) return;
-
-    if (e.key === 'k' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCommandPalette();
+    if (error) {
+      console.error('Error getting session:', error);
+      userEmailDisplay.textContent = '';
       return;
     }
 
-    if (e.key === 'i' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      showImageUrlInput();
-    }
-  };
+    if (session?.user) {
+      const userEmail = session.user.email ?? '';
+      userEmailDisplay.textContent = userEmail;
+      userEmailDisplay.title = userEmail;
 
-  window.updateUserStatus = null;
-
-  const initializeApp = () => {
-    if (TextFieldCompatibility.shouldUseProseMirror()) {
-      App.mathBoard = new MathBoard();
-      App.expressionEquivalence = new ExpressionEquivalence();
+      authButton.textContent = 'Sign Out';
+      authButton.onclick = async (evt) => {
+        evt.preventDefault();
+        try {
+          authButton.disabled = true;
+          authButton.textContent = 'Signing Out...';
+          await supabaseClient.auth.signOut();
+          // onAuthStateChange will refresh UI
+        } catch (err) {
+          console.error('Error signing out:', err);
+          alert('Error signing out. Please try again.');
+          authButton.disabled = false;
+          authButton.textContent = 'Sign Out';
+        }
+      };
     } else {
-      setTimeout(initializeApp, 100);
+      userEmailDisplay.textContent = '';
+      userEmailDisplay.title = '';
+      authButton.textContent = 'Sign In';
+      authButton.onclick = (evt) => {
+        evt.preventDefault();
+        window.location.href = '/login.html';
+      };
     }
+  } catch (err) {
+    console.error('Exception checking auth status:', err);
+    userEmailDisplay.textContent = '';
+  }
+}
+
+const readFileAsText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+
+const isModifierPressed = (e) => (navigator.platform.toUpperCase().includes('MAC') ? e.metaKey : e.ctrlKey);
+
+const isInInput = (target) =>
+  Boolean(
+    target.closest('.image-url-input') ||
+    target.closest('.command-palette-input') ||
+    target.closest('.text-editor')
+  );
+
+const setupImportInput = (el) => {
+  if (!el) return;
+  el.addEventListener('change', async (evt) => {
+    const file = evt.target.files?.[0];
+    if (file) {
+      try {
+        const jsonData = await readFileAsText(file);
+
+        try {
+          JSON.parse(jsonData);
+        } catch (parseError) {
+          alert('The selected file does not contain valid JSON. Please check the file format and try again.');
+          return;
+        }
+        
+        if (window.isCreateFromJsonMode) {
+          window.pendingJsonData = jsonData;
+          window.isCreateFromJsonMode = false;
+          
+          const modal = document.getElementById('createFromJsonModal');
+          const input = document.getElementById('newJsonFileNameInput');
+          const errorMsg = document.getElementById('createFromJson-error-message');
+          
+          if (modal) {
+            modal.style.display = 'block';
+            if (input) {
+              input.value = '';
+              input.focus();
+            }
+            if (errorMsg) {
+              errorMsg.style.display = 'none';
+              errorMsg.textContent = '';
+            }
+          }
+        } else {
+          App.mathBoard?.fileManager?.importData(jsonData);
+        }
+      } catch (err) {
+        console.error('Error reading JSON file:', err);
+      }
+    }
+    // reset to allow re-uploading same file
+    evt.target.value = '';
+  });
+};
+
+const showCommandPalette = () => {
+  if (window.commandPalette && typeof window.commandPalette.show === 'function') {
+    const refElement = document.activeElement?.closest('.math-field-container');
+    window.commandPalette.show(refElement);
+  }
+}; 
+
+const showImageUrlInput = () => {
+  if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
+    window.showImageUrlModal((url) => {
+      if (!App?.mathBoard) return;
+      const { x: mx, y: my } = App.mathBoard?.mouse ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const coords = App.mathBoard ? App.mathBoard.screenToCanvas(mx, my) : { x: 100, y: 100 };
+      const imageGroup = new ImageGroup(App.mathBoard, coords.x, coords.y);
+      imageGroup.setImageUrl(url);
+      App.mathBoard.fileManager.saveState();
+    });
+  }
+};
+
+const onKeyDown = (e) => {
+  const modifier = isModifierPressed(e);
+  if (!modifier) return;
+
+  if (isInInput(e.target)) return;
+
+  if (e.key === 'k' && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    showCommandPalette();
+    return;
+  }
+
+  if (e.key === 'i' && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    showImageUrlInput();
+  }
+};
+
+function initializeAppCore() {
+  initializeApp();
+
+  window.App = App;
+  window.mathBoard = App.mathBoard; // expose for backwards compatibility
+  window.initializeMathSupportForTextFields = () => {
+    document.querySelectorAll('.text-field-container').forEach((container) => {
+      const tf = container.textFieldInstance;
+      if (tf?.initializeMathSupport) tf.initializeMathSupport();
+    });
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
+  setupImportInput(getById('importInput'));
 
-    window.App = App;
-    window.mathBoard = App.mathBoard; // expose for backwards compatibility
-    window.initializeMathSupportForTextFields = () => {
-      document.querySelectorAll('.text-field-container').forEach((container) => {
-        const tf = container.textFieldInstance;
-        if (tf?.initializeMathSupport) tf.initializeMathSupport();
-      });
-    };
-
-    setupImportInput(getById('importInput'));
-
-    // Capture phase so we intercept before other handlers
-    document.addEventListener('keydown', onKeyDown, true);
-    supabaseClient.auth.onAuthStateChange(() => {
-      window.updateUserStatus?.();
-    });
-
+  // Capture phase so we intercept before other handlers
+  document.addEventListener('keydown', onKeyDown, true);
+  supabaseClient.auth.onAuthStateChange(() => {
     window.updateUserStatus?.();
   });
 
-  async function updateUserStatus() {
-    const userEmailDisplay = getById('user-email-display');
-    const authButton = getById('auth-button');
+  window.updateUserStatus?.();
+}
 
-    if (!userEmailDisplay || !authButton) return;
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initializeAppCore();
+});
 
-    if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
+// Set up global references
+window.updateUserStatus = updateUserStatus;
+App.updateUserStatus = updateUserStatus;
+window.App = App;
 
-    try {
-      const { data: { session } = {}, error } =
-        (await supabaseClient.auth.getSession()) || {};
-
-      if (error) {
-        console.error('Error getting session:', error);
-        userEmailDisplay.textContent = '';
-        return;
-      }
-
-      if (session?.user) {
-        const userEmail = session.user.email ?? '';
-        userEmailDisplay.textContent = userEmail;
-        userEmailDisplay.title = userEmail;
-
-        authButton.textContent = 'Sign Out';
-        authButton.onclick = async (evt) => {
-          evt.preventDefault();
-          try {
-            authButton.disabled = true;
-            authButton.textContent = 'Signing Out...';
-            await supabaseClient.auth.signOut();
-            // onAuthStateChange will refresh UI
-          } catch (err) {
-            console.error('Error signing out:', err);
-            alert('Error signing out. Please try again.');
-            authButton.disabled = false;
-            authButton.textContent = 'Sign Out';
-          }
-        };
-      } else {
-        userEmailDisplay.textContent = '';
-        userEmailDisplay.title = '';
-        authButton.textContent = 'Sign In';
-        authButton.onclick = (evt) => {
-          evt.preventDefault();
-          window.location.href = '/login.html';
-        };
-      }
-    } catch (err) {
-      console.error('Exception checking auth status:', err);
-      userEmailDisplay.textContent = '';
-    }
-  }
-
-  window.updateUserStatus = updateUserStatus;
-  App.updateUserStatus = updateUserStatus;
-  window.App = App;
-})();
+export { App, updateUserStatus, initializeApp };
+export default { App, updateUserStatus, initializeApp };

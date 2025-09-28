@@ -1,3 +1,5 @@
+import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+
 function initializeRenameFileModal() {
     const renameFileModal = document.getElementById('renameFileModal');
     const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
@@ -79,3 +81,5 @@ function initializeRenameFileModal() {
         }
     });
 }
+
+export { initializeRenameFileModal };

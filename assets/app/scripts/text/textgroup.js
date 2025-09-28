@@ -1,3 +1,6 @@
+import { ObjectGroup } from '../core/objectgroup.js';
+import { TextFieldCompatibility } from './textfield-compatibility.js';
+
 class TextGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
     super(board, x, y, data, 'text');
@@ -7,11 +10,17 @@ class TextGroup extends ObjectGroup {
       content = data.fields[0];
     }
 
+    this.initializeTextField(content, data);
+    this.setupClickHandler();
+  }
+  
+  async initializeTextField(content, data) {
     try {
       if (!TextFieldCompatibility.shouldUseProseMirror()) {
         throw new Error('ProseMirror components not fully loaded yet. TextFieldProseMirror class is required.');
       }
 
+      const { TextFieldProseMirror } = await import('./textfield.js');
       const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
       this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
       this.useProseMirror = true;
@@ -26,8 +35,6 @@ class TextGroup extends ObjectGroup {
       console.error('Failed to create TextField:', error);
       this.textField = null;
     }
-
-    this.setupClickHandler();
   }
 
   setupClickHandler() {
@@ -44,3 +51,5 @@ class TextGroup extends ObjectGroup {
     });
   }
 }
+
+export { TextGroup };

@@ -1,3 +1,5 @@
+import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+
 function initializeCreateBlankFileModal() {
     const createBlankFileModal = document.getElementById('createBlankFileModal');
     const closeCreateBlankFileModalBtn = document.getElementById('closeCreateBlankFileModal');
@@ -51,3 +53,5 @@ function initializeCreateBlankFileModal() {
         window.handleCreateBlankFile();
     });
 }
+
+export { initializeCreateBlankFileModal };

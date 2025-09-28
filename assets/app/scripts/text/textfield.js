@@ -1,3 +1,9 @@
+import { TextFieldProseMirrorSchema } from './textfield-schema.js';
+import { TextFieldProseMirrorContent } from './textfield-content.js';
+import { MathNodeView } from './textfield-math-nodeview.js';
+import { TextFieldProseMirrorEventHandler } from './textfield-event-handler.js';
+import { ObjectGroup } from '../core/objectgroup.js';
+
 class TextFieldProseMirror {
   constructor(textGroup, isNewField, content = '') {
     this.textGroup = textGroup;
@@ -278,3 +284,5 @@ class TextFieldProseMirror {
     return this.content.setOptimizedContent(content);
   }
 }
+
+export { TextFieldProseMirror };

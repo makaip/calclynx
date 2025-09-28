@@ -85,3 +85,5 @@ class TextFieldProseMirrorSchema {
     return this.schema.nodes.math.create({ latex });
   }
 }
+
+export { TextFieldProseMirrorSchema };

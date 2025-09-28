@@ -1,3 +1,5 @@
+import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+
 function initializeDeleteFileModal() {
     const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
     const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
@@ -72,3 +74,5 @@ function initializeDeleteFileModal() {
         await confirmActualFileDelete();
     });
 }
+
+export { initializeDeleteFileModal };

@@ -1,3 +1,5 @@
+import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+
 class FileWriter {
     constructor(board, fileManager) {
         this.board = board;
@@ -166,3 +168,5 @@ class FileWriter {
         URL.revokeObjectURL(url);
     }
 }
+
+export { FileWriter };

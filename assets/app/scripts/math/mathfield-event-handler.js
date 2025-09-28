@@ -1,3 +1,7 @@
+import { MathFieldUtils } from './mathfield-utils.js';
+import { MathFieldUIManager } from './mathfield-ui-manager.js';
+import { MathFieldEditor } from './mathfield-editor.js';
+
 class MathFieldEventHandler {
   constructor(mathField) {
     this.mathField = mathField;
@@ -115,3 +119,5 @@ class MathFieldEventHandler {
     }
   }
 }
+
+export { MathFieldEventHandler };

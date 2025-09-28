@@ -262,3 +262,5 @@ function initializeDocumentClickHandlers() {
         });
     });
 }
+
+export { SidebarUtils };

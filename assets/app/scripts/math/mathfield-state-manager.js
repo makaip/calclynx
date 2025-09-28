@@ -1,3 +1,6 @@
+import { MathFieldUtils } from './mathfield-utils.js';
+import { MathFieldUIManager } from './mathfield-ui-manager.js';
+
 class MathFieldStateManager {
   constructor(mathField) {
     this.mathField = mathField;
@@ -70,3 +73,5 @@ class MathFieldStateManager {
     this.container.dataset.latex = '';
   }
 }
+
+export { MathFieldStateManager };

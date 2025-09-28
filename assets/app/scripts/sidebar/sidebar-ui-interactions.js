@@ -1,3 +1,16 @@
+import { initializeCreateBlankFileModal } from '../modals/createmodal.js';
+import { initializeDeleteFileModal } from '../modals/deletemodal.js';
+import { initializeImageUrlModal } from '../modals/imagemodal.js';
+import { initializeRenameFileModal } from '../modals/renamemodal.js';
+import { 
+    initializeFileDownloadHandler,
+    showError,
+    hideError,
+    showModal,
+    hideModal,
+    setButtonLoading
+} from './sidebar-file-actions.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeSettingsHandler();
     initializeCreateBlankFileModal();
@@ -257,3 +270,14 @@ function initializeCreateFromJsonModal() {
         window.handleCreateFromJson();
     });
 }
+
+export {
+    initializeSettingsHandler,
+    initializeCreateBlankFileModal,
+    initializeDeleteFileModal,
+    initializeImageUrlModal,
+    initializeRenameFileModal,
+    initializeFileDownloadHandler,
+    initializeCreateFromJsonModal,
+    initializeEventDelegation
+};

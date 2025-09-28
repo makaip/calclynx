@@ -100,3 +100,5 @@ class ObjectGroup {
     groupElements.forEach(element => element.classList.add('selected'));
   }
 }
+
+export { ObjectGroup };

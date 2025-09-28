@@ -1,6 +1,8 @@
+import { supabaseClient } from '../auth/initsupabaseapp.js';
+
 class User {
     constructor() {
-        this.client = supabaseClient; // sb client is global
+        this.client = supabaseClient;
         this.currentUser = null;
         this.currentSession = null;
     }
@@ -460,3 +462,5 @@ class User {
 }
 
 const userManager = new User();
+
+export { User, userManager };

@@ -378,3 +378,5 @@ class ExpressionEquivalence {
     containers.forEach((c) => c.classList.remove('group-editing'));
   }
 }
+
+export { ExpressionEquivalence };

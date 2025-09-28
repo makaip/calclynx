@@ -250,3 +250,5 @@ window.showTextToolbar = function() {
         window.textFormatToolbar.show();
     }
 };
+
+export { TextFormatToolbar };

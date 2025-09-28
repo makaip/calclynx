@@ -148,3 +148,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Also initialize when the DOM is loaded (in case modal is shown immediately)
     checkAuthAndInitSettings();
 });
+
+export const SettingsModalHandlers = true;
