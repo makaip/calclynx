@@ -35,6 +35,11 @@ class MathNodeView {
         enter: () => {
           this.exitMathField('right');
         },
+        paste: () => {
+          setTimeout(() => {
+            this.updateNodeContent();
+          }, 0);
+        },
         moveOutOf: (dir) => {
           const MQInterface = window.MathQuill.getInterface(2);
           if (dir === MQInterface.L) {
@@ -73,6 +78,10 @@ class MathNodeView {
       this.blurOtherMathFields();
     }, true);
 
+    this.dom.addEventListener('focusin', (e) => {
+      e.stopPropagation();
+    });
+
     this.dom.addEventListener('mousedown', (event) => {
       event.preventDefault();
     });
@@ -108,6 +117,30 @@ class MathNodeView {
         e.stopPropagation();
         this.exitMathField('right');
       }
+    });
+
+    this.dom.addEventListener('paste', (e) => {
+      e.stopPropagation();
+    });
+
+    this.dom.addEventListener('input', (e) => {
+      e.stopPropagation();
+    });
+
+    this.dom.addEventListener('beforeinput', (e) => {
+      e.stopPropagation();
+    });
+
+    this.dom.addEventListener('compositionstart', (e) => {
+      e.stopPropagation();
+    });
+
+    this.dom.addEventListener('compositionend', (e) => {
+      e.stopPropagation();
+    });
+
+    this.dom.addEventListener('compositionupdate', (e) => {
+      e.stopPropagation();
     });
   }
 
@@ -161,6 +194,12 @@ class MathNodeView {
           key === 'Tab' || key === '$') {
         return true;
       }
+    }
+
+    if (event.type === 'paste' || event.type === 'input' || event.type === 'beforeinput' ||
+        event.type === 'compositionstart' || event.type === 'compositionend' || 
+        event.type === 'compositionupdate') {
+      return true;
     }
     return false;
   }

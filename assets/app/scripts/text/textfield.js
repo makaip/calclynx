@@ -150,6 +150,47 @@ class TextFieldProseMirror {
       },
       handleKeyDown: (view, event) => {
         return this.eventHandler ? this.eventHandler.handleKeyDown(view, event) : false;
+      },
+      handlePaste: (view, event, slice) => {
+        const target = event.target;
+        const mathField = target.closest('.mathquill');
+        
+        if (mathField) {
+          event.preventDefault();
+          event.stopPropagation();
+          return true;
+        }
+        
+        return false;
+      },
+      handleDOMEvents: {
+        paste: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        },
+        input: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        },
+        beforeinput: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        }
       }
     });
 
