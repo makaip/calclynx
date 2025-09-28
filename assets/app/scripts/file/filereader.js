@@ -2,6 +2,7 @@ import { TextGroup } from '../text/textgroup.js';
 import { MathGroup } from '../math/mathgroup.js';
 import { ImageGroup } from '../image/imagegroup.js';
 import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+import { supabaseClient } from '../auth/initsupabaseapp.js';
 
 class FileReader {
     constructor(board, fileManager) {

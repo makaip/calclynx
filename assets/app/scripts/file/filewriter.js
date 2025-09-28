@@ -1,4 +1,5 @@
 import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+import { supabaseClient } from '../auth/initsupabaseapp.js';
 
 class FileWriter {
     constructor(board, fileManager) {

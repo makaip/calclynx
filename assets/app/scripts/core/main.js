@@ -3,6 +3,7 @@ import { ExpressionEquivalence } from '../utils/equivalence.js';
 import { TextFieldCompatibility } from '../text/textfield-compatibility.js';
 import { ImageGroup } from '../image/imagegroup.js';
 import { supabaseClient } from '../auth/initsupabaseapp.js';
+import { loadUserFiles } from '../sidebar/sidebar.js';
 
 const App = {
   mathBoard: null,
@@ -26,7 +27,7 @@ async function updateUserStatus() {
 
   if (!userEmailDisplay || !authButton) return;
 
-  if (typeof window.loadUserFiles === 'function') window.loadUserFiles();
+  loadUserFiles();
 
   try {
     const { data: { session } = {}, error } =
@@ -178,24 +179,17 @@ const onKeyDown = (e) => {
 function initializeAppCore() {
   initializeApp();
 
-  window.App = App;
-  window.mathBoard = App.mathBoard; // expose for backwards compatibility
-  window.initializeMathSupportForTextFields = () => {
-    document.querySelectorAll('.text-field-container').forEach((container) => {
-      const tf = container.textFieldInstance;
-      if (tf?.initializeMathSupport) tf.initializeMathSupport();
-    });
-  };
+  // Note: Removed global assignments - use proper imports instead
 
   setupImportInput(getById('importInput'));
 
   // Capture phase so we intercept before other handlers
   document.addEventListener('keydown', onKeyDown, true);
   supabaseClient.auth.onAuthStateChange(() => {
-    window.updateUserStatus?.();
+    updateUserStatus();
   });
 
-  window.updateUserStatus?.();
+  updateUserStatus();
 }
 
 // Initialize when DOM is ready
@@ -203,10 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeAppCore();
 });
 
-// Set up global references
-window.updateUserStatus = updateUserStatus;
+// Set up internal references
 App.updateUserStatus = updateUserStatus;
-window.App = App;
 
 export { App, updateUserStatus, initializeApp };
 export default { App, updateUserStatus, initializeApp };

@@ -1,3 +1,5 @@
+import { userManager } from '../core/cloud.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const settingsModal = document.getElementById('settings-modal');
