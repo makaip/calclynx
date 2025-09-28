@@ -1,5 +1,6 @@
 import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
+import { userManager } from '../core/cloud.js';
 
 function initializeDeleteFileModal() {
     const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');

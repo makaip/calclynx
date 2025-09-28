@@ -4,6 +4,7 @@ import { TextFieldCompatibility } from '../text/textfield-compatibility.js';
 import { ImageGroup } from '../image/imagegroup.js';
 import { supabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
+import { TextFormatToolbar } from '../ui/toolbar.js';
 
 const App = {
   mathBoard: null,

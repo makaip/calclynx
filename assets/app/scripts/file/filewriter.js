@@ -60,8 +60,7 @@ class FileWriter {
 
     async saveState() {
         let version = "3.0";
-        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                       typeof TextFieldProseMirror !== 'undefined';
+        let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
         
         if (!hasProseMirrorCapability) {
             version = "2.0";
@@ -140,8 +139,7 @@ class FileWriter {
 
     exportData() {
         let version = "3.0";
-        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                       typeof TextFieldProseMirror !== 'undefined';
+        let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
         
         if (!hasProseMirrorCapability) {
             version = "2.0";

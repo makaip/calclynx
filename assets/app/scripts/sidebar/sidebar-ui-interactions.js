@@ -2,6 +2,7 @@ import { initializeCreateBlankFileModal } from '../modals/createmodal.js';
 import { initializeDeleteFileModal } from '../modals/deletemodal.js';
 import { initializeImageUrlModal } from '../modals/imagemodal.js';
 import { initializeRenameFileModal } from '../modals/renamemodal.js';
+import { userManager } from '../core/cloud.js';
 import { 
     initializeFileDownloadHandler,
     showError,

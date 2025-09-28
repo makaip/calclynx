@@ -1,4 +1,5 @@
 import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { userManager } from '../core/cloud.js';
 
 function initializeCreateBlankFileModal() {
     const createBlankFileModal = document.getElementById('createBlankFileModal');

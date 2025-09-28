@@ -177,8 +177,9 @@ class TextFieldProseMirror {
         const newState = this.proseMirrorView.state.apply(tr);
         this.proseMirrorView.updateState(newState);
         
-        if (window.textFormatToolbar && window.textFormatToolbar.activeTextField === this) {
-            window.textFormatToolbar.updateButtonStates();
+        const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
+        if (toolbar && toolbar.activeTextField === this) {
+            toolbar.updateButtonStates();
         }
         
         clearTimeout(this.saveTimeout);
@@ -190,7 +191,8 @@ class TextFieldProseMirror {
 
     this.editorElement.addEventListener('blur', () => {
       this.textGroup.board.fileManager.saveState();
-      if (window.textFormatToolbar) {
+      const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
+      if (toolbar) {
         setTimeout(() => {
           const focusedElement = document.activeElement;
           const hasProseMirrorFocus = document.querySelector('.ProseMirror:focus-within');
@@ -201,7 +203,7 @@ class TextFieldProseMirror {
           );
           
           if (!hasProseMirrorFocus && !isFocusInTextEditor) {
-            window.textFormatToolbar.hide();
+            toolbar.hide();
           }
         }, 50); 
       }
@@ -210,8 +212,9 @@ class TextFieldProseMirror {
     this.editorElement.addEventListener('focus', () => {
       ObjectGroup.clearAllSelections();
       
-      if (window.textFormatToolbar) {
-        window.textFormatToolbar.show(this);
+      const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
+      if (toolbar) {
+        toolbar.show(this);
       }
     });
 
@@ -227,8 +230,9 @@ class TextFieldProseMirror {
         }
       }
       
-      if (window.textFormatToolbar) {
-        window.textFormatToolbar.show(this);
+      const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
+      if (toolbar) {
+        toolbar.show(this);
       }
     });
   }
@@ -246,10 +250,11 @@ class TextFieldProseMirror {
         this.proseMirrorView.dispatch(tr);
       }
       
-      if (window.textFormatToolbar) {
+      const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
+      if (toolbar) {
         setTimeout(() => {
           if (this.proseMirrorView.hasFocus() || document.activeElement === this.editorElement) {
-            window.textFormatToolbar.show(this);
+            toolbar.show(this);
           }
         }, 50);
       }

@@ -163,8 +163,7 @@ class User {
             }
 
             let initialVersion = 3;
-            let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                           typeof TextFieldProseMirror !== 'undefined';
+            let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
             if (!hasProseMirrorCapability) {
                 initialVersion = 2;
             }

@@ -1,5 +1,6 @@
 import { FileWriter } from './filewriter.js';
 import { FileReader } from './filereader.js';
+import { userManager } from '../core/cloud.js';
 
 class FileManager {
     constructor(board) {
