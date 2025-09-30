@@ -99,8 +99,10 @@ class MathFieldUtils {
     this.recreateContainerStructure(container);
     const staticMath = this.createStaticMathElement();
     container.appendChild(staticMath);
-    MQ.StaticMath(staticMath).latex(latex);
+
+    if (MQ) MQ.StaticMath(staticMath).latex(latex);
   }
 }
+
 
 export { MathFieldUtils };

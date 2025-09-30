@@ -2,7 +2,7 @@ import { MathBoard } from './canvas.js';
 import { ExpressionEquivalence } from '../utils/equivalence.js';
 import { TextFieldCompatibility } from '../text/textfield-compatibility.js';
 import { ImageGroup } from '../image/imagegroup.js';
-import { supabaseClient } from '../auth/initsupabaseapp.js';
+import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { TextFormatToolbar } from '../ui/toolbar.js';
 import '../sidebar/sidebar-ui-interactions.js';
@@ -58,8 +58,9 @@ async function updateUserStatus() {
   loadUserFiles();
 
   try {
+    const client = await getSupabaseClient();
     const { data: { session } = {}, error } =
-      (await supabaseClient.auth.getSession()) || {};
+      (await client.auth.getSession()) || {};
 
     if (error) {
       console.error('Error getting session:', error);
@@ -78,7 +79,8 @@ async function updateUserStatus() {
         try {
           authButton.disabled = true;
           authButton.textContent = 'Signing Out...';
-          await supabaseClient.auth.signOut();
+          const client = await getSupabaseClient();
+          await client.auth.signOut();
           // onAuthStateChange will refresh UI
         } catch (err) {
           console.error('Error signing out:', err);
@@ -210,21 +212,26 @@ const onKeyDown = (e) => {
   }
 };
 
-function initializeAppCore() {
+async function initializeAppCore() {
   initializeApp();
   setupImportInput(getById('importInput'));
 
   document.addEventListener('keydown', onKeyDown, true);
-  supabaseClient.auth.onAuthStateChange(() => {
+  
+  try {
+    const client = await getSupabaseClient();
+    client.auth.onAuthStateChange(() => {
+      updateUserStatus();
+    });
     updateUserStatus();
-  });
-
-  updateUserStatus();
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+  }
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  initializeAppCore();
+document.addEventListener('DOMContentLoaded', async () => {
+  await initializeAppCore();
 });
 
 // Set up internal references

@@ -1,15 +1,19 @@
-// Use the globally available supabaseClient from initsupabaseapp.js
+import { getSupabaseClient } from '../app/scripts/auth/initsupabaseapp.js';
 
 // Function to check session and redirect if logged in
 async function checkSessionAndRedirect() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        // If a session exists, redirect to the app
-        console.log('User already logged in, redirecting to app...');
-        window.location.href = '/app.html'; // Use relative path
-    } else {
-        console.log('No active session found.');
-        // Initialize landing page features only if not redirecting
+    try {
+        const client = await getSupabaseClient();
+        const { data: { session } } = await client.auth.getSession();
+        if (session) {
+            console.log('User already logged in, redirecting to app...');
+            window.location.href = '/app.html';
+        } else {
+            console.log('No active session found.');
+            initializeLandingPageFeatures();
+        }
+    } catch (error) {
+        console.error('Error checking session:', error);
         initializeLandingPageFeatures();
     }
 }

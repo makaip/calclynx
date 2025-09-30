@@ -7,11 +7,10 @@ async function loadProseMirrorModules() {
       { EditorState, TextSelection },
       { EditorView },
       { schema: basicSchema },
-      { addListNodes },
+      { addListNodes, wrapInList, splitListItem, liftListItem, sinkListItem },
       { history },
       { keymap },
-      { baseKeymap, toggleMark, setBlockType, wrapIn },
-      { wrapInList, splitListItem, liftListItem, sinkListItem }
+      { baseKeymap, toggleMark, setBlockType, wrapIn }
     ] = await Promise.all([
       import("https://esm.sh/prosemirror-model"),
       import("https://esm.sh/prosemirror-state"),
@@ -20,8 +19,7 @@ async function loadProseMirrorModules() {
       import("https://esm.sh/prosemirror-schema-list"),
       import("https://esm.sh/prosemirror-history"),
       import("https://esm.sh/prosemirror-keymap"),
-      import("https://esm.sh/prosemirror-commands"),
-      import("https://esm.sh/prosemirror-schema-list")
+      import("https://esm.sh/prosemirror-commands")
     ]);
 
     window.ProseMirror = {
