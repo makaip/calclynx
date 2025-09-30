@@ -262,3 +262,5 @@ class TextFieldResizeHandler {
     }
   }
 }
+
+export { TextFieldResizeHandler };

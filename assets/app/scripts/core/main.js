@@ -5,6 +5,10 @@ import { ImageGroup } from '../image/imagegroup.js';
 import { supabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { TextFormatToolbar } from '../ui/toolbar.js';
+import '../sidebar/sidebar-ui-interactions.js';
+import '../ui/contextmenu.js';
+import '../ui/command-palette.js';
+import '../ui/settings-modal.js';
 
 const App = {
   mathBoard: null,

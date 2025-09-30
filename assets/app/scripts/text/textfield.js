@@ -2,6 +2,7 @@ import { TextFieldProseMirrorSchema } from './textfield-schema.js';
 import { TextFieldProseMirrorContent } from './textfield-content.js';
 import { MathNodeView } from './textfield-math-nodeview.js';
 import { TextFieldProseMirrorEventHandler } from './textfield-event-handler.js';
+import { TextFieldResizeHandler } from './textfield-resize-handler.js';
 import { ObjectGroup } from '../core/objectgroup.js';
 
 class TextFieldProseMirror {
