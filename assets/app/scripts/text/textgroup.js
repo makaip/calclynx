@@ -25,6 +25,12 @@ class TextGroup extends ObjectGroup {
       this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
       this.useProseMirror = true;
       
+      if (data && data.widthData && this.textField.setWidthData) {
+        setTimeout(() => {
+          this.textField.setWidthData(data.widthData);
+        }, 50); // magic fix
+      }
+      
       if (data && TextFieldCompatibility.detectContentFormat(content) !== 'prosemirror-v3') {
         console.log('Auto-upgrading legacy content to ProseMirror v3.0');
       } else {

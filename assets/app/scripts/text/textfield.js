@@ -11,8 +11,9 @@ class TextFieldProseMirror {
     this.saveTimeout = null;
     
     this.schemaManager = new TextFieldProseMirrorSchema();
-    this.eventHandler = null; // Will be initialized after proseMirrorView is created
+    this.eventHandler = null;
     this.content = new TextFieldProseMirrorContent(this);
+    this.resizeHandler = null;
     
     if (window.proseMirrorReady) {
       this.initialize(isNewField, content);
@@ -72,6 +73,7 @@ class TextFieldProseMirror {
     });
 
     this.textGroup.element.appendChild(this.container);
+    this.resizeHandler = new TextFieldResizeHandler(this);
   }
 
   createProseMirrorEditor(content = '') {
@@ -156,10 +158,55 @@ class TextFieldProseMirror {
       },
       handleKeyDown: (view, event) => {
         return this.eventHandler ? this.eventHandler.handleKeyDown(view, event) : false;
+      },
+      handlePaste: (view, event, slice) => {
+        const target = event.target;
+        const mathField = target.closest('.mathquill');
+        
+        if (mathField) {
+          event.preventDefault();
+          event.stopPropagation();
+          return true;
+        }
+        
+        return false;
+      },
+      handleDOMEvents: {
+        paste: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        },
+        input: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        },
+        beforeinput: (view, event) => {
+          const target = event.target;
+          const mathField = target.closest('.mathquill');
+          
+          if (mathField) {
+            return true;
+          }
+          return false;
+        }
       }
     });
 
     this.eventHandler = new TextFieldProseMirrorEventHandler(this.proseMirrorView);
+
+    if (this.resizeHandler) {
+      this.resizeHandler.createResizeHandles(this.container);
+    }
 
     if (content && typeof content === 'object' && content.text !== undefined && content.mathFields !== undefined) {
       setTimeout(() => {
@@ -266,6 +313,10 @@ class TextFieldProseMirror {
       clearTimeout(this.saveTimeout);
     }
     
+    if (this.resizeHandler) {
+      this.resizeHandler.destroy();
+    }
+    
     if (this.proseMirrorView) {
       this.proseMirrorView.destroy();
     }
@@ -287,6 +338,16 @@ class TextFieldProseMirror {
 
   setOptimizedContent(content) {
     return this.content.setOptimizedContent(content);
+  }
+
+  getWidthData() {
+    return this.resizeHandler ? this.resizeHandler.getWidthData() : null;
+  }
+
+  setWidthData(data) {
+    if (this.resizeHandler) {
+      this.resizeHandler.setWidthData(data);
+    }
   }
 }
 

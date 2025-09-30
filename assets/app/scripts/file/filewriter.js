@@ -29,6 +29,8 @@ class FileWriter {
             const left = group.style.left;
             const top = group.style.top;
             const fields = [];
+            let widthData = null;
+            
             const containers = group.querySelectorAll('.text-field-container');
             containers.forEach((container) => {
                 const field = container.textFieldInstance;
@@ -39,9 +41,21 @@ class FileWriter {
                 } else {
                     fields.push(field.getOptimizedContent());
                 }
+                
+                if (field.getWidthData) {
+                    const fieldWidthData = field.getWidthData();
+                    if (fieldWidthData) {
+                        widthData = fieldWidthData;
+                    }
+                }
             });
             
-            saveData.groups.push({ type: 'text', left, top, fields });
+            const groupData = { type: 'text', left, top, fields };
+            if (widthData) {
+                groupData.widthData = widthData;
+            }
+            
+            saveData.groups.push(groupData);
         });
     }
 

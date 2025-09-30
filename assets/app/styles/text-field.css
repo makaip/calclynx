@@ -170,3 +170,50 @@
 .text-editor:not(:empty)::before {
     display: none;
 }
+
+.text-resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    color: #666;
+    font-size: 10px;
+    font-weight: bold;
+    background: rgba(68, 68, 68, 0.1);
+    border-radius: 2px;
+    transition: all 0.1s ease;
+    z-index: 10;
+    user-select: none;
+    pointer-events: auto;
+    opacity: 0;
+}
+
+.text-resize-handle:hover {
+    background: rgba(68, 68, 68, 0.3);
+    color: #999;
+}
+
+.text-resize-handle-left {
+    left: -4px;
+}
+
+.text-resize-handle-right {
+    right: -4px;
+}
+
+.text-resize-cursor * {
+    cursor: col-resize !important;
+}
+
+.text-field-container.text-resizing {
+    z-index: 100;
+}
+
+.text-field-container.text-resizing .text-resize-handle {
+    background: rgba(0, 197, 154, 0.3);
+    color: #00c59a;
+}

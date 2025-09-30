@@ -11,7 +11,141 @@ const App = {
   expressionEquivalence: null,
 };
 
-const getById = (id) => document.getElementById(id);
+  const getById = (id) => document.getElementById(id);
+
+  const readFileAsText = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new window.FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+
+  const isModifierPressed = (e) => (navigator.platform.toUpperCase().includes('MAC') ? e.metaKey : e.ctrlKey);
+
+  const isInInput = (target) =>
+    Boolean(
+      target.closest('.image-url-input') ||
+      target.closest('.command-palette-input') ||
+      target.closest('.text-editor')
+    );
+
+  const setupImportInput = (el) => {
+    if (!el) return;
+    el.addEventListener('change', async (evt) => {
+      const file = evt.target.files?.[0];
+      if (file) {
+        try {
+          const jsonData = await readFileAsText(file);
+          
+          // Basic JSON validation
+          try {
+            JSON.parse(jsonData);
+          } catch (parseError) {
+            alert('The selected file does not contain valid JSON. Please check the file format and try again.');
+            return;
+          }
+          
+          // Check if this is being used for "From JSON" functionality
+          if (window.isCreateFromJsonMode) {
+            window.pendingJsonData = jsonData;
+            window.isCreateFromJsonMode = false;
+            
+            const modal = document.getElementById('createFromJsonModal');
+            const input = document.getElementById('newJsonFileNameInput');
+            const errorMsg = document.getElementById('createFromJson-error-message');
+            
+            if (modal) {
+              modal.style.display = 'block';
+              if (input) {
+                input.value = '';
+                input.focus();
+              }
+              if (errorMsg) {
+                errorMsg.style.display = 'none';
+                errorMsg.textContent = '';
+              }
+            }
+          } else {
+            // Original behavior - import into current board
+            App.mathBoard?.fileManager?.importData(jsonData);
+          }
+        } catch (err) {
+          console.error('Error reading JSON file:', err);
+          alert('Error reading the file. Please ensure it\'s a valid JSON file.');
+        }
+      }
+      // reset to allow re-uploading same file
+      evt.target.value = '';
+    });
+  };
+
+  const showCommandPalette = () => {
+    if (window.commandPalette && typeof window.commandPalette.show === 'function') {
+      const refElement = document.activeElement?.closest('.math-field-container');
+      window.commandPalette.show(refElement);
+    }
+  }; 
+
+  const showImageUrlInput = () => {
+    if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
+      window.showImageUrlModal((url) => {
+        const { x: mx, y: my } = App.mathBoard?.mouse ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const coords = App.mathBoard ? App.mathBoard.screenToCanvas(mx, my) : { x: 100, y: 100 };
+        const imageGroup = new ImageGroup(App.mathBoard, coords.x, coords.y);
+        imageGroup.setImageUrl(url);
+        App.mathBoard.fileManager.saveState();
+      });
+    }
+  };
+
+  const toggleTextFieldWidth = () => {
+    try {
+      const activeElement = document.activeElement;
+      if (!activeElement) return;
+      
+      const textEditor = activeElement.closest('.text-editor');
+      if (!textEditor) return;
+      
+      const container = textEditor.closest('.text-field-container');
+      if (!container || !container.textFieldInstance) return;
+      
+      const textField = container.textFieldInstance;
+      if (textField.resizeHandler && typeof textField.resizeHandler.toggleFreeWidth === 'function') {
+        textField.resizeHandler.toggleFreeWidth();
+      }
+    } catch (error) {
+      console.warn('Error toggling text field width:', error);
+    }
+  };
+
+  const onKeyDown = (e) => {
+    const modifier = isModifierPressed(e);
+    if (!modifier) return;
+
+    if (e.key === 'd') {
+      e.preventDefault();
+      toggleTextFieldWidth();
+      return;
+    }
+
+    if (isInInput(e.target)) return;
+
+    if (e.key === 'k' && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      showCommandPalette();
+      return;
+    }
+
+    if (e.key === 'i' && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      showImageUrlInput();
+    }
+  };
+
+  window.updateUserStatus = null;
+
 
 const initializeApp = () => {
   if (TextFieldCompatibility.shouldUseProseMirror()) {
