@@ -41,17 +41,28 @@ class Clipboard {
         };
       } else if (group.classList.contains('text-group')) {
         const fields = [];
+        let widthData = null;
         const container = group.querySelector('.text-field-container');
         if (container && container.textFieldInstance) {
           fields.push(container.textFieldInstance.getContent());
+          
+          if (container.textFieldInstance.getWidthData) {
+            widthData = container.textFieldInstance.getWidthData();
+          }
         }
 
-        return { 
+        const result = { 
           type: 'text',
           relativeLeft: left - minX, 
           relativeTop: top - minY, 
           fields 
         };
+        
+        if (widthData) {
+          result.widthData = widthData;
+        }
+        
+        return result;
       } else if (group.classList.contains('image-group')) {
         return { 
           type: 'image',
@@ -92,7 +103,8 @@ class Clipboard {
       fields: groupData.fields,
       imageUrl: groupData.imageUrl,
       imageWidth: groupData.imageWidth,
-      imageHeight: groupData.imageHeight
+      imageHeight: groupData.imageHeight,
+      widthData: groupData.widthData
       };
       
       let newGroupInstance;

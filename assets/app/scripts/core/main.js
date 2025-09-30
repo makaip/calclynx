@@ -92,9 +92,35 @@
     }
   };
 
+  const toggleTextFieldWidth = () => {
+    try {
+      const activeElement = document.activeElement;
+      if (!activeElement) return;
+      
+      const textEditor = activeElement.closest('.text-editor');
+      if (!textEditor) return;
+      
+      const container = textEditor.closest('.text-field-container');
+      if (!container || !container.textFieldInstance) return;
+      
+      const textField = container.textFieldInstance;
+      if (textField.resizeHandler && typeof textField.resizeHandler.toggleFreeWidth === 'function') {
+        textField.resizeHandler.toggleFreeWidth();
+      }
+    } catch (error) {
+      console.warn('Error toggling text field width:', error);
+    }
+  };
+
   const onKeyDown = (e) => {
     const modifier = isModifierPressed(e);
     if (!modifier) return;
+
+    if (e.key === 'd') {
+      e.preventDefault();
+      toggleTextFieldWidth();
+      return;
+    }
 
     if (isInInput(e.target)) return;
 

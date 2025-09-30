@@ -22,7 +22,7 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
   - Click and drag on an empty area of the canvas (left mouse) to draw a dashed selection box.
 - **Dragging groups**:
   - Click and drag a group (left mouse) to move it. If a clicked group is part of the current selection, all selected groups move together.
-  - While dragging, hold <kbd>Ctrl</kbd> (Windows/Linux) or <kbd>Command</kbd> (Mac) to snap movement to grid.
+  - While dragging, hold <kbd>Ctrl/Cmd</kbd> (Windows/Linux) or <kbd>Command</kbd> (Mac) to snap movement to grid.
 - **Deleting selected groups (global keys)**:
   - When no MathQuill field or text editor is focused, pressing <kbd>Backspace</kbd>, <kbd>Delete</kbd>, or the character <kbd>x</kbd> will remove all selected groups.
 
@@ -35,8 +35,8 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
   - <kbd>Backspace</kbd> while editing an empty math field will remove that field and focus the previous field (if present).
 - **Keyboard delete behaviors while editing a math field**:
   - <kbd>Backspace</kbd> in an empty math field removes the field and focuses the previous one.
-  - <kbd>Ctrl</kbd> + <kbd>Backspace</kbd> deletes the current math field.
-  - <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd> deletes the entire math group.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>Backspace</kbd> deletes the current math field.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd> deletes the entire math group.
 - **Reordering math fields within a group**:
   - Use the left dotted drag handle to drag a math field up/down inside its group. A placeholder shows the drop location; release to insert.
 
@@ -47,15 +47,17 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 - **Inline math in text fields**:
   - Press <kbd>$</kbd> while focused in a text editor to insert an inline math field.
   - Inline math in text fields can be clicked to be edited.
+- **Auto vs. fixed width**:
+  - Press <kbd>Ctrl/Cmd</kbd> + <kbd>D</kbd> to toggle fixed vs. free width text fields. Alternatively, you can right click on the text field and select free/fixed width. 
 - **Cursor and boundary handling (MathQuill inside text)**:
   - Arrow keys and the delete key behave intuitively at the boundaries between math and text.
 
 ## Clipboard
 
 - **Keyboard shortcuts (only when not focused inside a MathQuill field nor a text editor)**:
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>C</kbd> — Copy selected groups (copies math and text groups, stores relative positions).
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>X</kbd> — Cut selected groups (copy + remove original).
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>V</kbd> — Paste groups at the current mouse position (uses internal mouse coordinates updated on mousemove).
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>C</kbd>: Copy selected groups (copies math and text groups, stores relative positions).
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>X</kbd>: Cut selected groups (copy + remove original).
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>V</kbd>: Paste groups at the current mouse position (uses internal mouse coordinates updated on mousemove).
 - **Context menu clipboard**:
   - Right-click the canvas or a group to open the custom context menu. Menu items include: New Math Stack, New Text Stack, Cut, Copy, Paste, and Delete.
 
@@ -117,26 +119,26 @@ CalcLynx is a web-based interactive math board that lets you create, edit, and m
 ## Keyboard shortcuts
 
 - **Canvas / Groups / Clipboard**:
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>C</kbd> — Copy selected groups.
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>X</kbd> — Cut selected groups.
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>V</kbd> — Paste groups.
-  - <kbd>Backspace</kbd> / <kbd>Delete</kbd> / <kbd>x</kbd> — Remove selected groups.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>C</kbd>: Copy selected groups.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>X</kbd>: Cut selected groups.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>V</kbd>: Paste groups.
+  - <kbd>Backspace</kbd> / <kbd>Delete</kbd> / <kbd>x</kbd>: Remove selected groups.
 - **Command palette**:
-  - <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd> — Open command palette.
-  - <kbd>Escape</kbd> — Close command palette.
-  - <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> — Move selection inside the palette list.
-  - <kbd>Enter</kbd> — Execute selected command.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>K</kbd>: Open command palette.
+  - <kbd>Escape</kbd>: Close command palette.
+  - <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd>: Move selection inside the palette list.
+  - <kbd>Enter</kbd>: Execute selected command.
 - **Panning / Zooming / Navigation**:
-  - Middle mouse drag — Pan the canvas.
-  - Hold <kbd>Space</kbd> + left-drag — Pan the canvas.
-  - Mouse wheel — Zoom.
+  - Middle mouse drag: Pan the canvas.
+  - Hold <kbd>Space</kbd> + left-drag: Pan the canvas.
+  - Mouse wheel: Zoom.
 - **Math field editing**:
-  - <kbd>Enter</kbd> — Finalize the focused math field and create a new one below it.
-  - <kbd>Backspace</kbd> (in an empty math field) — Removes the field and focuses the one above it.
-  - <kbd>Ctrl</kbd> + <kbd>Backspace</kbd> — Deletes the current math field.
-  - <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd> — Deletes the entire math group.
+  - <kbd>Enter</kbd>: Finalize the focused math field and create a new one below it.
+  - <kbd>Backspace</kbd> (in an empty math field): Removes the field and focuses the one above it.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>Backspace</kbd>: Deletes the current math field.
+  - <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Backspace</kbd>: Deletes the entire math group.
 - **Text editor math insertion**:
-  - <kbd>$</kbd> — Insert an inline math field at the cursor.
+  - <kbd>$</kbd>: Insert an inline math field at the cursor.
 
 ## Mathematical Engine (MathGene)
 

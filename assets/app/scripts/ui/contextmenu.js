@@ -95,7 +95,24 @@ class ContextMenu {
           });
         }
       },
-      { separator: true },
+      { separator: true }
+    ];
+
+    if (targetTextGroupElement) {
+      const textFieldInstance = targetTextGroupElement.querySelector('.text-field-container')?.textFieldInstance;
+      if (textFieldInstance && textFieldInstance.resizeHandler) {
+        const isFixedWidth = textFieldInstance.resizeHandler.isFixedWidth;
+        menuItems.push({
+          label: isFixedWidth ? 'Set Free Width' : 'Set Fixed Width',
+          action: () => {
+            textFieldInstance.resizeHandler.toggleFreeWidth();
+          }
+        });
+        menuItems.push({ separator: true });
+      }
+    }
+
+    menuItems.push(
       {
         label: 'Cut',
         disabled: !canPerformClipboardAction,
@@ -143,7 +160,7 @@ class ContextMenu {
           window.App.mathBoard.fileManager.saveState();
         }
       }
-    ];
+    );
   
     contextMenu.show(e.pageX, e.pageY, menuItems);
   });
