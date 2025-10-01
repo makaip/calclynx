@@ -1,4 +1,5 @@
 import { BoxSelection } from './selection.js';
+import { ZoomControls } from '../ui/zoom-controls.js';
 
 const ZOOM = { FACTOR: 1.08, MIN: 0.3, MAX: 3.3333 };
 
@@ -7,6 +8,7 @@ class Navigation {
     this.board = board;
     this.boxSelection = new BoxSelection(board);
     this.zoom = new Zoom(board);
+    this.zoomControls = new ZoomControls(board);
   }
 
   init() {
@@ -14,6 +16,7 @@ class Navigation {
     this.initTrackpadNavigation();
     this.boxSelection.init();
     this.zoom.init();
+    this.zoomControls.init();
 
     window.addEventListener('resize', () => CanvasUtils.updateTransform(this.board));
   }
@@ -82,7 +85,7 @@ class Navigation {
 
   updateTransform() {
     CanvasUtils.updateTransform(this.board);
-    this.zoom.updateZoomControls();
+    this.zoomControls.updateZoomControls();
   }
 
   screenToCanvas(x, y) {
@@ -93,22 +96,10 @@ class Navigation {
 class Zoom {
   constructor(board) {
     this.board = board;
-    this.cacheDOMElements();
-  }
-
-  cacheDOMElements() {
-    this.dom = {
-      zoomControls: document.getElementById('zoom-controls'),
-      zoomSlider: document.getElementById('zoom-slider'),
-      zoomIn: document.getElementById('zoom-in-btn'),
-      zoomOut: document.getElementById('zoom-out-btn'),
-      resetZoom: document.getElementById('reset-zoom-btn'),
-    };
   }
 
   init() {
     this.initZoom();
-    this.initZoomControls();
   }
 
   initZoom() {
@@ -154,33 +145,15 @@ class Zoom {
     this.board.canvasState.offset.y = screenY - (this.board.canvasState.initialOffset.y + logical.y * newScale);
 
     CanvasUtils.updateTransform(this.board);
-    this.updateZoomControls();
+    this.board.navigation.zoomControls.updateZoomControls();
   }
 
-  initZoomControls() {
-    const { zoomSlider, zoomIn, zoomOut, resetZoom } = this.dom;
-    if (!zoomSlider) return;
-
-    this.updateZoomControls();
-    this.setupZoomEventListeners();
+  zoomIn() {
+    this.setZoomLevel(this.clampScale(this.board.canvasState.scale * ZOOM.FACTOR));
   }
 
-  setupZoomEventListeners() {
-    const { zoomSlider, zoomIn, zoomOut, resetZoom } = this.dom;
-    
-    zoomSlider.addEventListener('input', (e) => 
-      this.setZoomLevel(parseFloat(e.target.value) / 100)
-    );
-    
-    zoomIn.addEventListener('click', () => 
-      this.setZoomLevel(this.clampScale(this.board.canvasState.scale * ZOOM.FACTOR))
-    );
-    
-    zoomOut.addEventListener('click', () => 
-      this.setZoomLevel(this.clampScale(this.board.canvasState.scale / ZOOM.FACTOR))
-    );
-    
-    resetZoom.addEventListener('click', () => this.setZoomLevel(1));
+  zoomOut() {
+    this.setZoomLevel(this.clampScale(this.board.canvasState.scale / ZOOM.FACTOR));
   }
 
   setZoomLevel(newScale) {
@@ -195,27 +168,12 @@ class Zoom {
       cy - (this.board.canvasState.initialOffset.y + logical.y * newScale);
 
     CanvasUtils.updateTransform(this.board);
-    this.updateZoomControls();
-  }
-
-  updateZoomControls() {
-    const { zoomControls, zoomSlider } = this.dom;
-    if (!zoomControls || !zoomSlider) return;
-
-    zoomSlider.value = Math.round(this.board.canvasState.scale * 100);
-    zoomControls.classList.toggle(
-      'visible',
-      Math.abs(this.board.canvasState.scale - 1) >= 0.01
-    );
-    zoomControls.classList.toggle(
-      'hidden',
-      Math.abs(this.board.canvasState.scale - 1) < 0.01
-    );
+    this.board.navigation.zoomControls.updateZoomControls();
   }
 
   updateTransform() {
     CanvasUtils.updateTransform(this.board);
-    this.updateZoomControls();
+    this.board.navigation.zoomControls.updateZoomControls();
   }
 
   screenToCanvas(x, y) {

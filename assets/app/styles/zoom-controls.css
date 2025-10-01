@@ -1,11 +1,7 @@
-/* Zoom Controls Styling */
 .zoom-controls {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -15,114 +11,106 @@
     opacity: 1;
 }
 
-.zoom-slider-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.zoom-controls .btn-group {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-controls .btn {
+    background-color: #1e1e1e;
+    border-color: #666;
+    color: #fff;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.zoom-controls .btn:hover {
+    border-color: #00c59a;
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+.zoom-controls .btn:focus {
+    box-shadow: none;
 }
 
 .zoom-btn {
-    background-color: #1e1e1e;
-    border: 1px solid #666;
-    color: #fff;
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
     padding: 0;
     line-height: 1;
 }
 
-.zoom-btn:hover {
-    border-color: #00c59a;
-    background-color: #2a2a2a;
-}
-
-.zoom-btn:active {
-    background-color: #00c59a;
-    color: #000;
-}
-
-.zoom-slider {
-    width: 120px;
-    height: 4px;
-    background: #333;
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.zoom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #ffffff;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.zoom-slider::-webkit-slider-thumb:hover {
-    background: #f0f0f0;
-    transform: scale(1.1);
-}
-
-.zoom-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #ffffff;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
-}
-
-.zoom-slider::-moz-range-thumb:hover {
-    background: #f0f0f0;
-    transform: scale(1.1);
-}
-
-.zoom-slider::-moz-range-track {
-    width: 100%;
-    height: 4px;
-    background: #333;
-    border-radius: 2px;
-    border: none;
-}
-
-.reset-zoom-btn {
-    background-color: #1e1e1e;
-    border: 1px solid #666;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.zoom-percentage {
+    width: 72px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 500;
     white-space: nowrap;
+    text-align: center;
+    user-select: none;
+    padding: 0 8px;
 }
 
-.reset-zoom-btn:hover {
+.zoom-input {
+    width: 72px;
+    height: 36px;
+    background-color: #1e1e1e;
     border-color: #00c59a;
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+    padding: 0 4px;
+    border-radius: 0;
+}
+
+.zoom-input:focus {
     background-color: #2a2a2a;
+    border-color: #00c59a;
+    color: #fff;
+    box-shadow: none;
 }
 
-.reset-zoom-btn:active {
-    background-color: #00c59a;
-    color: #000;
+.zoom-input::placeholder {
+    color: #888;
 }
 
-/* Hide zoom controls when scale is exactly 1 (100%) */
+.zoom-input::-webkit-outer-spin-button,
+.zoom-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.zoom-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 .zoom-controls.hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+.zoom-controls .btn-outline-secondary {
+    background-color: #1e1e1e;
+    border-color: #666;
+    color: #fff;
+}
+
+.zoom-controls .btn-outline-secondary:hover {
+    background-color: #2a2a2a;
+    border-color: #00c59a;
+    color: #fff;
+}
+
+.zoom-controls .btn-outline-secondary:focus {
+    background-color: #1e1e1e;
+    border-color: #00c59a;
+    color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 197, 154, 0.25);
 }
