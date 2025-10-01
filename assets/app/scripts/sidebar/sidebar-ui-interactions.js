@@ -33,20 +33,6 @@ function initializeEventDelegation() {
             return;
         }
         
-        const newFileBtn = target.closest('#newFileBtnSidebar');
-        if (newFileBtn) {
-            e.preventDefault();
-            toggleNewFileDropdown();
-            return;
-        }
-        
-        const actionsBtn = target.closest('.file-actions-button');
-        if (actionsBtn) {
-            e.preventDefault();
-            toggleFileActionMenu(actionsBtn);
-            return;
-        }
-        
         const settingsLink = target.closest('#settings-link');
         if (settingsLink) {
             e.preventDefault();
@@ -110,45 +96,26 @@ function initializeEventDelegation() {
             return;
         }
         
-        if (!target.closest('.dropdown, .file-actions-menu')) {
-            document.querySelectorAll('.dropdown-content, .file-actions-menu').forEach(menu => {
-                UIStateManager.toggleVisibility(menu, false);
-            });
-        }
+        // Bootstrap handles dropdown closing automatically
+        // No need for custom dropdown close handling
     });
 }
 
-function toggleNewFileDropdown() {
-    const dropdown = document.getElementById('newFileDropdownSidebar');
-    UIStateManager.toggleVisibility(dropdown);
-}
-
 function showCreateBlankModal() {
-    const dropdown = document.getElementById('newFileDropdownSidebar');
     const modal = document.getElementById('createBlankFileModal');
     const input = document.getElementById('newBlankFileNameInput');
     
-    UIStateManager.toggleVisibility(dropdown, false);
     UIStateManager.resetFormElements(modal);
     showModal(modal);
     input?.focus();
 }
 
 function showCreateFromJsonDialog() {
-    const dropdown = document.getElementById('newFileDropdownSidebar');
     const importInput = document.getElementById('importInput');
     
-    UIStateManager.toggleVisibility(dropdown, false);
     if (importInput) {
         window.isCreateFromJsonMode = true;
         importInput.click();
-    }
-}
-
-function toggleFileActionMenu(button) {
-    const menu = button.nextElementSibling;
-    if (menu?.classList.contains('file-actions-menu')) {
-        UIStateManager.toggleVisibility(menu);
     }
 }
 
