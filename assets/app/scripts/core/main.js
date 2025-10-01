@@ -55,8 +55,6 @@ async function updateUserStatus() {
 
   if (!userEmailDisplay || !authButton) return;
 
-  loadUserFiles();
-
   try {
     const client = await getSupabaseClient();
     const { data: { session } = {}, error } =
@@ -69,6 +67,8 @@ async function updateUserStatus() {
     }
 
     if (session?.user) {
+      loadUserFiles();
+
       const userEmail = session.user.email ?? '';
       userEmailDisplay.textContent = userEmail;
       userEmailDisplay.title = userEmail;
@@ -97,6 +97,9 @@ async function updateUserStatus() {
         evt.preventDefault();
         window.location.href = '/login.html';
       };
+
+      const fileList = getById('sidebar-file-list');
+      if (fileList) fileList.innerHTML = '';
     }
   } catch (err) {
     console.error('Exception checking auth status:', err);

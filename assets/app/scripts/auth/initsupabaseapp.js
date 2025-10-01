@@ -21,6 +21,8 @@ async function initializeSupabase() {
         
     } catch (error) {
         console.error('Failed to initialize Supabase:', error);
+        initializationPromise = null;
+        supabaseClient = null;
         throw error;
     }
 }
