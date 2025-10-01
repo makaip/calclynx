@@ -42,15 +42,15 @@ const SidebarUtils = {
     },
 
     createLoadingIndicator(message = 'Loading files...') {
-        return `<li><span class="loading-text">${message}</span></li>`;
+        return `<div class="list-group-item border-0" style="background-color: transparent; color: #666;"><span class="loading-text">${message}</span></div>`;
     },
 
     createErrorIndicator(message = 'Error loading files.') {
-        return `<li><span class="error-text">${message}</span></li>`;
+        return `<div class="list-group-item border-0 text-danger" style="background-color: transparent;"><span class="error-text">${message}</span></div>`;
     },
 
     createInfoIndicator(message = 'No files found.') {
-        return `<li><span class="info-text">${message}</span></li>`;
+        return `<div class="list-group-item border-0" style="background-color: transparent; color: #666;"><span class="info-text">${message}</span></div>`;
     }
 };
 
@@ -59,26 +59,34 @@ function createFileItem(file, isActive = false) {
     const safeIdAttr = SidebarUtils.escapeHtml(String(file?.id ?? ''));
     const safeIdUrl = encodeURIComponent(String(file?.id ?? ''));
     return `
-        <li class="${isActive ? 'active' : ''}">
-            <a href="/app.html?fileId=${safeIdUrl}" title="${safeName}">
+        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
+                    ${isActive ? 'active' : ''}" 
+             style="background-color: ${isActive ? '#333' : 'transparent'}; border-left: ${isActive ? '3px solid #00c59a' : '3px solid transparent'} !important; border-bottom: 1px solid #444; padding: 0.75rem 1rem;">
+            <a href="/app.html?fileId=${safeIdUrl}" title="${safeName}" 
+               class="text-decoration-none flex-grow-1 ${isActive ? 'text-white' : 'text-light'}">
                 <div class="file-link-content">
-                    <span class="file-title">${safeName}</span>
-                    <div class="file-metadata">
+                    <div class="file-title fw-medium mb-1" style="font-family: 'Inter', sans-serif;">${safeName}</div>
+                    <div class="file-metadata small" style="color: #666;">
                         <span class="file-last-modified">${SidebarUtils.formatDate(file.last_modified)}</span>
                         <span class="metadata-separator"> • </span>
                         <span class="file-size">${SidebarUtils.formatFileSize(file.file_size ?? 0)}</span>
                     </div>
                 </div>
             </a>
-            <button type="button" class="file-actions-button" title="File actions" aria-haspopup="true" aria-expanded="false">&#x22EE;</button>
-            <div class="file-actions-menu" role="menu" aria-hidden="true">
-                <ul>
-                    <li><a href="#" class="rename-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Rename</a></li>
-                    <li><a href="#" class="download-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Download as JSON</a></li>
-                    <li><a href="#" class="delete-file-link" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Delete</a></li>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary file-actions-button" type="button" 
+                        data-bs-toggle="dropdown" aria-expanded="false" title="File actions"
+                        style="border: none; background: transparent; color: #666; font-size: 14px; line-height: 1; padding: 6px 9px; min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" style="background-color: #2c2c2c;">
+                    <li><a class="dropdown-item rename-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Rename</a></li>
+                    <li><a class="dropdown-item download-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Download as JSON</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger delete-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Delete</a></li>
                 </ul>
             </div>
-        </li>
+        </div>
     `;
 }
 
@@ -86,7 +94,7 @@ const loadUserFiles = async function() {
     const fileList = document.getElementById('sidebar-file-list');
     if (!fileList) return;
     
-    fileList.innerHTML = '<li><span class="loading-text">Loading files...</span></li>';
+    fileList.innerHTML = SidebarUtils.createLoadingIndicator();
     
     try {
         const result = await userManager.listUserFiles();
@@ -95,7 +103,7 @@ const loadUserFiles = async function() {
         const currentFileId = SidebarUtils.getCurrentFileId();
         
         if (!result.files?.length) {
-            fileList.innerHTML = '<li><span class="info-text">No files found.</span></li>';
+            fileList.innerHTML = SidebarUtils.createInfoIndicator();
             return;
         }
         
@@ -105,7 +113,7 @@ const loadUserFiles = async function() {
             
     } catch (error) {
         console.error('Error loading files:', error);
-        fileList.innerHTML = '<li><span class="error-text">Error loading files.</span></li>';
+        fileList.innerHTML = SidebarUtils.createErrorIndicator();
     }
 };
 
@@ -158,20 +166,53 @@ const SidebarResizer = {
     },
 
     setInitialState() {
-        this.applyWidthWithTransition(this.currentWidth);
+        this.showSidebar();
         loadUserFiles(); 
     },
 
     handleHamburgerClick(e) {
         e.stopPropagation();
-        document.body.classList.toggle('sidebar-open');
-        this.applyWidthWithTransition(this.currentWidth);
+        const { sidebar } = this.elements;
+        if (sidebar) {
+            if (document.body.classList.contains('sidebar-open')) {
+                this.hideSidebar();
+            } else {
+                this.showSidebar();
+            }
+        }
     },
 
     handleMainContentClick() {
         if (document.body.classList.contains('sidebar-open') && !this.isResizing) {
+            this.hideSidebar();
+        }
+    },
+
+    showSidebar() {
+        const { sidebar } = this.elements;
+        const mainContent = document.getElementById('main-content');
+        
+        if (sidebar) {
+            sidebar.style.transform = 'translateX(0)';
+            document.body.classList.add('sidebar-open');
+            
+            if (mainContent) {
+                mainContent.style.marginLeft = `${this.currentWidth}px`;
+            }
+        }
+    },
+
+    hideSidebar() {
+        const { sidebar } = this.elements;
+        const mainContent = document.getElementById('main-content');
+        
+        if (sidebar) {
+            sidebar.style.transform = `translateX(-${this.currentWidth}px)`;
             document.body.classList.remove('sidebar-open');
-            this.applyWidthWithTransition(this.currentWidth);
+            
+            if (mainContent) {
+                mainContent.style.marginLeft = '0';
+            }
         }
     },
 
@@ -196,7 +237,19 @@ const SidebarResizer = {
         const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
         sidebar.style.transition = 'none';
         sidebar.style.width = `${clampedWidth}px`;
-        sidebar.style.left = document.body.classList.contains('sidebar-open') ? '0px' : `-${clampedWidth}px`;
+        
+        const mainContent = document.getElementById('main-content');
+        if (document.body.classList.contains('sidebar-open')) {
+            sidebar.style.transform = 'translateX(0)';
+            if (mainContent) {
+                mainContent.style.marginLeft = `${clampedWidth}px`;
+            }
+        } else {
+            sidebar.style.transform = `translateX(-${clampedWidth}px)`;
+            if (mainContent) {
+                mainContent.style.marginLeft = '0';
+            }
+        }
         this.currentWidth = clampedWidth;
     },
 
@@ -215,13 +268,24 @@ const SidebarResizer = {
         if (!sidebar) return;
 
         const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
-        sidebar.style.transition = 'width 0.3s ease, left 0.3s ease';
+        sidebar.style.transition = 'width 0.3s ease, transform 0.3s ease';
         sidebar.style.width = `${clampedWidth}px`;
         
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.style.transition = 'margin-left 0.3s ease';
+        }
+        
         if (document.body.classList.contains('sidebar-open')) {
-            sidebar.style.left = '0px';
+            sidebar.style.transform = 'translateX(0)';
+            if (mainContent) {
+                mainContent.style.marginLeft = `${clampedWidth}px`;
+            }
         } else {
-            sidebar.style.left = `-${clampedWidth}px`;
+            sidebar.style.transform = `translateX(-${clampedWidth}px)`;
+            if (mainContent) {
+                mainContent.style.marginLeft = '0';
+            }
         }
         
         this.currentWidth = clampedWidth;
