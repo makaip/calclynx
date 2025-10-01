@@ -1,3 +1,5 @@
+import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+
 function initializeImageUrlModal() {
     const imageUrlModal = document.getElementById('imageUrlModal');
     const closeImageUrlModalBtn = document.getElementById('closeImageUrlModal');
@@ -72,3 +74,5 @@ function initializeImageUrlModal() {
         }, 0);
     });
 }
+
+export { initializeImageUrlModal };

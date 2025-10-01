@@ -1,3 +1,8 @@
+import { ObjectGroup } from './objectgroup.js';
+import { TextGroup } from '../text/textgroup.js';
+import { MathGroup } from '../math/mathgroup.js';
+import { ImageGroup } from '../image/imagegroup.js';
+
 class Clipboard {
   constructor(mathBoard) {
     this.mathBoard = mathBoard;
@@ -138,3 +143,5 @@ class Clipboard {
     this.clipboardData = null;
   }
 }
+
+export { Clipboard };

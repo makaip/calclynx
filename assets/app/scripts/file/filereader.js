@@ -1,3 +1,9 @@
+import { TextGroup } from '../text/textgroup.js';
+import { MathGroup } from '../math/mathgroup.js';
+import { ImageGroup } from '../image/imagegroup.js';
+import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+import { getSupabaseClient } from '../auth/initsupabaseapp.js';
+
 class FileReader {
     constructor(board, fileManager) {
         this.board = board;
@@ -16,14 +22,15 @@ class FileReader {
     async loadStateFromCloud() {
         console.log(`Attempting to load file from cloud: ${this.fileManager.fileId}`);
         try {
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            const client = await getSupabaseClient();
+            const { data: { session }, error: sessionError } = await client.auth.getSession();
             if (sessionError || !session) {
                 throw new Error("User session not found. Cannot load file.");
             }
             const userId = session.user.id;
             const filePath = `${userId}/${this.fileManager.fileId}.json`;
 
-            const { data: blob, error: downloadError } = await supabaseClient
+            const { data: blob, error: downloadError } = await client
                 .storage
                 .from('storage')
                 .download(filePath);
@@ -98,3 +105,5 @@ class FileReader {
         }
     }
 }
+
+export { FileReader };

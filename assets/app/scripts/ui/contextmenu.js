@@ -1,3 +1,9 @@
+import { ObjectGroup } from '../core/objectgroup.js';
+import { MathGroup } from '../math/mathgroup.js';
+import { TextGroup } from '../text/textgroup.js';
+import { ImageGroup } from '../image/imagegroup.js';
+import { App } from '../core/main.js';
+
 class ContextMenu {
     constructor(menuElement) {
       this.menuElement = menuElement;
@@ -46,10 +52,10 @@ class ContextMenu {
   
     hide() {
       this.menuElement.style.display = 'none';
-    }
   }
-  
-  // Initialize the context menu.
+}
+
+document.addEventListener('DOMContentLoaded', () => {
   const contextMenu = new ContextMenu(document.getElementById('context-menu'));
   
   document.addEventListener('contextmenu', function (e) {
@@ -62,11 +68,11 @@ class ContextMenu {
     const targetGroupElement = targetMathGroupElement || targetTextGroupElement || targetImageGroupElement;
     const isAnythingSelected = ObjectGroup.getSelectedGroups().length > 0;
     const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
-    const canPaste = window.App?.mathBoard && window.App.mathBoard.clipboard;
+    const canPaste = App?.mathBoard && App.mathBoard.clipboard;
   
     // Convert the screen coordinates to canvas coordinates.
-    const canvasCoords = window.App?.mathBoard
-      ? window.App.mathBoard.screenToCanvas(e.pageX, e.pageY)
+    const canvasCoords = App?.mathBoard
+      ? App.mathBoard.screenToCanvas(e.pageX, e.pageY)
       : { x: e.pageX, y: e.pageY };
   
     // Build the menu items array.
@@ -74,24 +80,27 @@ class ContextMenu {
       {
         label: 'New Math Stack',
         action: () => {
-          new MathGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.App.mathBoard.fileManager.saveState();
+          if (!App?.mathBoard) return;
+          new MathGroup(App.mathBoard, canvasCoords.x, canvasCoords.y);
+          App.mathBoard.fileManager.saveState();
         }
       },
       {
         label: 'New Text Stack',
         action: () => {
-          new TextGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
-          window.App.mathBoard.fileManager.saveState();
+          if (!App?.mathBoard) return;
+          new TextGroup(App.mathBoard, canvasCoords.x, canvasCoords.y);
+          App.mathBoard.fileManager.saveState();
         }
       },
       {
         label: 'New Image from URL',
         action: () => {
+          if (!App?.mathBoard) return;
           window.showImageUrlModal((url) => {
-            const imageGroup = new ImageGroup(window.App.mathBoard, canvasCoords.x, canvasCoords.y);
+            const imageGroup = new ImageGroup(App.mathBoard, canvasCoords.x, canvasCoords.y);
             imageGroup.setImageUrl(url);
-            window.App.mathBoard.fileManager.saveState();
+            App.mathBoard.fileManager.saveState();
           });
         }
       },
@@ -122,7 +131,8 @@ class ContextMenu {
             ObjectGroup.clearAllSelections();
             targetGroupElement.classList.add('selected');
           }
-          window.App.mathBoard.cutSelectedGroups();
+          if (!App?.mathBoard) return;
+          App.mathBoard.cutSelectedGroups();
         }
       },
       {
@@ -134,14 +144,16 @@ class ContextMenu {
              ObjectGroup.clearAllSelections();
              targetGroupElement.classList.add('selected');
            }
-           window.App.mathBoard.copySelectedGroups();
+           if (!App?.mathBoard) return;
+           App.mathBoard.copySelectedGroups();
         }
       },
       {
         label: 'Paste',
         disabled: !canPaste,
         action: () => {
-          window.App.mathBoard.pasteGroups(); 
+          if (!App?.mathBoard) return;
+          App.mathBoard.pasteGroups(); 
         }
       },
       { separator: true },
@@ -157,10 +169,14 @@ class ContextMenu {
             const selectedGroups = ObjectGroup.getSelectedGroups();
             selectedGroups.forEach(group => group.remove());
           }
-          window.App.mathBoard.fileManager.saveState();
+          if (!App?.mathBoard) return;
+          App.mathBoard.fileManager.saveState();
         }
       }
     );
   
     contextMenu.show(e.pageX, e.pageY, menuItems);
   });
+});
+
+export { ContextMenu };

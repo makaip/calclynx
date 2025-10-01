@@ -1,3 +1,5 @@
+import { userManager } from '../core/cloud.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const settingsModal = document.getElementById('settings-modal');
@@ -148,3 +150,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Also initialize when the DOM is loaded (in case modal is shown immediately)
     checkAuthAndInitSettings();
 });
+
+export const SettingsModalHandlers = true;

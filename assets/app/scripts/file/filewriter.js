@@ -1,3 +1,6 @@
+import { EquivalenceUtils } from '../utils/equivalence-utils.js';
+import { getSupabaseClient } from '../auth/initsupabaseapp.js';
+
 class FileWriter {
     constructor(board, fileManager) {
         this.board = board;
@@ -71,8 +74,7 @@ class FileWriter {
 
     async saveState() {
         let version = "3.0";
-        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                       typeof TextFieldProseMirror !== 'undefined';
+        let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
         
         if (!hasProseMirrorCapability) {
             version = "2.0";
@@ -96,7 +98,8 @@ class FileWriter {
             return; 
         }
 
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        const client = await getSupabaseClient();
+        const { data: { session }, error } = await client.auth.getSession();
         if (error || !session) {
             console.error("User session not found, cannot save to cloud.");
             return;
@@ -113,7 +116,7 @@ class FileWriter {
 
         try {
             console.log(`Starting cloud save for fileId: ${fileId} (version ${version})...`); 
-            const { error: uploadError } = await supabaseClient.storage
+            const { error: uploadError } = await client.storage
                 .from('storage')
                 .upload(filePath, fileBlob, { upsert: true }); // upsert to overwrite
 
@@ -122,7 +125,7 @@ class FileWriter {
             }
 
             const now = new Date().toISOString();
-            const { error: dbError } = await supabaseClient
+            const { error: dbError } = await client
                 .from('files')
                 .update({ 
                     last_modified: now, 
@@ -151,8 +154,7 @@ class FileWriter {
 
     exportData() {
         let version = "3.0";
-        let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                       typeof TextFieldProseMirror !== 'undefined';
+        let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
         
         if (!hasProseMirrorCapability) {
             version = "2.0";
@@ -180,3 +182,5 @@ class FileWriter {
         URL.revokeObjectURL(url);
     }
 }
+
+export { FileWriter };

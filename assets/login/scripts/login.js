@@ -1,4 +1,4 @@
-// Use the globally available supabaseClient from initsupabaseapp.js
+import { getSupabaseClient } from '../../app/scripts/auth/initsupabaseapp.js';
 
 const googleSignInButton = document.getElementById('google-signin-button');
 const emailPasswordForm = document.getElementById('email-password-form');
@@ -48,7 +48,8 @@ if (emailPasswordForm) {
         loginButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging In...';
     }
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
+    const client = await getSupabaseClient();
+    const { data, error } = await client.auth.signInWithPassword({
         email: email,
         password: password,
     });
@@ -78,7 +79,8 @@ if (googleSignInButton) {
             const redirectURL = window.location.origin + '/app.html';
             console.log('Redirecting to:', redirectURL);
 
-            const { error } = await supabaseClient.auth.signInWithOAuth({
+            const client = await getSupabaseClient();
+            const { error } = await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: redirectURL
@@ -101,9 +103,14 @@ if (googleSignInButton) {
 
 // Auto-redirect if already logged in
 async function checkLoginStatus() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        window.location.href = '/app.html';
+    try {
+        const client = await getSupabaseClient();
+        const { data: { session } } = await client.auth.getSession();
+        if (session) {
+            window.location.href = '/app.html';
+        }
+    } catch (error) {
+        console.error('Error checking login status:', error);
     }
 }
 

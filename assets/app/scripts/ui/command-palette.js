@@ -1,3 +1,5 @@
+import { BaseModal } from '../modals/base-modal.js';
+
 class CommandPalette extends BaseModal {
   constructor(options = {}) {
     super({
@@ -558,3 +560,5 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error initializing command palette:', error);
     }
 });
+
+export { CommandPalette };

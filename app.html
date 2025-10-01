@@ -258,87 +258,14 @@
     })();
   </script>
 
-  <!-- Authentication Scripts -->
-  <script src="assets/app/scripts/auth/initsupabaseapp.js"></script>
-  
-  <!-- Cloud and User Management -->
-  <script src="assets/app/scripts/core/cloud.js"></script>
-
   <!-- MathGene Library -->
   <script src="libs/mathgene/mg_translate.js"></script>
   <script src="libs/mathgene/mg_calculate.js"></script>
   
-  <!-- Core Object Group (base class) -->
-  <script src="assets/app/scripts/core/objectgroup.js"></script>
+  <!-- ES Modules -->
+  <script type="module" src="assets/app/scripts/main.mjs"></script>
   
-  <!-- Utility Scripts -->
-  <script src="assets/app/scripts/utils/equivalence-utils.js"></script>
-  <script src="assets/app/scripts/utils/equivalence.js"></script>
-
-  <!-- File Management Scripts -->
-  <script src="assets/app/scripts/file/filereader.js"></script>
-  <script src="assets/app/scripts/file/filewriter.js"></script>
-  <script src="assets/app/scripts/file/filemanager.js"></script>
-  
-  <!-- Math Scripts -->
-  <script src="assets/app/scripts/core/navigation.js"></script>
-  <script src="assets/app/scripts/core/selection.js"></script>
-  <script src="assets/app/scripts/core/clipboard.js"></script>
-  <script src="assets/app/scripts/core/canvas.js"></script>
-
-  <script src="assets/app/scripts/math/mathgroup.js"></script>
-  <script src="assets/app/scripts/math/mathfield-container.js"></script>
-  <script src="assets/app/scripts/math/mathfield-editor.js"></script>
-  <script src="assets/app/scripts/math/mathfield-event-handler.js"></script>
-  <script src="assets/app/scripts/math/mathfield-state-manager.js"></script>
-  <script src="assets/app/scripts/math/mathfield-ui-manager.js"></script>
-  <script src="assets/app/scripts/math/mathfield.js"></script>
-  <script src="assets/app/scripts/math/mathfield-utils.js"></script>
-  
-  <!-- Text Scripts -->
-  <script src="assets/app/scripts/text/textgroup.js"></script>
-  
-  <!-- Compatibility Handler (must load before ProseMirror scripts) -->
-  <script src="assets/app/scripts/text/textfield-compatibility.js"></script>
-  
-  <!-- ProseMirror-based Text Scripts (v3.0) -->
-  <script src="assets/app/scripts/text/textfield-content.js"></script>
-  <script src="assets/app/scripts/text/textfield-math-nodeview.js"></script>
-  <script src="assets/app/scripts/text/textfield-schema.js"></script>
-  <script src="assets/app/scripts/text/textfield-event-handler.js"></script>
-  <script src="assets/app/scripts/text/textfield-resize-handler.js"></script>
-  <script src="assets/app/scripts/text/textfield.js"></script>
-
-  
-  <!-- Image Scripts -->
-  <script src="assets/app/scripts/image/imagegroup-resize-handler.js"></script>
-  <script src="assets/app/scripts/image/imagegroup.js"></script>
-  
-  <!-- worker script MUST be after MathGene scripts and equivalence.js -->
+  <!-- MathGene worker -->
   <script src="assets/app/scripts/utils/mathgene-worker.js"></script>
-
-  <!-- UI Scripts -->
-  <script src="assets/app/scripts/ui/contextmenu.js"></script>
-  <script src="assets/app/scripts/ui/toolbar.js"></script>
-  
-  <!-- Modal System -->
-  <script src="assets/app/scripts/modals/base-modal.js"></script>
-  <script src="assets/app/scripts/ui/command-palette.js"></script>
-
-  <!-- Sidebar Scripts -->
-  <script src="assets/app/scripts/sidebar/sidebar.js"></script> 
-  <script src="assets/app/scripts/sidebar/sidebar-file-actions.js"></script>
-  <script src="assets/app/scripts/sidebar/sidebar-ui-interactions.js"></script>
-
-  <script src="assets/app/scripts/modals/renamemodal.js"></script>
-  <script src="assets/app/scripts/modals/deletemodal.js"></script>
-  <script src="assets/app/scripts/modals/createmodal.js"></script>
-  <script src="assets/app/scripts/modals/imagemodal.js"></script>
-  
-  <!-- Settings Scripts -->
-  <script src="assets/app/scripts/ui/settings-modal.js"></script>
-
-  <!-- main.js initializes mathBoard etc. -->
-  <script src="assets/app/scripts/core/main.js"></script>
 </body>
 </html>

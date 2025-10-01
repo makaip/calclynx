@@ -238,15 +238,32 @@ class TextFormatToolbar {
 }
 
 
-// TODO: find all the DOMContentLoaded's and put them all together
+let toolbarInstance = null;
+
+function getToolbarInstance() {
+    if (!toolbarInstance) {
+        toolbarInstance = new TextFormatToolbar();
+        window.textFormatToolbar = toolbarInstance;
+    }
+    return toolbarInstance;
+}
+
 document.addEventListener('DOMContentLoaded', () => { 
-    window.textFormatToolbar = new TextFormatToolbar();
+    getToolbarInstance();
 });
+
+if (document.readyState === 'loading') {
+} else {
+    getToolbarInstance();
+}
 
 window.TextFormatToolbar = TextFormatToolbar;
 
 window.showTextToolbar = function() {
-    if (window.textFormatToolbar) {
-        window.textFormatToolbar.show();
-    }
+    const toolbar = getToolbarInstance();
+    toolbar.show();
 };
+
+window.getTextFormatToolbar = getToolbarInstance;
+
+export { TextFormatToolbar };

@@ -1,3 +1,5 @@
+import { userManager } from '../core/cloud.js';
+
 const SidebarUtils = {
     formatDate(dateString) {
         if (!dateString) return 'N/A';
@@ -80,7 +82,7 @@ function createFileItem(file, isActive = false) {
     `;
 }
 
-window.loadUserFiles = async function() {
+const loadUserFiles = async function() {
     const fileList = document.getElementById('sidebar-file-list');
     if (!fileList) return;
     
@@ -157,7 +159,7 @@ const SidebarResizer = {
 
     setInitialState() {
         this.applyWidthWithTransition(this.currentWidth);
-        window.loadUserFiles(); 
+        loadUserFiles(); 
     },
 
     handleHamburgerClick(e) {
@@ -262,3 +264,5 @@ function initializeDocumentClickHandlers() {
         });
     });
 }
+
+export { SidebarUtils, loadUserFiles };

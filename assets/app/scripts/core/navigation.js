@@ -1,3 +1,5 @@
+import { BoxSelection } from './selection.js';
+
 const ZOOM = { FACTOR: 1.08, MIN: 0.3, MAX: 3.3333 };
 
 class Navigation {
@@ -235,3 +237,5 @@ class CanvasUtils {
     };
   }
 }
+
+export { Navigation };

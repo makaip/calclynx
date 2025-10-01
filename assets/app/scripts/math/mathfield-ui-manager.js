@@ -97,3 +97,5 @@ class MathFieldUIManager {
     return event.target.closest('.drag-handle');
   }
 }
+
+export { MathFieldUIManager };

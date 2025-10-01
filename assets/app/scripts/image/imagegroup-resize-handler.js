@@ -106,3 +106,5 @@ class ImageGroupResizeHandler {
     this.imageGroup.board.fileManager.saveState();
   }
 }
+
+export { ImageGroupResizeHandler };

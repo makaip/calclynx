@@ -6,3 +6,5 @@ class EquivalenceUtils {
         }
     }
 }
+
+export { EquivalenceUtils };

@@ -1,3 +1,7 @@
+import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { loadUserFiles } from '../sidebar/sidebar.js';
+import { userManager } from '../core/cloud.js';
+
 function initializeDeleteFileModal() {
     const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
     const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
@@ -38,9 +42,7 @@ function initializeDeleteFileModal() {
             }
             
             hideModal(deleteSidebarFileModal);
-            if (typeof window.loadUserFiles === 'function') {
-                window.loadUserFiles();
-            }
+            loadUserFiles();
 
             const urlParams = new URLSearchParams(window.location.search);
             const currentFileId = urlParams.get('fileId');
@@ -72,3 +74,5 @@ function initializeDeleteFileModal() {
         await confirmActualFileDelete();
     });
 }
+
+export { initializeDeleteFileModal };

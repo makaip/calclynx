@@ -1,5 +1,7 @@
 const BOX_SELECT_STYLE = { position: 'absolute', border: '1px dashed #00c59a', backgroundColor: 'rgba(0, 197, 154, 0.1)', pointerEvents: 'none', };
 
+import { ObjectGroup } from './objectgroup.js';
+
 class BoxSelection {
   constructor(board) {
     this.board = board;
@@ -103,3 +105,5 @@ class BoxSelection {
     }
   }
 }
+
+export { BoxSelection };

@@ -1,13 +1,23 @@
+import { getSupabaseClient } from '../auth/initsupabaseapp.js';
+
 class User {
     constructor() {
-        this.client = supabaseClient; // sb client is global
+        this.client = null;
         this.currentUser = null;
         this.currentSession = null;
     }
 
+    async ensureClient() {
+        if (!this.client) {
+            this.client = await getSupabaseClient();
+        }
+        return this.client;
+    }
+
     async getSession() {
         try {
-            const { data: { session }, error } = await this.client.auth.getSession();
+            const client = await this.ensureClient();
+            const { data: { session }, error } = await client.auth.getSession();
             if (error) throw error;
             
             this.currentSession = session;
@@ -21,7 +31,8 @@ class User {
 
     async signOut() {
         try {
-            const { error } = await this.client.auth.signOut();
+            const client = await this.ensureClient();
+            const { error } = await client.auth.signOut();
             if (error) throw error;
             
             this.currentSession = null;
@@ -53,7 +64,8 @@ class User {
                 throw new Error('No user logged in');
             }
 
-            const { error } = await this.client.rpc('delete_user_account');
+            const client = await this.ensureClient();
+            const { error } = await client.rpc('delete_user_account');
             if (error) throw error;
 
             await this.signOut();
@@ -74,7 +86,8 @@ class User {
                 throw new Error('User not authenticated');
             }
 
-            const { error: storageError } = await this.client.storage
+            const client = await this.ensureClient();
+            const { error: storageError } = await client.storage
                 .from('storage')
                 .upload(filePath, fileData);
 
@@ -94,7 +107,8 @@ class User {
                 throw new Error('User not authenticated');
             }
 
-            const { data: blob, error } = await this.client.storage
+            const client = await this.ensureClient();
+            const { data: blob, error } = await client.storage
                 .from('storage')
                 .download(filePath);
 
@@ -114,7 +128,8 @@ class User {
                 throw new Error('User not authenticated');
             }
 
-            const { error } = await this.client.storage
+            const client = await this.ensureClient();
+            const { error } = await client.storage
                 .from('storage')
                 .remove([filePath]);
 
@@ -132,7 +147,8 @@ class User {
             const { session } = await this.getSession();
             if (!session) throw new Error('User not authenticated');
 
-            const { data: files, error } = await this.client
+            const client = await this.ensureClient();
+            const { data: files, error } = await client
                 .from('files')
                 .select('id, file_name, last_modified, file_size')
                 .eq('user_id', session.user.id)
@@ -161,8 +177,7 @@ class User {
             }
 
             let initialVersion = 3;
-            let hasProseMirrorCapability = (window.proseMirrorReady || window.ProseMirror) && 
-                                           typeof TextFieldProseMirror !== 'undefined';
+            let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
             if (!hasProseMirrorCapability) {
                 initialVersion = 2;
             }
@@ -173,14 +188,15 @@ class User {
             const initialBlob = new Blob([initialContent], { type: 'application/json' });
             const initialFileSize = initialBlob.size;
 
-            const { error: storageError } = await this.client.storage
+            const client = await this.ensureClient();
+            const { error: storageError } = await client.storage
                 .from('storage')
                 .upload(filePath, initialBlob);
 
             if (storageError) throw storageError;
 
             const now = new Date().toISOString();
-            const { error: dbError } = await this.client
+            const { error: dbError } = await client
                 .from('files')
                 .insert({
                     id: fileId,
@@ -193,7 +209,7 @@ class User {
                 });
 
             if (dbError) {
-                await this.client.storage.from('storage').remove([filePath]);
+                await client.storage.from('storage').remove([filePath]);
                 throw dbError;
             }
 
@@ -243,14 +259,15 @@ class User {
             const contentBlob = new Blob([jsonContent], { type: 'application/json' });
             const fileSize = contentBlob.size;
 
-            const { error: storageError } = await this.client.storage
+            const client = await this.ensureClient();
+            const { error: storageError } = await client.storage
                 .from('storage')
                 .upload(filePath, contentBlob);
 
             if (storageError) throw storageError;
 
             const now = new Date().toISOString();
-            const { error: dbError } = await this.client
+            const { error: dbError } = await client
                 .from('files')
                 .insert({
                     id: fileId,
@@ -263,7 +280,7 @@ class User {
                 });
 
             if (dbError) {
-                await this.client.storage.from('storage').remove([filePath]);
+                await client.storage.from('storage').remove([filePath]);
                 throw dbError;
             }
 
@@ -287,7 +304,8 @@ class User {
             const { session } = await this.getSession();
             if (!session) throw new Error('User not authenticated');
 
-            const { data: existingFiles, error } = await this.client
+            const client = await this.ensureClient();
+            const { data: existingFiles, error } = await client
                 .from('files')
                 .select('id')
                 .eq('user_id', session.user.id)
@@ -314,7 +332,8 @@ class User {
             const validatedName = validationResult.name;
             const now = new Date().toISOString();
 
-            const { error: updateError } = await this.client
+            const client = await this.ensureClient();
+            const { error: updateError } = await client
                 .from('files')
                 .update({ 
                     file_name: validatedName, 
@@ -344,7 +363,8 @@ class User {
             const userId = session.user.id;
             const filePath = `${userId}/${fileId}.json`;
 
-            const { error: storageError } = await this.client.storage
+            const client = await this.ensureClient();
+            const { error: storageError } = await client.storage
                 .from('storage')
                 .remove([filePath]);
 
@@ -352,7 +372,7 @@ class User {
                 console.warn(`Storage deletion warning for ${filePath}: ${storageError.message}`);
             }
 
-            const { error: dbError } = await this.client
+            const { error: dbError } = await client
                 .from('files')
                 .delete()
                 .eq('id', fileId)
@@ -380,7 +400,8 @@ class User {
             const trimmedName = newName.trim();
             if (!trimmedName) throw new Error('File name cannot be empty');
 
-            const { data: existingFiles, error } = await this.client
+            const client = await this.ensureClient();
+            const { data: existingFiles, error } = await client
                 .from('files')
                 .select('id')
                 .eq('user_id', session.user.id)
@@ -404,7 +425,8 @@ class User {
             const { session } = await this.getSession();
             if (!session) throw new Error('User not authenticated');
 
-            const { data, error } = await this.client
+            const client = await this.ensureClient();
+            const { data, error } = await client
                 .from('files')
                 .select('id, file_name, created_at, last_modified, file_size')
                 .eq('id', fileId)
@@ -460,3 +482,5 @@ class User {
 }
 
 const userManager = new User();
+
+export { User, userManager };

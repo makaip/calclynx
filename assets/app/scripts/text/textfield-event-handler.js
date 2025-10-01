@@ -254,3 +254,5 @@ class TextFieldProseMirrorEventHandler {
     return null;
   }
 }
+
+export { TextFieldProseMirrorEventHandler };

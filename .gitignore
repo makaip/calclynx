@@ -1,6 +1,5 @@
 /node_modules
-/package-lock.json
-/package.json
+package-lock.json
+package.json
 /.vscode
 /.DS_Store
-eslint.config.mjs

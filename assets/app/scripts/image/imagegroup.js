@@ -1,3 +1,6 @@
+import { ObjectGroup } from '../core/objectgroup.js';
+import { ImageGroupResizeHandler } from './imagegroup-resize-handler.js';
+
 class ImageGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
 
@@ -111,3 +114,5 @@ class ImageGroup extends ObjectGroup {
     super.remove();
   }
 }
+
+export { ImageGroup };

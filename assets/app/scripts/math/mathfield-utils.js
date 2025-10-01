@@ -1,3 +1,6 @@
+const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
+
+
 class MathFieldUtils {
   static createCircleIndicator() {
     const circleIndicator = document.createElement('div');
@@ -96,6 +99,10 @@ class MathFieldUtils {
     this.recreateContainerStructure(container);
     const staticMath = this.createStaticMathElement();
     container.appendChild(staticMath);
-    MQ.StaticMath(staticMath).latex(latex);
+
+    if (MQ) MQ.StaticMath(staticMath).latex(latex);
   }
 }
+
+
+export { MathFieldUtils };

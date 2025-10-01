@@ -1,3 +1,5 @@
+import { userManager } from '../core/cloud.js';
+
 function sanitizeFileName(fileName) {
     if (!fileName || typeof fileName !== 'string') {
         return 'untitled';
@@ -87,3 +89,13 @@ function initializeFileDownloadHandler() {
         }
     };
 }
+
+export { 
+    sanitizeFileName,
+    showError,
+    hideError, 
+    showModal,
+    hideModal,
+    setButtonLoading,
+    initializeFileDownloadHandler
+};
