@@ -103,12 +103,12 @@
 
     <!-- Zoom Controls -->
     <div id="zoom-controls" class="zoom-controls">
-      <div class="zoom-slider-container">
-        <button id="zoom-out-btn" class="zoom-btn">−</button>
-        <input type="range" id="zoom-slider" class="zoom-slider" min="30" max="333" value="100" step="1">
-        <button id="zoom-in-btn" class="zoom-btn">+</button>
+      <div class="btn-group" role="group" aria-label="Zoom controls">
+        <button id="zoom-out-btn" class="btn btn-outline-secondary zoom-btn" type="button">−</button>
+        <button id="zoom-percentage-btn" class="btn btn-outline-secondary zoom-percentage" type="button">100%</button>
+        <input id="zoom-input" class="form-control zoom-input d-none" type="number" min="30" max="333" value="100">
+        <button id="zoom-in-btn" class="btn btn-outline-secondary zoom-btn" type="button">+</button>
       </div>
-      <button id="reset-zoom-btn" class="reset-zoom-btn">Reset Zoom</button>
     </div>
 
     <div id="canvas"></div>
