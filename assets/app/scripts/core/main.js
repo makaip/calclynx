@@ -8,7 +8,6 @@ import { TextFormatToolbar } from '../ui/toolbar.js';
 import '../sidebar/sidebar-ui-interactions.js';
 import '../ui/contextmenu.js';
 import '../ui/command-palette.js';
-import '../ui/settings-modal.js';
 
 const App = {
   mathBoard: null,
@@ -148,10 +147,11 @@ const setupImportInput = (el) => {
           const errorMsg = document.getElementById('createFromJson-error-message');
           
           if (modal) {
-            modal.style.display = 'block';
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+            bsModal.show();
             if (input) {
               input.value = '';
-              input.focus();
+              setTimeout(() => input.focus(), 100);
             }
             if (errorMsg) {
               errorMsg.style.display = 'none';

@@ -124,145 +124,165 @@
     <input type="file" id="importInput" accept=".json" style="display: none;">
   </div>
 
-  <div id="settings-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Settings</h2>
-        <span class="close-button modal-close" id="close-settings-modal">&times;</span>
-      </div>
 
-      <div class="modal-body">
-        <div class="settings-section">
-          <h3>Account Management</h3>
-          <div class="settings-info">
-            <p>Your email address: <strong id="userEmail">Loading...</strong></p>
+  <div class="modal fade" id="settings-modal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-settings-modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h6>Account Management</h6>
+            <div class="settings-info">
+              <p>Your email address: <strong id="userEmail">Loading...</strong></p>
+            </div>
+          </div>
+
+          <div class="settings-section danger-zone mt-4">
+            <h6 class="text-danger">Danger Zone</h6>
+            <div class="settings-info">
+              <p>Permanently delete your account and all associated data (including saved files). This action cannot be undone.</p>
+              <button class="btn btn-danger" id="deleteAccountButton">Delete My Account</button>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="settings-section danger-zone">
-          <h3>Danger Zone</h3>
-          <div class="settings-info">
-            <p>Permanently delete your account and all associated data (including saved files). This action cannot be undone.</p>
-            <button class="danger-button" id="deleteAccountButton">Delete My Account</button>
+
+  <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-delete-modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>This action is irreversible. All your files and data will be permanently deleted.</p>
+          <p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box below:</p>
+          <div class="mb-3">
+            <label for="deleteConfirmInput" class="form-label">Confirm Email:</label>
+            <input type="email" class="form-control" id="deleteConfirmInput" placeholder="Enter your email address">
+            <div id="delete-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteAccountModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Confirm Account Deletion</h2>
-        <span class="close-button" id="close-delete-modal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>This action is irreversible. All your files and data will be permanently deleted.</p>
-        <p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box below:</p>
-        <div class="input-group">
-          <label for="deleteConfirmInput">Confirm Email:</label>
-          <input type="email" id="deleteConfirmInput" placeholder="Enter your email address">
-          <div id="delete-error-message" class="error-message"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel-delete-button">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteAccountButton">Delete Account Permanently</button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="cancel-button" id="cancel-delete-button">Cancel</button>
-        <button class="danger-button" id="confirmDeleteAccountButton">Delete Account Permanently</button>
-      </div>
     </div>
   </div>
 
-  <div id="createBlankFileModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Create New Blank File</h2>
-        <span class="close-button modal-close" id="closeCreateBlankFileModal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Enter the name for your new blank file:</p>
-        <input type="text" id="newBlankFileNameInput" class="modal-input" placeholder="File name">
-        <div id="createBlankFile-error-message" class="error-message" style="display: none;"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-button modal-cancel" id="cancelCreateBlankFileButton">Cancel</button>
-        <button class="action-button" id="confirmCreateBlankFileButton">Create File</button>
-      </div>
-    </div>
-  </div>
 
-  <div id="renameFileModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Rename File</h2>
-        <span class="close-button modal-close" id="closeRenameFileModal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Enter the new name for the file:</p>
-        <input type="text" id="newFileNameInput" class="modal-input" placeholder="New file name">
-        <div id="rename-error-message" class="error-message" style="display: none;"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-button modal-cancel" id="cancelRenameFileButton">Cancel</button>
-        <button class="action-button" id="confirmRenameFileButton">Rename</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteSidebarFileModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Confirm File Deletion</h2>
-        <span class="close-button modal-close" id="closeDeleteSidebarFileModal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="" id="doNotAskAgainDeleteFile">
-          <label class="form-check-label" for="doNotAskAgainDeleteFile">
-            Do not ask again
-          </label>
+  <div class="modal fade" id="createBlankFileModal" tabindex="-1" aria-labelledby="createBlankFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createBlankFileModalLabel">Create New Blank File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCreateBlankFileModal"></button>
         </div>
-        <div id="delete-sidebar-file-error-message" class="error-message" style="display: none;"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-button modal-cancel" id="cancelDeleteSidebarFileButton">Cancel</button>
-        <button class="danger-button" id="confirmDeleteSidebarFileButton">Delete File</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="imageUrlModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add Image from URL</h2>
-        <span class="close-button modal-close" id="closeImageUrlModal">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p>Enter the URL of the image you want to add:</p>
-        <input type="url" id="imageUrlInput" class="modal-input" placeholder="https://example.com/image.jpg">
-        <div id="imageUrl-error-message" class="error-message" style="display: none;"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-button modal-cancel" id="cancelImageUrlButton">Cancel</button>
-        <button class="action-button" id="confirmImageUrlButton">Add Image</button>
+        <div class="modal-body">
+          <p>Enter the name for your new blank file:</p>
+          <input type="text" class="form-control" id="newBlankFileNameInput" placeholder="File name">
+          <div id="createBlankFile-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelCreateBlankFileButton">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmCreateBlankFileButton">Create File</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="createFromJsonModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Create File from JSON</h2>
-        <span class="close-button modal-close" id="closeCreateFromJsonModal">&times;</span>
+
+  <div class="modal fade" id="renameFileModal" tabindex="-1" aria-labelledby="renameFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="renameFileModalLabel">Rename File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeRenameFileModal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Enter the new name for the file:</p>
+          <input type="text" class="form-control" id="newFileNameInput" placeholder="New file name">
+          <div id="rename-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelRenameFileButton">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmRenameFileButton">Rename</button>
+        </div>
       </div>
-      <div class="modal-body">
-        <p>Enter a name for the new file:</p>
-        <input type="text" id="newJsonFileNameInput" class="modal-input" placeholder="File name">
-        <div id="createFromJson-error-message" class="error-message" style="display: none;"></div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="deleteSidebarFileModal" tabindex="-1" aria-labelledby="deleteSidebarFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteSidebarFileModalLabel">Confirm File Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeDeleteSidebarFileModal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="doNotAskAgainDeleteFile">
+            <label class="form-check-label" for="doNotAskAgainDeleteFile">
+              Do not ask again
+            </label>
+          </div>
+          <div id="delete-sidebar-file-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteSidebarFileButton">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteSidebarFileButton">Delete File</button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button class="cancel-button modal-cancel" id="cancelCreateFromJsonButton">Cancel</button>
-        <button class="action-button" id="confirmCreateFromJsonButton">Create File</button>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="imageUrlModal" tabindex="-1" aria-labelledby="imageUrlModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imageUrlModalLabel">Add Image from URL</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeImageUrlModal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Enter the URL of the image you want to add:</p>
+          <input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg">
+          <div id="imageUrl-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelImageUrlButton">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmImageUrlButton">Add Image</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="createFromJsonModal" tabindex="-1" aria-labelledby="createFromJsonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createFromJsonModalLabel">Create File from JSON</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCreateFromJsonModal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Enter a name for the new file:</p>
+          <input type="text" class="form-control" id="newJsonFileNameInput" placeholder="File name">
+          <div id="createFromJson-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelCreateFromJsonButton">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmCreateFromJsonButton">Create File</button>
+        </div>
       </div>
     </div>
   </div>
