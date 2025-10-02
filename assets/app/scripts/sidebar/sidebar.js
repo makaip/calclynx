@@ -42,15 +42,15 @@ const SidebarUtils = {
     },
 
     createLoadingIndicator(message = 'Loading files...') {
-        return `<div class="list-group-item border-0" style="background-color: transparent; color: #666;"><span class="loading-text">${message}</span></div>`;
+        return `<div class="list-group-item text-secondary"><span class="loading-text">${message}</span></div>`;
     },
 
     createErrorIndicator(message = 'Error loading files.') {
-        return `<div class="list-group-item border-0 text-danger" style="background-color: transparent;"><span class="error-text">${message}</span></div>`;
+        return `<div class="list-group-item text-danger"><span class="error-text">${message}</span></div>`;
     },
 
     createInfoIndicator(message = 'No files found.') {
-        return `<div class="list-group-item border-0" style="background-color: transparent; color: #666;"><span class="info-text">${message}</span></div>`;
+        return `<div class="list-group-item text-secondary"><span class="info-text">${message}</span></div>`;
     }
 };
 
@@ -59,14 +59,12 @@ function createFileItem(file, isActive = false) {
     const safeIdAttr = SidebarUtils.escapeHtml(String(file?.id ?? ''));
     const safeIdUrl = encodeURIComponent(String(file?.id ?? ''));
     return `
-        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
-                    ${isActive ? 'active' : ''}" 
-             style="background-color: ${isActive ? '#333' : 'transparent'}; border-left: ${isActive ? '3px solid #00c59a' : '3px solid transparent'} !important; border-bottom: 1px solid #444; padding: 0.75rem 1rem;">
+        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center ${isActive ? 'active' : ''}">
             <a href="/app.html?fileId=${safeIdUrl}" title="${safeName}" 
-               class="text-decoration-none flex-grow-1 ${isActive ? 'text-white' : 'text-light'}">
-                <div class="file-link-content">
-                    <div class="file-title fw-medium mb-1" style="font-family: 'Inter', sans-serif;">${safeName}</div>
-                    <div class="file-metadata small" style="color: #666;">
+               class="text-decoration-none flex-grow-1 file-link-content">
+                <div class="file-content">
+                    <div class="file-title fw-medium mb-1">${safeName}</div>
+                    <div class="file-metadata small">
                         <span class="file-last-modified">${SidebarUtils.formatDate(file.last_modified)}</span>
                         <span class="metadata-separator"> • </span>
                         <span class="file-size">${SidebarUtils.formatFileSize(file.file_size ?? 0)}</span>
@@ -74,12 +72,11 @@ function createFileItem(file, isActive = false) {
                 </div>
             </a>
             <div class="dropdown">
-                <button class="btn btn-outline-secondary file-actions-button" type="button" 
-                        data-bs-toggle="dropdown" aria-expanded="false" title="File actions"
-                        style="border: none; background: transparent; color: #666; font-size: 14px; line-height: 1; padding: 6px 9px; min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                <button class="btn btn-sm file-actions-button" type="button" 
+                        data-bs-toggle="dropdown" aria-expanded="false" title="File actions">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" style="background-color: #2c2c2c;">
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                     <li><a class="dropdown-item rename-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Rename</a></li>
                     <li><a class="dropdown-item download-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Download as JSON</a></li>
                     <li><hr class="dropdown-divider"></li>
