@@ -146,7 +146,7 @@ body.sidebar-open #file-title {
 
 #sidebar .sidebar-list li a .file-metadata {
     font-size: 0.8em; /* Smaller font for metadata */
-    color: #999; /* Lighter color for metadata */
+    color: #666; /* Lighter color for metadata */
     margin-top: 4px; /* Space between title and metadata */
     white-space: nowrap;
     overflow: hidden;

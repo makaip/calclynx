@@ -15,52 +15,60 @@
   <link rel="stylesheet" href="assets/app/styles/main.css" /> 
 </head>
 <body>
-  <div id="menu-container">
-    <button id="hamburgerBtn">☰</button>
-    <div id="file-title">Untitled</div>
+  <div id="menu-container" class="text-white">
+    <button id="hamburgerBtn" class="text-white">☰</button>
+    <div id="file-title" class="text-white">Untitled</div>
   </div>
 
   <!-- Bootstrap Offcanvas Sidebar -->
-  <div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="sidebar" 
-       style="background-color: #171717; border-right: 1px solid #444; width: 400px; visibility: visible;">
-    <div id="sidebar-resizer" style="position: absolute; top: 0; right: 0; width: 5px; height: 100%; cursor: col-resize; z-index: 1001;"></div>
+  <div class="offcanvas offcanvas-start show" 
+       data-bs-backdrop="false" 
+       data-bs-scroll="true" 
+       tabindex="-1" 
+       id="sidebar" 
+       aria-labelledby="sidebarLabel">
+    <div id="sidebar-resizer"></div>
     
-    <div class="offcanvas-header border-0 pb-1" style="padding: 30px 30px 0 30px;">
-      <h2 class="offcanvas-title text-white fw-semibold mb-0" style="font-family: 'Inter', sans-serif;">Calclynx</h2>
+    <div class="offcanvas-header" style="padding: 24px;">
+      <div class="d-flex flex-column">
+        <h2 class="offcanvas-title fw-semibold mb-0" id="sidebarLabel">Calclynx</h2>
+        <div id="user-email-display" class="small text-secondary"></div>
+      </div>
     </div>
     
-    <div class="offcanvas-body d-flex flex-column" style="padding: 0 30px 30px 30px; font-family: 'Inter', sans-serif;">
-      <div id="user-email-display" class="small mb-3" style="color: #bbbbbb;"></div>
+    <div class="offcanvas-body d-flex flex-column pt-0" style="padding: 0 24px 24px 24px;"> 
       
       <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
-        <h6 class="text-uppercase fw-medium mb-0" style="font-size: 0.9rem; letter-spacing: 0.5px; color: #bbbbbb;">Your Files</h6> 
+        <h6 class="text-uppercase fw-medium mb-0 text-secondary" 
+            style="font-size: 0.9rem; letter-spacing: 0.5px;">Your Files</h6> 
         <div class="dropdown">
-          <button class="btn btn-sm dropdown-toggle" type="button" id="newFileBtnSidebar" 
-                  data-bs-toggle="dropdown" aria-expanded="false"
-                  style="background-color: #00c59a; color: #141414; border: none; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif;">
+          <button class="btn btn-primary btn-sm dropdown-toggle" 
+                  type="button" 
+                  id="newFileBtnSidebar" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false">
             New File
           </button>
-          <ul class="dropdown-menu dropdown-menu-dark" style="background-color: #2c2c2c;">
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
             <li><a class="dropdown-item" href="#" id="createBlankFileSidebarOpt">Blank File</a></li>
             <li><a class="dropdown-item" href="#" id="createFromJsonSidebarOpt">From JSON</a></li>
           </ul>
         </div>
       </div>
       
-      <div class="list-group list-group-flush flex-grow-1" id="sidebar-file-list" style="overflow-y: auto;">
+      <div class="list-group list-group-flush flex-grow-1" id="sidebar-file-list">
         <!-- File list will be populated here -->
-        <div class="list-group-item border-0 text-muted" style="background-color: transparent;">
+        <div class="list-group-item text-secondary">
           <span class="loading-text">Loading files...</span>
         </div>
       </div>
 
-      <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #444 !important;">
-        <a href="#" id="settings-link" class="text-white text-decoration-none" title="Settings">
+      <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+        <a href="#" id="settings-link" class="text-decoration-none" title="Settings">
           <i class="fas fa-cog"></i>
         </a>
-        <span id="user-status-text" class="text-muted small"></span>
-        <button id="auth-button" class="btn btn-outline-secondary btn-sm" 
-                style="color: #bbbbbb; border-color: #666; font-weight: 500;">Sign In</button>
+        <span id="user-status-text" class="text-secondary small"></span>
+        <button id="auth-button" class="btn btn-outline-secondary btn-sm">Sign In</button>
       </div>
     </div>
   </div>
