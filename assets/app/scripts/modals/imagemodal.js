@@ -1,9 +1,7 @@
-import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { showError, hideError } from '../sidebar/sidebar-file-actions.js';
 
 function initializeImageUrlModal() {
     const imageUrlModal = document.getElementById('imageUrlModal');
-    const closeImageUrlModalBtn = document.getElementById('closeImageUrlModal');
-    const cancelImageUrlBtn = document.getElementById('cancelImageUrlButton');
     const confirmImageUrlBtn = document.getElementById('confirmImageUrlButton');
     const imageUrlInput = document.getElementById('imageUrlInput');
     const imageUrlErrorMessage = document.getElementById('imageUrl-error-message');
@@ -15,7 +13,8 @@ function initializeImageUrlModal() {
             imageUrlInput.value = '';
         }
         hideError(imageUrlErrorMessage);
-        showModal(imageUrlModal);
+        const modal = bootstrap.Modal.getOrCreateInstance(imageUrlModal);
+        modal.show();
         
         if (imageUrlInput) {
             imageUrlInput.focus();
@@ -31,35 +30,26 @@ function initializeImageUrlModal() {
         }
     }
 
-    closeImageUrlModalBtn?.addEventListener('click', () => {
-        hideModal(imageUrlModal);
-        imageUrlCallback = null;
-    });
-
-    cancelImageUrlBtn?.addEventListener('click', () => {
-        hideModal(imageUrlModal);
-        imageUrlCallback = null;
-    });
-
     confirmImageUrlBtn?.addEventListener('click', () => {
-            const url = imageUrlInput.value.trim();
-            
-            if (!url) {
-                showError(imageUrlErrorMessage, 'Please enter a URL.');
-                return;
-            }
-            
-            if (!isValidUrl(url)) {
-                showError(imageUrlErrorMessage, 'Please enter a valid URL.');
-                return;
-            }
+        const url = imageUrlInput.value.trim();
+        
+        if (!url) {
+            showError(imageUrlErrorMessage, 'Please enter a URL.');
+            return;
+        }
+        
+        if (!isValidUrl(url)) {
+            showError(imageUrlErrorMessage, 'Please enter a valid URL.');
+            return;
+        }
 
-            if (imageUrlCallback) {
-                imageUrlCallback(url);
-            }
-            hideModal(imageUrlModal);
-            imageUrlCallback = null;
-        });
+        if (imageUrlCallback) {
+            imageUrlCallback(url);
+        }
+        const modal = bootstrap.Modal.getInstance(imageUrlModal);
+        if (modal) modal.hide();
+        imageUrlCallback = null;
+    });
 
     imageUrlInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {

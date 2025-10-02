@@ -116,26 +116,12 @@ const loadUserFiles = async function() {
 
 const ModalManager = {
     init() {
-        window.addEventListener('click', this.handleModalBackdropClick.bind(this));
-    },
-    handleModalBackdropClick(event) {
-        const modals = [
-            'renameFileModal',
-            'deleteSidebarFileModal', 
-            'createBlankFileModal',
-            'createFromJsonModal',
-            'imageUrlModal'
-        ];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (modal && event.target === modal) {
-                modal.style.display = 'none';
-                // Clean up pending JSON data if closing the createFromJsonModal
-                if (modalId === 'createFromJsonModal') {
-                    window.pendingJsonData = null;
-                }
-            }
-        });
+        const createFromJsonModal = document.getElementById('createFromJsonModal');
+        if (createFromJsonModal) {
+            createFromJsonModal.addEventListener('hidden.bs.modal', () => {
+                window.pendingJsonData = null;
+            });
+        }
     }
 };
 

@@ -1,11 +1,9 @@
-import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { showError, hideError, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { userManager } from '../core/cloud.js';
 
 function initializeDeleteFileModal() {
     const deleteSidebarFileModal = document.getElementById('deleteSidebarFileModal');
-    const closeDeleteSidebarFileModalBtn = document.getElementById('closeDeleteSidebarFileModal');
-    const cancelDeleteSidebarFileBtn = document.getElementById('cancelDeleteSidebarFileButton');
     const confirmDeleteSidebarFileBtn = document.getElementById('confirmDeleteSidebarFileButton');
     const fileNameToDeleteSidebarElement = document.getElementById('fileNameToDeleteSidebar');
     const doNotAskAgainDeleteFileCheckbox = document.getElementById('doNotAskAgainDeleteFile');
@@ -25,7 +23,8 @@ function initializeDeleteFileModal() {
         if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
             confirmActualFileDelete();
         } else {
-            showModal(deleteSidebarFileModal);
+            const modal = bootstrap.Modal.getOrCreateInstance(deleteSidebarFileModal);
+            modal.show();
         }
     };
 
@@ -41,7 +40,8 @@ function initializeDeleteFileModal() {
                 throw new Error(result.error);
             }
             
-            hideModal(deleteSidebarFileModal);
+            const modal = bootstrap.Modal.getInstance(deleteSidebarFileModal);
+            if (modal) modal.hide();
             loadUserFiles();
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -58,14 +58,6 @@ function initializeDeleteFileModal() {
             setButtonLoading(confirmDeleteSidebarFileBtn, false, 'Deleting...', 'Delete File');
         }
     }
-
-    closeDeleteSidebarFileModalBtn?.addEventListener('click', () => {
-        hideModal(deleteSidebarFileModal);
-    });
-
-    cancelDeleteSidebarFileBtn?.addEventListener('click', () => {
-        hideModal(deleteSidebarFileModal);
-    });
 
     confirmDeleteSidebarFileBtn?.addEventListener('click', async () => {
         if (doNotAskAgainDeleteFileCheckbox?.checked) {

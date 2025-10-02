@@ -1,11 +1,9 @@
-import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { showError, hideError, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { userManager } from '../core/cloud.js';
 
 function initializeRenameFileModal() {
     const renameFileModal = document.getElementById('renameFileModal');
-    const closeRenameFileModalBtn = document.getElementById('closeRenameFileModal');
-    const cancelRenameFileBtn = document.getElementById('cancelRenameFileButton');
     const confirmRenameFileBtn = document.getElementById('confirmRenameFileButton');
     const newFileNameInput = document.getElementById('newFileNameInput');
     const renameErrorMessage = document.getElementById('rename-error-message');
@@ -17,20 +15,13 @@ function initializeRenameFileModal() {
             newFileNameInput.value = currentName;
         }
         hideError(renameErrorMessage);
-        showModal(renameFileModal);
+        const modal = bootstrap.Modal.getOrCreateInstance(renameFileModal);
+        modal.show();
 
         if (newFileNameInput) {
-            newFileNameInput.focus();
+            setTimeout(() => newFileNameInput.focus(), 100);
         }
     };
-
-    closeRenameFileModalBtn?.addEventListener('click', () => {
-        hideModal(renameFileModal);
-    });
-
-    cancelRenameFileBtn?.addEventListener('click', () => {
-        hideModal(renameFileModal);
-    });
 
     confirmRenameFileBtn?.addEventListener('click', async () => {
         const newName = newFileNameInput?.value.trim() || '';
@@ -64,7 +55,8 @@ function initializeRenameFileModal() {
                 return;
             }
             
-            hideModal(renameFileModal);
+            const modal = bootstrap.Modal.getInstance(renameFileModal);
+            if (modal) modal.hide();
             loadUserFiles();
             
             const urlParams = new URLSearchParams(window.location.search);

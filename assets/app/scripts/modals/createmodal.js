@@ -1,10 +1,8 @@
-import { showError, hideError, showModal, hideModal, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
+import { showError, hideError, setButtonLoading } from '../sidebar/sidebar-file-actions.js';
 import { userManager } from '../core/cloud.js';
 
 function initializeCreateBlankFileModal() {
     const createBlankFileModal = document.getElementById('createBlankFileModal');
-    const closeCreateBlankFileModalBtn = document.getElementById('closeCreateBlankFileModal');
-    const cancelCreateBlankFileBtn = document.getElementById('cancelCreateBlankFileButton');
     const confirmCreateBlankFileBtn = document.getElementById('confirmCreateBlankFileButton');
     const newBlankFileNameInput = document.getElementById('newBlankFileNameInput');
     const createBlankFileErrorMsg = document.getElementById('createBlankFile-error-message');
@@ -30,7 +28,8 @@ function initializeCreateBlankFileModal() {
             }
 
             console.log("Blank file created successfully:", fileName);
-            hideModal(createBlankFileModal);
+            const modal = bootstrap.Modal.getInstance(createBlankFileModal);
+            if (modal) modal.hide();
             window.location.href = `/app.html?fileId=${result.fileId}`;
 
         } catch (error) {
@@ -41,14 +40,6 @@ function initializeCreateBlankFileModal() {
             setButtonLoading(confirmCreateBlankFileBtn, false, 'Creating...', 'Create File');
         }
     };
-
-    closeCreateBlankFileModalBtn?.addEventListener('click', () => {
-        hideModal(createBlankFileModal);
-    });
-
-    cancelCreateBlankFileBtn?.addEventListener('click', () => {
-        hideModal(createBlankFileModal);
-    });
 
     confirmCreateBlankFileBtn?.addEventListener('click', () => {
         window.handleCreateBlankFile();

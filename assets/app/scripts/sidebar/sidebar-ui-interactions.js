@@ -2,18 +2,17 @@ import { initializeCreateBlankFileModal } from '../modals/createmodal.js';
 import { initializeDeleteFileModal } from '../modals/deletemodal.js';
 import { initializeImageUrlModal } from '../modals/imagemodal.js';
 import { initializeRenameFileModal } from '../modals/renamemodal.js';
+import { initializeSettingsModal } from '../modals/settingsmodal.js';
 import { userManager } from '../core/cloud.js';
 import { 
     initializeFileDownloadHandler,
     showError,
     hideError,
-    showModal,
-    hideModal,
     setButtonLoading
 } from './sidebar-file-actions.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeSettingsHandler();
+    initializeSettingsModal();
     initializeCreateBlankFileModal();
     initializeDeleteFileModal();
     initializeImageUrlModal();
@@ -26,17 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeEventDelegation() {
     document.addEventListener('click', (e) => {
         const target = e.target;
-        
-        if (target.matches('.modal-close, .modal-cancel')) {
-            const modal = target.closest('.modal');
-            if (modal) hideModal(modal);
-            return;
-        }
-        
+                
         const settingsLink = target.closest('#settings-link');
         if (settingsLink) {
             e.preventDefault();
-            showModal(document.getElementById('settings-modal'));
+            const settingsModal = document.getElementById('settings-modal');
+            if (settingsModal) {
+                const modal = bootstrap.Modal.getOrCreateInstance(settingsModal);
+                modal.show();
+            }
             return;
         }
         
@@ -95,9 +92,6 @@ function initializeEventDelegation() {
             showCreateFromJsonDialog();
             return;
         }
-        
-        // Bootstrap handles dropdown closing automatically
-        // No need for custom dropdown close handling
     });
 }
 
@@ -106,8 +100,9 @@ function showCreateBlankModal() {
     const input = document.getElementById('newBlankFileNameInput');
     
     UIStateManager.resetFormElements(modal);
-    showModal(modal);
-    input?.focus();
+    const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+    bsModal.show();
+    setTimeout(() => input?.focus(), 100);
 }
 
 function showCreateFromJsonDialog() {
@@ -163,24 +158,8 @@ const UIStateManager = {
     }
 };
 
-function initializeSettingsHandler() {
-    const settingsLink = document.getElementById('settings-link');
-    const settingsModal = document.getElementById('settings-modal');
-    
-    if (!settingsLink || !settingsModal) return;
-
-    console.debug("Settings modal handler initialized");
-    settingsLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        showModal(settingsModal);
-        console.debug("Settings modal opened");
-    });
-}
-
 function initializeCreateFromJsonModal() {
     const createFromJsonModal = document.getElementById('createFromJsonModal');
-    const closeCreateFromJsonModalBtn = document.getElementById('closeCreateFromJsonModal');
-    const cancelCreateFromJsonBtn = document.getElementById('cancelCreateFromJsonButton');
     const confirmCreateFromJsonBtn = document.getElementById('confirmCreateFromJsonButton');
     const newJsonFileNameInput = document.getElementById('newJsonFileNameInput');
     const createFromJsonErrorMsg = document.getElementById('createFromJson-error-message');
@@ -211,7 +190,8 @@ function initializeCreateFromJsonModal() {
             }
 
             console.log("File created from JSON successfully:", fileName);
-            hideModal(createFromJsonModal);
+            const modal = bootstrap.Modal.getInstance(createFromJsonModal);
+            if (modal) modal.hide();
             window.pendingJsonData = null;
             window.location.href = `/app.html?fileId=${result.fileId}`;
 
@@ -224,23 +204,12 @@ function initializeCreateFromJsonModal() {
         }
     };
 
-    closeCreateFromJsonModalBtn?.addEventListener('click', () => {
-        hideModal(createFromJsonModal);
-        window.pendingJsonData = null;
-    });
-
-    cancelCreateFromJsonBtn?.addEventListener('click', () => {
-        hideModal(createFromJsonModal);
-        window.pendingJsonData = null;
-    });
-
     confirmCreateFromJsonBtn?.addEventListener('click', () => {
         window.handleCreateFromJson();
     });
 }
 
 export {
-    initializeSettingsHandler,
     initializeCreateBlankFileModal,
     initializeDeleteFileModal,
     initializeImageUrlModal,

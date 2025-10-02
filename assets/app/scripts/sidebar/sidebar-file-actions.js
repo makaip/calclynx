@@ -30,12 +30,20 @@ function hideError(element) {
     if (element) element.style.display = 'none';
 }
 
-function showModal(modal) {
-    if (modal) modal.style.display = 'block';
+function showModal(modalElement) {
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
 }
 
-function hideModal(modal) {
-    if (modal) modal.style.display = 'none';
+function hideModal(modalElement) {
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    }
 }
 
 function setButtonLoading(button, isLoading, loadingText, normalText) {
