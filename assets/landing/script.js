@@ -9,11 +9,9 @@ async function checkSessionAndRedirect() {
             window.location.href = '/app.html';
         } else {
             console.log('No active session found.');
-            initializeLandingPageFeatures();
         }
     } catch (error) {
         console.error('Error checking session:', error);
-        initializeLandingPageFeatures();
     }
 }
 
