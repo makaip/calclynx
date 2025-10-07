@@ -68,7 +68,7 @@ a:hover {
     display: inline-block;
     font-weight: 700;
     font-size: 1.8rem;
-    color: var(--primary-color);
+    color: #fff;
     margin-bottom: 25px;
     text-decoration: none;
 }
@@ -77,7 +77,6 @@ a:hover {
     text-decoration: none;
 }
 
-/* Updated heading/subtitle styles */
 .auth-box h2 {
     font-size: 1.6rem;
     margin-bottom: 10px;
@@ -93,7 +92,6 @@ a:hover {
     text-align: center;
 }
 
-/* Google Sign In Button Styles */
 .google-signin-button {
     width: 100%;
     padding: 12px 15px;
@@ -115,107 +113,37 @@ a:hover {
 .google-signin-button:hover {
     background-color: var(--google-button-hover-bg);
     border-color: #cccccc;
+    color: var(--google-button-text);
 }
 
-.google-signin-button:focus {
+.google-signin-button:focus,
+.google-signin-button:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4); /* Google blue focus */
+    background-color: var(--google-button-bg);
+    border-color: var(--google-button-border);
+    color: var(--google-button-text);
+}
+
+.google-signin-button:active {
+    background-color: var(--google-button-hover-bg);
+    border-color: #cccccc;
+    color: var(--google-button-text);
 }
 
 .google-signin-button i.fa-google {
     font-size: 1.2em;
 }
 
-/* Separator Styles */
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 25px 0; /* Adjust margin */
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.separator span {
-    padding: 0 15px; /* Space around OR */
-}
-
-/* Form Styles */
-#email-password-form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px; /* Space between form elements */
-    margin-bottom: 20px; /* Space before error message */
-}
-
-.input-group {
-    text-align: left; /* Align labels and inputs left */
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.input-group input[type="email"],
-.input-group input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: var(--light-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--button-radius);
-    color: var(--text-color);
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.input-group input[type="email"]:focus,
-.input-group input[type="password"]:focus {
+.form-control:focus {
     outline: none;
     border-color: var(--primary-color);
     background-color: var(--lighter-color);
     box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3); /* Primary color focus glow */
 }
 
-/* Standard Sign In Button Styles */
-.signin-button {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: var(--primary-color);
-    color: var(--dark-color); /* Dark text on primary button */
-    border: none;
-    border-radius: var(--button-radius);
-    font-size: 1rem;
-    font-weight: 600; /* Bold weight */
-    cursor: pointer;
-    transition: var(--transition);
-    margin-top: 10px; /* Add some space above the button */
-}
-
-.signin-button:hover {
-    background-color: var(--primary-hover);
-}
-
-.signin-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 197, 154, 0.4); /* Primary color focus */
-}
-
-.signin-button:disabled {
-    background-color: var(--light-color);
+.form-control::placeholder {
     color: var(--text-secondary);
-    cursor: not-allowed;
 }
 
 .error-message {
@@ -226,7 +154,6 @@ a:hover {
     text-align: center;
 }
 
-/* Focus States for Accessibility */
 button:focus, a:focus {
     outline: none;
 }
