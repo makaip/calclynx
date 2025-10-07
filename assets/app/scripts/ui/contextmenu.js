@@ -7,7 +7,13 @@ import { App } from '../core/main.js';
 class ContextMenu {
     constructor(menuElement) {
       this.menuElement = menuElement;
-      document.addEventListener('click', () => this.hide());
+
+      document.addEventListener('click', (e) => {
+        if (!this.menuElement.contains(e.target)) {
+          this.hide();
+        }
+      });
+
       window.addEventListener('resize', () => this.hide());
     }
   
@@ -16,38 +22,54 @@ class ContextMenu {
   
       items.forEach(item => {
         if (item.separator) {
-          const sep = document.createElement('div');
-          sep.className = 'context-menu-separator';
-          this.menuElement.appendChild(sep);
+          const li = document.createElement('li');
+          const hr = document.createElement('hr');
+          hr.className = 'dropdown-divider';
+          li.appendChild(hr);
+          this.menuElement.appendChild(li);
         } else {
-          const menuItem = document.createElement('div');
-          menuItem.className = 'context-menu-item';
-          menuItem.textContent = item.label;
+          const li = document.createElement('li');
+          const anchor = document.createElement('a');
+          anchor.className = 'dropdown-item';
+          anchor.href = '#';
+          anchor.textContent = item.label;
+          
           if (item.disabled) {
-            menuItem.classList.add('disabled');
+            anchor.classList.add('disabled');
+            anchor.setAttribute('aria-disabled', 'true');
           }
-          menuItem.addEventListener('click', (e) => {
+          
+          anchor.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             if (!item.disabled && item.action) {
               item.action();
             }
             this.hide();
           });
-          this.menuElement.appendChild(menuItem);
+          
+          li.appendChild(anchor);
+          this.menuElement.appendChild(li);
         }
       });
   
-      // Adjust position if the menu might overflow the viewport.
-      const menuRect = this.menuElement.getBoundingClientRect();
-      if (x + menuRect.width > window.innerWidth) {
-        x = window.innerWidth - menuRect.width - 10;
-      }
-      if (y + menuRect.height > window.innerHeight) {
-        y = window.innerHeight - menuRect.height - 10;
-      }
       this.menuElement.style.left = x + 'px';
       this.menuElement.style.top = y + 'px';
       this.menuElement.style.display = 'block';
+      
+      const menuRect = this.menuElement.getBoundingClientRect();
+      let adjustedX = x;
+      let adjustedY = y;
+      
+      if (x + menuRect.width > window.innerWidth) {
+        adjustedX = window.innerWidth - menuRect.width - 10;
+      }
+      if (y + menuRect.height > window.innerHeight) {
+        adjustedY = window.innerHeight - menuRect.height - 10;
+      }
+      
+      this.menuElement.style.left = adjustedX + 'px';
+      this.menuElement.style.top = adjustedY + 'px';
     }
   
     hide() {

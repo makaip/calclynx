@@ -10,8 +10,8 @@
 @import 'indicators.css';
 @import 'menus-bootstrap.css';
 @import 'sidebar-bootstrap.css';
-@import 'context-menu.css';
 @import 'settings-modal.css';
 @import 'zoom-controls.css';
 @import 'modular-modal.css';
-@import 'toolbar.css'; 
+@import 'toolbar.css';
+@import 'context-menu.css'; 

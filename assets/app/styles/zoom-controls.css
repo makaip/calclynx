@@ -17,7 +17,7 @@
 
 .zoom-controls .btn {
     background-color: #1e1e1e;
-    border-color: #666 !important;
+    border-color: #666;
     color: #fff;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -71,7 +71,7 @@
     color: #fff;
     box-shadow: none;
     outline: none;
-    border-color: #666 !important;
+    border-color: #666;
 }
 
 .zoom-input::placeholder {
