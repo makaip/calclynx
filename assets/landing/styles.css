@@ -39,6 +39,11 @@ body {
     padding-top: 76px; /* for fixed navbar */
 }
 
+/* typed.js cursor customization */
+.typed-cursor {
+    font-weight: 400 !important;
+}
+
 .navbar {
     background-color: var(--dark-color) !important;
     border-bottom: 1px solid var(--border-color);
@@ -316,7 +321,7 @@ body {
 /* CTA Section */
 .cta {
     padding: 5rem 0;
-    background-color: var(--darker-color);
+    background-color: var(--dark-color);
     text-align: center;
 }
 

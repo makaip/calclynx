@@ -15,6 +15,20 @@ async function checkSessionAndRedirect() {
     }
 }
 
+function initTypedJS() {
+    new Typed('#typed', {
+        strings: ['Scratch paper', 'Notetaking', 'An interface'],
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 2500,
+        startDelay: 500,
+        loop: true,
+        cursorChar: '|',
+        autoInsertCss: true,
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     checkSessionAndRedirect();
+    initTypedJS();
 });
