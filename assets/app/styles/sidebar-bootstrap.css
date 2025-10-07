@@ -103,6 +103,19 @@ body.sidebar-open #file-title {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
+#sidebar-file-list .list-group-item:hover {
+    z-index: auto !important;
+}
+
+#sidebar-file-list .dropdown.show {
+    position: static;
+}
+
+#sidebar-file-list .dropdown-menu {
+    position: absolute !important;
+    z-index: 1060 !important;
+}
+
 #main-content {
     margin-left: 0;
     transition: margin-left 0.3s ease-in;
