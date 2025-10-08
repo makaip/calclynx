@@ -1,72 +1,73 @@
 .toolbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #1e1e1e;
-    border: 1px solid #666;
-    border-radius: 6px;
-    padding: 6px;
-    display: flex;
-    gap: 2px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    z-index: 10;
-    backdrop-filter: blur(4px);
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bs-surface-primary);
+  border: 1px solid #666666;
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  gap: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .toolbar.hidden {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-5px);
-    pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-5px);
+  pointer-events: none;
 }
 
 .toolbar .format-btn {
-    background-color: transparent;
-    border: none;
-    color: #ffffff;
-    padding: 8px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 4px;
-    box-sizing: border-box;
+  background-color: transparent;
+  border: none;
+  color: var(--bs-body-color, #ffffff);
+  padding: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
 }
 
 .format-btn:hover {
-    background-color: #2a2a2a;
+  background-color: #2a2a2a;
 }
 
 .format-btn:active {
-    background-color: #333;
+  background-color: var(--bs-surface-tertiary, #333333);
 }
 
 .format-btn.active {
-    background-color: #00b38a;
+  background-color: #00b38a;
 }
 
 .format-btn.active:hover {
-    background-color: #00b38a;
+  background-color: #00b38a;
 }
 
 .format-btn i {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
-    .toolbar {
-        top: 60px;
-        padding: 6px;
-        gap: 2px;
-    }
-    
-    .format-btn {
-        width: 28px;
-        height: 28px;
-        padding: 6px;
-        font-size: 12px;
-    }
+  .toolbar {
+    top: 60px;
+    padding: 6px;
+    gap: 2px;
+  }
+  
+  .format-btn {
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+    font-size: 12px;
+  }
 }

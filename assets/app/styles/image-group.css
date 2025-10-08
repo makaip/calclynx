@@ -1,98 +1,95 @@
-/* Image group specific styling - common styles are in object-group.css */
-
-/* Image container styling */
 .image-container {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: row;
-    position: relative;
-    padding: 0 5px 0 5px;
-    pointer-events: none; /* Make container non-interactive */
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  position: relative;
+  padding: 0 5px 0 5px;
+  pointer-events: none;
 }
 
-/* Make the content inside the container interactive */
+
 .image-container > * {
-    pointer-events: auto;
+  pointer-events: auto;
 }
 
-/* Image content styling */
+
 .image-content {
-    max-width: none; /* Remove max constraints for resize */
-    max-height: none;
-    width: auto;
-    height: auto;
-    border-radius: 4px;
-    display: block;
-    user-select: none; /* Prevent text selection */
-    -webkit-user-drag: none; /* Prevent webkit drag */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE/Edge */
-    pointer-events: auto; /* Ensure it can be clicked/dragged */
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
 }
 
-/* Resize handles - only show on hover and selection */
+
 .resize-handle {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: transparent; /* Default to transparent */
-    border-radius: 2px;
-    opacity: 0;
-    transition: opacity 0.2s ease, background-color 0.2s ease;
-    z-index: 10;
-    pointer-events: auto;
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+  pointer-events: auto;
 }
 
-/* Show resize handles on hover - match hover border color */
+
 .image-group:hover .resize-handle {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.05);
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* Show resize handles when selected - match selected border color */
+
 .image-group.selected .resize-handle {
-    opacity: 1;
-    background: #00c59a;
+  opacity: 1;
+  background: var(--bs-primary, #00c59a);
 }
 
-/* Show resize handles when dragging - match dragging border color */
+
 .image-group.dragging .resize-handle {
-    opacity: 1;
-    background: #00c59a;
+  opacity: 1;
+  background: var(--bs-primary, #00c59a);
 }
 
-/* Show resize handles when resizing - match resizing border color */
+
 .image-group.resizing .resize-handle {
-    opacity: 1;
-    background: #00c59a;
+  opacity: 1;
+  background: var(--bs-primary, #00c59a);
 }
 
-/* Position corner handles on the border */
+
 .resize-handle-nw {
-    top: -14px;
-    left: -14px;
-    cursor: nw-resize;
+  top: -14px;
+  left: -14px;
+  cursor: nw-resize;
 }
 
 .resize-handle-ne {
-    top: -14px;
-    right: -14px;
-    cursor: ne-resize;
+  top: -14px;
+  right: -14px;
+  cursor: ne-resize;
 }
 
 .resize-handle-sw {
-    bottom: -14px;
-    left: -14px;
-    cursor: sw-resize;
+  bottom: -14px;
+  left: -14px;
+  cursor: sw-resize;
 }
 
 .resize-handle-se {
-    bottom: -14px;
-    right: -14px;
-    cursor: se-resize;
+  bottom: -14px;
+  right: -14px;
+  cursor: se-resize;
 }
 
-/* Resizing state - specific image behavior */
+
 .image-group.resizing .image-content {
-    pointer-events: none; /* Disable image interactions while resizing */
+  pointer-events: none;
 }

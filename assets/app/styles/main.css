@@ -1,17 +1,19 @@
 @import 'reset.css';
+
 @import 'bootstrap-theme.css';
+
 @import 'canvas.css';
+@import 'sidebar.css';
+
 @import 'object-group.css';
 @import 'math-field.css';
 @import 'text-field.css';
 @import 'image-group.css';
-@import 'buttons.css';
-@import 'drag-handle.css';
-@import 'indicators.css';
-@import 'menus-bootstrap.css';
-@import 'sidebar-bootstrap.css';
-@import 'settings-modal.css';
-@import 'zoom-controls.css';
-@import 'modular-modal.css';
+
 @import 'toolbar.css';
-@import 'context-menu.css'; 
+@import 'zoom-controls.css';
+@import 'context-menu.css';
+@import 'buttons.css';
+@import 'indicators.css';
+
+@import 'modals.css';

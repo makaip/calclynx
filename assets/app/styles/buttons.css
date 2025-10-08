@@ -1,60 +1,26 @@
 button {
-    background-color: #1e1e1e; /* Green */
-    border: #666 1px solid;
-    color: white;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.1s ease, transform 0.1s ease;
-}
-  
-button:hover {
-    border: #00c59a 1px solid;
-}
-  
-button:active {
-    background: #00c59a;
-}
-  
-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+  background-color: var(--bs-surface-primary, #1e1e1e);
+  border: 1px solid #666666;
+  color: var(--bs-body-color, #ffffff);
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.1s ease, transform 0.1s ease;
 }
 
-/* Auth button styling */
-.auth-button {
-    background-color: #00c59a;
-    border: none;
-    color: #000;
-    padding: 6px 12px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-    /* Add fixed dimensions to prevent any size changes */
-    box-sizing: border-box;
+button:hover {
+  border: 1px solid var(--bs-primary, #00c59a);
 }
-  
-.auth-button:hover {
-    background-color: #00b38a;
-    /* Ensure no size-changing properties */
-    box-shadow: none;
-    border: none;
-    padding: 6px 12px; /* Keep same padding */
+
+button:active {
+  background: var(--bs-primary, #00c59a);
 }
-  
-.auth-button:active {
-    background-color: #00a37e;
-    /* Ensure no size-changing properties */
-    box-shadow: none;
-    border: none;
-    padding: 6px 12px; /* Keep same padding */
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
