@@ -1,4 +1,3 @@
-import { initializeCreateBlankFileModal } from '../modals/createmodal.js';
 import { initializeDeleteFileModal } from '../modals/deletemodal.js';
 import { initializeImageUrlModal } from '../modals/imagemodal.js';
 import { initializeRenameFileModal } from '../modals/renamemodal.js';
@@ -13,7 +12,6 @@ import {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeSettingsModal();
-    initializeCreateBlankFileModal();
     initializeDeleteFileModal();
     initializeImageUrlModal();
     initializeRenameFileModal();
@@ -97,12 +95,11 @@ function initializeEventDelegation() {
 
 function showCreateBlankModal() {
     const modal = document.getElementById('createBlankFileModal');
-    const input = document.getElementById('newBlankFileNameInput');
     
-    UIStateManager.resetFormElements(modal);
+    window.createFileModal.reset();
     const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
     bsModal.show();
-    setTimeout(() => input?.focus(), 100);
+    setTimeout(() => document.getElementById('newBlankFileNameInput')?.focus(), 100);
 }
 
 function showCreateFromJsonDialog() {
@@ -210,7 +207,6 @@ function initializeCreateFromJsonModal() {
 }
 
 export {
-    initializeCreateBlankFileModal,
     initializeDeleteFileModal,
     initializeImageUrlModal,
     initializeRenameFileModal,

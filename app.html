@@ -178,21 +178,21 @@
   </div>
 
 
-  <div class="modal fade" id="createBlankFileModal" tabindex="-1" aria-labelledby="createBlankFileModalLabel" aria-hidden="true">
+  <div class="modal fade" id="createBlankFileModal" tabindex="-1" aria-labelledby="createBlankFileModalLabel" aria-hidden="true" data-bs-target="createFileModal.reset()">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="createBlankFileModalLabel">Create New Blank File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCreateBlankFileModal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCreateBlankFileModal" onclick="createFileModal.reset()"></button>
         </div>
         <div class="modal-body">
           <p>Enter the name for your new blank file:</p>
-          <input type="text" class="form-control" id="newBlankFileNameInput" placeholder="File name">
+          <input type="text" class="form-control" id="newBlankFileNameInput" placeholder="File name" onkeypress="if(event.key==='Enter') createFileModal.createBlankFile()">
           <div id="createBlankFile-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelCreateBlankFileButton">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirmCreateBlankFileButton">Create File</button>
+          <button type="button" class="btn btn-primary" id="confirmCreateBlankFileButton" onclick="createFileModal.createBlankFile()">Create File</button>
         </div>
       </div>
     </div>
@@ -220,12 +220,12 @@
   </div>
 
 
-  <div class="modal fade" id="deleteSidebarFileModal" tabindex="-1" aria-labelledby="deleteSidebarFileModalLabel" aria-hidden="true">
+  <div class="modal fade" id="deleteSidebarFileModal" tabindex="-1" aria-labelledby="deleteSidebarFileModalLabel" aria-hidden="true" data-bs-target="deleteFileModal.reset()">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="deleteSidebarFileModalLabel">Confirm File Deletion</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeDeleteSidebarFileModal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeDeleteSidebarFileModal" onclick="deleteFileModal.reset()"></button>
         </div>
         <div class="modal-body">
           <p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
@@ -239,7 +239,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteSidebarFileButton">Cancel</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteSidebarFileButton">Delete File</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteSidebarFileButton" onclick="deleteFileModal.confirmDeletion()">Delete File</button>
         </div>
       </div>
     </div>
