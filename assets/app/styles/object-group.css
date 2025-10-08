@@ -1,41 +1,89 @@
-/* Common object group styling for all group types (math, text, image) */
 .math-group, 
 .text-group, 
 .image-group {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 10px;
-    cursor: grab; /* Indicates draggable area */
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px;
+  cursor: grab;
 }
 
-/* Hover state: white outline at low opacity */
+
 .math-group:hover,
 .text-group:hover,
 .image-group:hover {
-    outline: 2px solid rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
+  outline: 2px solid rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
 }
 
-/* Selected state: green outline */
+
 .math-group.selected,
 .text-group.selected,
 .image-group.selected {
-    outline: 2px solid #00c59a;
-    border-radius: 5px;
+  outline: 2px solid var(--bs-primary, #00c59a);
+  border-radius: 5px;
 }
 
-/* Dragging state: green outline with grabbing cursor */
+
 .math-group.dragging,
 .text-group.dragging,
 .image-group.dragging {
-    outline: 2px solid #00c59a !important;
-    cursor: grabbing;
+  outline: 2px solid var(--bs-primary, #00c59a) !important;
+  cursor: grabbing;
 }
 
-/* Resizing state for image groups */
+
 .image-group.resizing {
-    outline: 2px solid #00c59a !important;
-    cursor: grabbing;
+  outline: 2px solid var(--bs-primary, #00c59a) !important;
+  cursor: grabbing;
+}
+
+
+.drop-placeholder {
+  height: 30px;
+  background-color: rgba(0, 197, 154, 0.1);
+  border: 1px dashed var(--bs-primary, #00c59a);
+  margin: 2px 0;
+  box-sizing: border-box;
+}
+
+
+.drag-handle {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 18px;
+  background-color: rgba(200, 200, 200, 0.25);
+  border-radius: 3px;
+  cursor: grab;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  padding: 3px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.math-field-container:hover .drag-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drag-handle-dot {
+  width: 2px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  justify-self: center;
+  align-self: center;
+  pointer-events: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
