@@ -1,30 +1,48 @@
 import { userManager } from '../core/cloud.js';
+import { ModalUtils } from './modalutils.js';
 
 export class CreateFileModal {
-    async createBlankFile(fileName) {
-        const fileName = textInput?.value.trim() || '';
+    constructor() {
+        this.modal = document.getElementById('createBlankFileModal');
+        this.input = document.getElementById('newBlankFileNameInput');
+        this.button = document.getElementById('confirmCreateBlankFileButton');
+        this.error = document.getElementById('createBlankFile-error-message');
+    }
+
+    async createBlankFile() {
+        if (!this.input || !this.modal) this.init();
+
+        const fileName = this.input?.value.trim() || '';
 
         if (!fileName) {
-            // show 'File name cannot be empty.'
-            textInput?.focus();
+            this.showError('File name cannot be empty.');
+            this.input?.focus();
             return;
         }
-        
-        // use bootstrap instead of this custom hide/show error thing
+
+        this.hideError();
 
         try {
-            setButtonLoading(confirmCreateBlankFileBtn, true, 'Creating...', 'Create File');
+            this.setButtonLoading(true);
             const result = await userManager.createBlankFile(fileName);
-            if (!result.success) throw new Error(result.error);
-            const modal = bootstrap.Modal.getInstance(createBlankFileModal);
-            if (modal) modal.hide();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            console.log("Blank file created successfully:", fileName);
+            const modalInstance = bootstrap.Modal.getInstance(this.modal);
+            if (modalInstance) modalInstance.hide();
+            
             window.location.href = `/app.html?fileId=${result.fileId}`;
         } catch (error) {
             console.error('Create blank file failed:', error);
-            // show 'Failed to create blank file'
-            textInput?.focus();
+            this.showError(error.message || 'Failed to create blank file');
+            this.input?.focus();
         } finally {
-            setButtonLoading(confirmCreateBlankFileBtn, false, 'Creating...', 'Create File');
+            this.setButtonLoading(false);
         }
     }
 }
+
+window.createFileModal = new CreateFileModal();
