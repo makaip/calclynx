@@ -15,12 +15,12 @@ export class CreateFileModal {
         const fileName = this.input?.value.trim() || '';
 
         if (!fileName) {
-            this.showError('File name cannot be empty.');
+            ModalUtils.showError(this.error, 'File name cannot be empty.');
             this.input?.focus();
             return;
         }
 
-        this.hideError();
+        ModalUtils.hideError(this.error);
 
         try {
             this.setButtonLoading(true);

@@ -1,10 +1,14 @@
-import { userManager } from '../core/cloud.js';
-
 export class ModalUtils {
-    showError(message) {
+    toggleModal(modalId) {
+        const modalElement = document.getElementById(modalId);
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modalElement.classList.contains('show') ? modal.hide() : modal.show();
+    }
+
+    showError(element, message) {
         if (message) {
-            this.error.textContent = message;
-            this.error.style.display = 'block';
+            element.textContent = message;
+            element.style.display = 'block';
         }
 
         if (this.input) {
@@ -12,10 +16,11 @@ export class ModalUtils {
         }
     }
 
-    hideError() {
-        if (this.error) {
-            this.error.style.display = 'none';
+    hideError(element) {
+        if (element) {
+            element.style.display = 'none';
         }
+
         if (this.input) {
             this.input.classList.remove('is-invalid');
         }
@@ -34,5 +39,17 @@ export class ModalUtils {
         if (this.input) this.input.value = '';
         this.hideError();
         this.setButtonLoading(false);
+    }
+
+    sanitizeFileName(fileName) {
+        if (!fileName || typeof fileName !== 'string') {
+            return 'untitled';
+        }
+
+        return fileName.trim()
+            .replace(/[<>:"/\\|?*]/g, '_')
+            .replace(/\s+/g, '_')
+            .replace(/_{2,}/g, '_')
+            .replace(/^_+|_+$/g, '') || 'untitled';
     }
 }

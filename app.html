@@ -50,8 +50,8 @@
             New File
           </button>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" id="createBlankFileSidebarOpt">Blank File</a></li>
-            <li><a class="dropdown-item" href="#" id="createFromJsonSidebarOpt">From JSON</a></li>
+            <li><a class="dropdown-item" href="#" id="createBlankFileSidebarOpt" data-bs-toggle="modal" data-bs-target="#createBlankFileModal">Blank File</a></li>
+            <li><a class="dropdown-item" href="#" id="createFromJsonSidebarOpt" data-bs-toggle="modal" data-bs-target="#createFromJsonModal">From JSON</a></li>
           </ul>
         </div>
       </div>
@@ -64,7 +64,7 @@
       </div>
 
       <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
-        <a href="#" id="settings-link" class="text-decoration-none" title="Settings">
+        <a href="#" id="settings-link" class="text-decoration-none" title="Settings" data-bs-toggle="modal" data-bs-target="#settings-modal">
           <i class="fas fa-cog"></i>
         </a>
         <span id="user-status-text" class="text-secondary small"></span>
@@ -144,7 +144,7 @@
             <h6 class="text-danger">Danger Zone</h6>
             <div class="settings-info">
               <p>Permanently delete your account and all associated data (including saved files). This action cannot be undone.</p>
-              <button class="btn btn-danger" id="deleteAccountButton">Delete My Account</button>
+              <button class="btn btn-danger" id="deleteAccountButton" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Delete My Account</button>
             </div>
           </div>
         </div>
