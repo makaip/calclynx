@@ -3,14 +3,14 @@ import { userManager } from '../core/cloud.js';
 export class RenameFileModal {
     getRenameFile() {
         fileIdToRename = fileId;
-        if (newFileNameInput) newFileNameInput.value = currentName;
+        if (newName) newName.value = currentName;
         
         const modal = bootstrap.Modal.getOrCreateInstance(renameFileModal);
         modal.show();
     }
 
     validateFilename(fileId, newName) {
-        const newName = newFileNameInput?.value.trim() || '';
+        newName = newName?.value.trim() || '';
         
         if (!fileIdToRename) {
             // 'No file selected to rename.'

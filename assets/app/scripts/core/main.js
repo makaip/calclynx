@@ -14,9 +14,49 @@ const App = {
   expressionEquivalence: null,
 };
 
-const getById = (id) => document.getElementById(id);
+const onKeyDown = (e) => {
+  const modifier = isModifierPressed(e);
+  if (!modifier) return;
 
-const toggleTextFieldWidth = () => {
+  if (e.key === 'd') {
+    e.preventDefault();
+    toggleTextFieldWidth();
+    return;
+  }
+
+  if (isInInput(e.target)) return;
+
+  if (e.key === 'k' && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    showCommandPalette();
+    return;
+  }
+
+  if (e.key === 'i' && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    showImageUrlInput();
+  }
+};
+
+async function initializeAppCore() {
+  initializeApp();
+  setupImportInput(document.getElementById('importInput'));
+
+  document.addEventListener('keydown', onKeyDown, true);
+  
+  try {
+    const client = await getSupabaseClient();
+    client.auth.onAuthStateChange(() => {
+      updateUserStatus();
+    });
+    updateUserStatus();
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+  }
+}
+
+const toggleTextFieldWidth = () => { // i feel like theres a better place to put this but idk where
   try {
     const activeElement = document.activeElement;
     if (!activeElement) return;
@@ -49,8 +89,8 @@ const initializeApp = () => {
 };
 
 async function updateUserStatus() {
-  const userEmailDisplay = getById('user-email-display');
-  const authButton = getById('auth-button');
+  const userEmailDisplay = document.getElementById('user-email-display');
+  const authButton = document.getElementById('auth-button');
 
   if (!userEmailDisplay || !authButton) return;
 
@@ -97,7 +137,7 @@ async function updateUserStatus() {
         window.location.href = '/login.html';
       };
 
-      const fileList = getById('sidebar-file-list');
+      const fileList = document.getElementById('sidebar-file-list');
       if (fileList) fileList.innerHTML = '';
     }
   } catch (err) {
@@ -190,47 +230,7 @@ const showImageUrlInput = () => {
   }
 };
 
-const onKeyDown = (e) => {
-  const modifier = isModifierPressed(e);
-  if (!modifier) return;
 
-  if (e.key === 'd') {
-    e.preventDefault();
-    toggleTextFieldWidth();
-    return;
-  }
-
-  if (isInInput(e.target)) return;
-
-  if (e.key === 'k' && !e.shiftKey && !e.altKey) {
-    e.preventDefault();
-    e.stopPropagation();
-    showCommandPalette();
-    return;
-  }
-
-  if (e.key === 'i' && !e.shiftKey && !e.altKey) {
-    e.preventDefault();
-    showImageUrlInput();
-  }
-};
-
-async function initializeAppCore() {
-  initializeApp();
-  setupImportInput(getById('importInput'));
-
-  document.addEventListener('keydown', onKeyDown, true);
-  
-  try {
-    const client = await getSupabaseClient();
-    client.auth.onAuthStateChange(() => {
-      updateUserStatus();
-    });
-    updateUserStatus();
-  } catch (error) {
-    console.error('Failed to initialize Supabase client:', error);
-  }
-}
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {

@@ -77,10 +77,10 @@ function createFileItem(file, isActive = false) {
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                    <li><a class="dropdown-item rename-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Rename</a></li>
-                    <li><a class="dropdown-item download-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Download as JSON</a></li>
+                    <li><a class="dropdown-item rename-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}" data-bs-toggle="modal" data-bs-target="#renameFileModal">Rename</a></li>
+                    <li><a class="dropdown-item download-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}" data-bs-toggle="modal" data-bs-target="#downloadFileModal">Download as JSON</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger delete-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}">Delete</a></li>
+                    <li><a class="dropdown-item text-danger delete-file-link" href="#" data-file-id="${safeIdAttr}" data-file-name="${safeName}" data-bs-toggle="modal" data-bs-target="#deleteFileModal">Delete</a></li>
                 </ul>
             </div>
         </div>

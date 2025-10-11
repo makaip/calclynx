@@ -1,7 +1,3 @@
-import { initializeDeleteFileModal } from '../modals/deletemodal.js';
-import { initializeImageUrlModal } from '../modals/imagemodal.js';
-import { initializeRenameFileModal } from '../modals/renamemodal.js';
-import { initializeSettingsModal } from '../modals/settingsmodal.js';
 import { userManager } from '../core/cloud.js';
 import { 
     initializeFileDownloadHandler,
@@ -9,16 +5,6 @@ import {
     hideError,
     setButtonLoading
 } from './sidebar-file-actions.js';
-
-document.addEventListener('DOMContentLoaded', () => {
-    initializeSettingsModal();
-    initializeDeleteFileModal();
-    initializeImageUrlModal();
-    initializeRenameFileModal();
-    initializeFileDownloadHandler();
-    initializeCreateFromJsonModal();
-    initializeEventDelegation();
-});
 
 function initializeEventDelegation() {
     document.addEventListener('click', (e) => {
@@ -206,11 +192,3 @@ function initializeCreateFromJsonModal() {
     });
 }
 
-export {
-    initializeDeleteFileModal,
-    initializeImageUrlModal,
-    initializeRenameFileModal,
-    initializeFileDownloadHandler,
-    initializeCreateFromJsonModal,
-    initializeEventDelegation
-};

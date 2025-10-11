@@ -10,10 +10,10 @@ export class ImageUrlModal {
         }
     }
 
-    addImageFromUrl(url) {
-        const url = imageUrlInput.value.trim();
-        
-        // TODO: use boostrap form validation 
+    addImageFromUrl(inputUrl) {
+        const url = inputUrl.value.trim();
+
+        // TODO: use boostrap form validation
         // https://getbootstrap.com/docs/5.3/forms/validation/
 
         if (!url) {
