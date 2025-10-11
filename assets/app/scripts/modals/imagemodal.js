@@ -1,6 +1,25 @@
-import { userManager } from '../core/cloud.js';
+import { ModalUtils } from './modalutils.js';
 
 export class ImageUrlModal {
+    constructor() {
+        this.modal = document.getElementById('imageUrlModal');
+        this.input = document.getElementById('imageUrlInput');
+        this.button = document.getElementById('confirmImageUrlButton');
+        this.error = document.getElementById('imageUrl-error-message');
+        this.callback = null;
+    }
+
+    show(callback) {
+        this.callback = callback;
+        if (this.input) this.input.value = '';
+        ModalUtils.hideError(this.error);
+        
+        const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
+        modal.show();
+        
+        setTimeout(() => this.input?.focus(), 100);
+    }
+
     isValidUrl(url) {
         try {
             new URL(url);
@@ -10,26 +29,35 @@ export class ImageUrlModal {
         }
     }
 
-    addImageFromUrl(inputUrl) {
-        const url = inputUrl.value.trim();
-
-        // TODO: use boostrap form validation
-        // https://getbootstrap.com/docs/5.3/forms/validation/
+    addImageFromUrl() {
+        const url = this.input?.value.trim() || '';
 
         if (!url) {
-            // show 'Please enter a URL.'
+            ModalUtils.showError(this.error, 'Please enter a URL.');
+            this.input?.focus();
             return;
         }
 
         if (!this.isValidUrl(url)) {
-            // show 'Please enter a valid URL.'
+            ModalUtils.showError(this.error, 'Please enter a valid URL.');
+            this.input?.focus();
             return;
         }
 
-        if (imageUrlCallback) imageUrlCallback(url);
+        ModalUtils.hideError(this.error);
 
-        const modal = bootstrap.Modal.getInstance(imageUrlModal);
+        if (this.callback) {
+            this.callback(url);
+            this.callback = null;
+        }
+
+        const modal = bootstrap.Modal.getInstance(this.modal);
         if (modal) modal.hide();
-        imageUrlCallback = null;
+    }
+
+    reset() {
+        if (this.input) this.input.value = '';
+        this.callback = null;
+        ModalUtils.hideError(this.error);
     }
 }

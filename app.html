@@ -158,20 +158,20 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-delete-modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="settingsModal.reset()"></button>
         </div>
         <div class="modal-body">
           <p>This action is irreversible. All your files and data will be permanently deleted.</p>
           <p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box below:</p>
           <div class="mb-3">
             <label for="deleteConfirmInput" class="form-label">Confirm Email:</label>
-            <input type="email" class="form-control" id="deleteConfirmInput" placeholder="Enter your email address">
+            <input type="email" class="form-control" id="deleteConfirmInput" placeholder="Enter your email address" onkeypress="if(event.key==='Enter') settingsModal.deleteAccount()">
             <div id="delete-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel-delete-button">Cancel</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteAccountButton">Delete Account Permanently</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteAccountButton" onclick="settingsModal.deleteAccount()">Delete Account Permanently</button>
         </div>
       </div>
     </div>
@@ -204,16 +204,16 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="renameFileModalLabel">Rename File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeRenameFileModal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="renameFileModal.reset()"></button>
         </div>
         <div class="modal-body">
           <p>Enter the new name for the file:</p>
-          <input type="text" class="form-control" id="newFileNameInput" placeholder="New file name">
+          <input type="text" class="form-control" id="newFileNameInput" placeholder="New file name" onkeypress="if(event.key==='Enter') renameFileModal.renameFile()">
           <div id="rename-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelRenameFileButton">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirmRenameFileButton">Rename</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmRenameFileButton" onclick="renameFileModal.renameFile()">Rename</button>
         </div>
       </div>
     </div>
@@ -251,16 +251,16 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="imageUrlModalLabel">Add Image from URL</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeImageUrlModal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="imageUrlModal.reset()"></button>
         </div>
         <div class="modal-body">
           <p>Enter the URL of the image you want to add:</p>
-          <input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg">
+          <input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg" onkeypress="if(event.key==='Enter') imageUrlModal.addImageFromUrl()">
           <div id="imageUrl-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelImageUrlButton">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirmImageUrlButton">Add Image</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmImageUrlButton" onclick="imageUrlModal.addImageFromUrl()">Add Image</button>
         </div>
       </div>
     </div>

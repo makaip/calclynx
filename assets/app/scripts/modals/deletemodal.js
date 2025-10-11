@@ -1,52 +1,73 @@
 import { userManager } from '../core/cloud.js';
+import { ModalUtils } from './modalutils.js';
 
 export class DeleteFileModal {
+    constructor() {
+        this.modal = document.getElementById('deleteSidebarFileModal');
+        this.fileNameElement = document.getElementById('fileNameToDeleteSidebar');
+        this.button = document.getElementById('confirmDeleteSidebarFileButton');
+        this.error = document.getElementById('delete-sidebar-file-error-message');
+        this.checkbox = document.getElementById('doNotAskAgainDeleteFile');
+        this.fileToDelete = null;
+    }
+
     initializeDeleteFileModal(fileId, fileName) {
-        fileToDelete = fileId;
-        if (fileElement) {
-            fileElement.textContent = fileName;
+        this.fileToDelete = fileId;
+        if (this.fileNameElement) {
+            this.fileNameElement.textContent = fileName;
         }
 
-        hideError(deleteSidebarFileErrorMessage);
-        if (dontAskAgain) {
-            dontAskAgain.checked = false;
+        ModalUtils.hideError(this.error);
+        if (this.checkbox) {
+            this.checkbox.checked = false;
         }
 
         if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
-            confirmDeletion();
+            this.confirmDeletion();
         } else {
-            const modal = bootstrap.Modal.getOrCreateInstance(deleteSidebarFileModal);
+            const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
             modal.show();
         }
     }
 
     async confirmDeletion() {
-        if (!fileToDelete) return;
+        if (!this.fileToDelete) return;
+
+        if (this.checkbox?.checked) {
+            sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
+        }
 
         try {
-            //bootstrap? 
-            setButtonLoading(confirmDeleteSidebarFileBtn, true, 'Deleting...', 'Delete File');
-            const result = await userManager.deleteFileRecord(fileToDelete);
+            ModalUtils.setButtonLoading(this.button, true, 'Deleting...', 'Delete File');
+            const result = await userManager.deleteFileRecord(this.fileToDelete);
             
             if (!result.success) throw new Error(result.error);
             
-            const modal = bootstrap.Modal.getInstance(deleteSidebarFileModal);
+            const modal = bootstrap.Modal.getInstance(this.modal);
             if (modal) modal.hide();
-            loadUserFiles();
+            
+            // refresh file list
+            if (window.loadUserFiles) window.loadUserFiles();
 
             const urlParams = new URLSearchParams(window.location.search);
             const currentFileId = urlParams.get('fileId');
-            if (currentFileId === fileToDelete) {
+            if (currentFileId === this.fileToDelete) {
                 await userManager.updateFileTitle(null);
                 window.location.href = '/app.html';
             }
 
         } catch (error) {
             console.error('Error deleting file from sidebar:', error);
-            // show error message
-
+            ModalUtils.showError(this.error, error.message || 'Failed to delete file');
         } finally {
-            setButtonLoading(confirmDeleteSidebarFileBtn, false, 'Deleting...', 'Delete File');
+            ModalUtils.setButtonLoading(this.button, false, 'Deleting...', 'Delete File');
         }
+    }
+
+    reset() {
+        this.fileToDelete = null;
+        if (this.checkbox) this.checkbox.checked = false;
+        ModalUtils.hideError(this.error);
+        ModalUtils.setButtonLoading(this.button, false, 'Deleting...', 'Delete File');
     }
 }
