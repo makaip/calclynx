@@ -1,9 +1,9 @@
-export class ModalUtils {
+export const ModalUtils = {
     toggleModal(modalId) {
         const modalElement = document.getElementById(modalId);
         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         modalElement.classList.contains('show') ? modal.hide() : modal.show();
-    }
+    },
 
     showError(element, message) {
         if (message) {
@@ -14,7 +14,7 @@ export class ModalUtils {
         if (this.input) {
             this.input.classList.add('is-invalid');
         }
-    }
+    },
 
     hideError(element) {
         if (element) {
@@ -24,7 +24,7 @@ export class ModalUtils {
         if (this.input) {
             this.input.classList.remove('is-invalid');
         }
-    }
+    },
 
     setButtonLoading(isLoading) {
         if (!this.button) return;
@@ -33,13 +33,13 @@ export class ModalUtils {
         this.button.innerHTML = isLoading 
             ? '<i class="fas fa-spinner fa-spin"></i> Creating...'
             : 'Create File';
-    }
+    },
 
     reset() {
         if (this.input) this.input.value = '';
         this.hideError();
         this.setButtonLoading(false);
-    }
+    },
 
     sanitizeFileName(fileName) {
         if (!fileName || typeof fileName !== 'string') {
@@ -51,5 +51,13 @@ export class ModalUtils {
             .replace(/\s+/g, '_')
             .replace(/_{2,}/g, '_')
             .replace(/^_+|_+$/g, '') || 'untitled';
+    },
+
+    ensureJsonExt(fileName) {
+        if (!fileName || typeof fileName !== 'string') {
+            return 'untitled.json';
+        }
+        
+        return fileName.endsWith('.json') ? fileName : `${fileName}.json`;
     }
 }

@@ -5,9 +5,11 @@ import { ImageGroup } from '../image/imagegroup.js';
 import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { TextFormatToolbar } from '../ui/toolbar.js';
-import '../sidebar/sidebar-ui-interactions.js';
 import '../ui/contextmenu.js';
 import '../ui/command-palette.js';
+
+import { CreateFileModal } from '../modals/createmodal.js';
+window.createFileModal = new CreateFileModal();
 
 const App = {
   mathBoard: null,
@@ -179,24 +181,10 @@ const setupImportInput = (el) => {
         }
         
         if (window.isCreateFromJsonMode) {
-          window.pendingJsonData = jsonData;
           window.isCreateFromJsonMode = false;
           
-          const modal = document.getElementById('createFromJsonModal');
-          const input = document.getElementById('newJsonFileNameInput');
-          const errorMsg = document.getElementById('createFromJson-error-message');
-          
-          if (modal) {
-            const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
-            bsModal.show();
-            if (input) {
-              input.value = '';
-              setTimeout(() => input.focus(), 100);
-            }
-            if (errorMsg) {
-              errorMsg.style.display = 'none';
-              errorMsg.textContent = '';
-            }
+          if (window.createFileModal) {
+            window.createFileModal.setJsonData(jsonData);
           }
         } else {
           App.mathBoard?.fileManager?.importData(jsonData);

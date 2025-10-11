@@ -114,17 +114,6 @@ const loadUserFiles = async function() {
     }
 };
 
-const ModalManager = {
-    init() {
-        const createFromJsonModal = document.getElementById('createFromJsonModal');
-        if (createFromJsonModal) {
-            createFromJsonModal.addEventListener('hidden.bs.modal', () => {
-                window.pendingJsonData = null;
-            });
-        }
-    }
-};
-
 const SidebarResizer = {
     minWidth: 200,
     maxWidth: 800,
@@ -276,8 +265,6 @@ const SidebarResizer = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    ModalManager.init();
-
     const elements = {
         hamburgerBtn: document.getElementById('hamburgerBtn'),
         sidebar: document.getElementById('sidebar'),
