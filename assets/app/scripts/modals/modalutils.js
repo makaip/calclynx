@@ -6,39 +6,28 @@ export const ModalUtils = {
     },
 
     showError(element, message) {
+        if (!element) return;
+        
         if (message) {
             element.textContent = message;
             element.style.display = 'block';
-        }
-
-        if (this.input) {
-            this.input.classList.add('is-invalid');
         }
     },
 
     hideError(element) {
         if (element) {
             element.style.display = 'none';
-        }
-
-        if (this.input) {
-            this.input.classList.remove('is-invalid');
+            element.textContent = '';
         }
     },
 
-    setButtonLoading(isLoading) {
-        if (!this.button) return;
+    setButtonLoading(button, isLoading, loadingText = 'Loading...', normalText = 'Submit') {
+        if (!button) return;
         
-        this.button.disabled = isLoading;
-        this.button.innerHTML = isLoading 
-            ? '<i class="fas fa-spinner fa-spin"></i> Creating...'
-            : 'Create File';
-    },
-
-    reset() {
-        if (this.input) this.input.value = '';
-        this.hideError();
-        this.setButtonLoading(false);
+        button.disabled = isLoading;
+        button.innerHTML = isLoading 
+            ? `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`
+            : normalText;
     },
 
     sanitizeFileName(fileName) {

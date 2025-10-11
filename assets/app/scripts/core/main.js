@@ -8,9 +8,6 @@ import { TextFormatToolbar } from '../ui/toolbar.js';
 import '../ui/contextmenu.js';
 import '../ui/command-palette.js';
 
-import { CreateFileModal } from '../modals/createmodal.js';
-window.createFileModal = new CreateFileModal();
-
 const App = {
   mathBoard: null,
   expressionEquivalence: null,
@@ -217,8 +214,6 @@ const showImageUrlInput = () => {
     });
   }
 };
-
-
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {

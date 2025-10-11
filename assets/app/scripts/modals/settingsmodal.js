@@ -1,40 +1,54 @@
 import { userManager } from '../core/cloud.js';
+import { ModalUtils } from './modalutils.js';
 
 export class SettingsModal {
+    constructor() {
+        this.modal = document.getElementById('deleteAccountModal');
+        this.userEmailElement = document.getElementById('userEmailDisplay');
+        this.confirmUserEmailElement = document.getElementById('confirmUserEmail');
+        this.deleteConfirmInput = document.getElementById('deleteConfirmInput');
+        this.button = document.getElementById('confirmDeleteAccountButton');
+        this.error = document.getElementById('delete-error-message');
+        this.currentUserEmail = null;
+    }
+
     async loadUserInfo() {
-         try {
+        try {
             const userInfo = await userManager.getUserInfo();
 
             if (!userInfo.isLoggedIn) {
-                console.error('log in bru');
+                console.error('User not logged in');
                 return;
             }
 
-            userEmailElement.textContent = userInfo.email;
-            confirmUserEmailElement.textContent = userInfo.email;
+            this.currentUserEmail = userInfo.email;
+            if (this.userEmailElement) this.userEmailElement.textContent = userInfo.email;
+            if (this.confirmUserEmailElement) this.confirmUserEmailElement.textContent = userInfo.email;
 
         } catch (error) {
             console.error('Error loading user info:', error);
         }
     }
 
-    validateDeleteAccount() {
-        const confirmationEmail = deleteConfirmInput?.value.trim() || '';
+    async deleteAccount() {
+        const confirmationEmail = this.deleteConfirmInput?.value.trim() || '';
+        
         if (!confirmationEmail) {
-            // show 'Please enter your email address.'
+            ModalUtils.showError(this.error, 'Please enter your email address.');
+            this.deleteConfirmInput?.focus();
             return;
         }
         
-        if (confirmationEmail !== currentUserEmail) {
-            // show 'Email does not match your account email.'
+        if (confirmationEmail !== this.currentUserEmail) {
+            ModalUtils.showError(this.error, 'Email does not match your account email.');
+            this.deleteConfirmInput?.focus();
             return;
         }
-    }
 
-    async deleteAccount() {
+        ModalUtils.hideError(this.error);
+
         try {
-            // set loading state for button "Delete Account Permanently" to "Deleting..."
-
+            ModalUtils.setButtonLoading(this.button, true, 'Deleting...', 'Delete Account Permanently');
             const result = await userManager.deleteAccount();
 
             if (!result.success) throw new Error(result.error || 'Failed to delete account');
@@ -43,9 +57,15 @@ export class SettingsModal {
 
         } catch (error) {
             console.error('Error deleting account:', error);
-            // showError 'An unexpected error occurred. Please try again.');
+            ModalUtils.showError(this.error, error.message || 'An unexpected error occurred. Please try again.');
         } finally {
-            // unset loading state for button "Delete Account Permanently"
+            ModalUtils.setButtonLoading(this.button, false, 'Deleting...', 'Delete Account Permanently');
         }
+    }
+
+    reset() {
+        if (this.deleteConfirmInput) this.deleteConfirmInput.value = '';
+        ModalUtils.hideError(this.error);
+        ModalUtils.setButtonLoading(this.button, false, 'Deleting...', 'Delete Account Permanently');
     }
 }

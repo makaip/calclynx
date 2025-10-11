@@ -1,58 +1,78 @@
 import { userManager } from '../core/cloud.js';
+import { ModalUtils } from './modalutils.js';
 
 export class RenameFileModal {
-    getRenameFile() {
-        fileIdToRename = fileId;
-        if (newName) newName.value = currentName;
-        
-        const modal = bootstrap.Modal.getOrCreateInstance(renameFileModal);
-        modal.show();
+    constructor() {
+        this.modal = document.getElementById('renameFileModal');
+        this.input = document.getElementById('newFileNameInput');
+        this.button = document.getElementById('confirmRenameFileButton');
+        this.error = document.getElementById('rename-error-message');
+        this.fileIdToRename = null;
     }
 
-    validateFilename(fileId, newName) {
-        newName = newName?.value.trim() || '';
+    show(fileId, currentName) {
+        this.fileIdToRename = fileId;
+        if (this.input) this.input.value = currentName || '';
         
-        if (!fileIdToRename) {
-            // 'No file selected to rename.'
+        ModalUtils.hideError(this.error);
+        const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
+        modal.show();
+        
+        setTimeout(() => this.input?.focus(), 100);
+    }
+
+    async renameFile() {
+        const newName = this.input?.value.trim() || '';
+        
+        if (!this.fileIdToRename) {
+            ModalUtils.showError(this.error, 'No file selected to rename.');
             return;
         }
 
         if (!newName) {
-            // 'File name cannot be empty.'
+            ModalUtils.showError(this.error, 'File name cannot be empty.');
+            this.input?.focus();
             return;
         }
 
         const nameValidation = userManager.validateFileName?.(newName);
         if (nameValidation?.error) {
-            // show nameValidation.error
+            ModalUtils.showError(this.error, nameValidation.error);
+            this.input?.focus();
             return;
         }
-    }
 
-    async renameFile() {
-        this.validateFilename(fileId, newName);
+        ModalUtils.hideError(this.error);
 
         try {
-            // set loading state for button "Renaming..."
-            const result = await userManager.renameFile(fileIdToRename, newName);
+            ModalUtils.setButtonLoading(this.button, true, 'Renaming...', 'Rename');
+            const result = await userManager.renameFile(this.fileIdToRename, newName);
 
             if (!result.success) throw new Error(result.error);
 
-            const modal = bootstrap.Modal.getInstance(renameFileModal);
+            const modal = bootstrap.Modal.getInstance(this.modal);
             if (modal) modal.hide();
-            loadUserFiles();
             
-            // update sidebar: push to sidebar class?
+            if (window.loadUserFiles) window.loadUserFiles();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const currentFileId = urlParams.get('fileId');
-            if (currentFileId === fileIdToRename) {
-                await userManager.updateFileTitle(fileIdToRename);
+            if (currentFileId === this.fileIdToRename) {
+                await userManager.updateFileTitle(this.fileIdToRename);
             }
         } catch (error) {
-            console.error('error renaming file:', error);
-            // show error or failed to rename file
+            console.error('Error renaming file:', error);
+            ModalUtils.showError(this.error, error.message || 'Failed to rename file');
+            this.input?.focus();
         } finally {
-            // unset loading state for button "Renaming..."
+            ModalUtils.setButtonLoading(this.button, false, 'Renaming...', 'Rename');
         }
+    }
+
+    reset() {
+        if (this.input) this.input.value = '';
+        this.fileIdToRename = null;
+        ModalUtils.hideError(this.error);
+        ModalUtils.setButtonLoading(this.button, false, 'Renaming...', 'Rename');
     }
 }

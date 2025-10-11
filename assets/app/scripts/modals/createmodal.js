@@ -73,5 +73,3 @@ export class CreateFileModal {
         ModalUtils.setButtonLoading(this.button, false, 'Creating...', 'Create File');
     }
 }
-
-window.createFileModal = new CreateFileModal();
