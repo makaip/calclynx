@@ -3,7 +3,7 @@ import { MathField } from './mathfield.js';
 
 const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
 
-class MathGroup extends ObjectGroup {
+export class MathGroup extends ObjectGroup {
   constructor(board, x, y, data = null) {
     super(board, x, y, data, 'math');
     
@@ -199,6 +199,4 @@ class MathGroup extends ObjectGroup {
     }
   }
 }
-
-export { MathGroup };
 
