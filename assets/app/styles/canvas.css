@@ -3,18 +3,6 @@
   width: 100%;
   position: relative;
   overflow: hidden;
-  margin-left: 0;
-  transition: margin-left 0.3s ease-in;
-}
-
-body.sidebar-open #main-content {
-  transition: margin-left 0.3s ease-out;
-}
-
-@media (max-width: 768px) {
-  body.sidebar-open #main-content {
-    margin-left: 0;
-  }
 }
 
 #canvas {

@@ -31,9 +31,9 @@ class ExpressionEquivalence {
                 this.pendingNormalizations.delete(id); // Clean up
 
                 // Optional: Log worker errors for debugging
-                // if (error) {
-                //     console.warn(`Worker normalization error for ${originalLatex}: ${error}`);
-                // }
+                if (error) {
+                    console.warn(`Worker normalization error for ${originalLatex}: ${error}`);
+                }
             }
         };
 
