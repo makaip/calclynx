@@ -42,7 +42,6 @@ async function loadProseMirrorModules() {
     };
 
     window.proseMirrorReady = true;
-    console.log('ProseMirror ready flag set - all modules loaded');
 
     if (typeof window !== 'undefined' && window.dispatchEvent) {
       window.dispatchEvent(new Event('prosemirror-ready'));

@@ -4,7 +4,7 @@ import { MathFieldEventHandler } from './mathfield-event-handler.js';
 import { MathFieldStateManager } from './mathfield-state-manager.js';
 import { MathFieldUIManager } from './mathfield-ui-manager.js';
 
-class MathField {
+export class MathField {
   constructor(mathGroup, isNewField) {
     this.mathGroup = mathGroup;
     this.containerManager = new MathFieldContainer(mathGroup);
@@ -30,5 +30,3 @@ class MathField {
     this.stateManager.finalize();
   }
 }
-
-export { MathField };

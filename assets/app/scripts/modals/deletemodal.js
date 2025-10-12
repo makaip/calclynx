@@ -11,7 +11,7 @@ export class DeleteFileModal {
         this.fileToDelete = null;
     }
 
-    initializeDeleteFileModal(fileId, fileName) {
+    initDeleteFileModal(fileId, fileName) {
         this.fileToDelete = fileId;
         if (this.fileNameElement) {
             this.fileNameElement.textContent = fileName;

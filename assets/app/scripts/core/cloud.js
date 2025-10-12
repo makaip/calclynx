@@ -479,6 +479,70 @@ class User {
             return { success: false, error: error.message, title: 'Untitled' };
         }
     }
+
+    async downloadFileAsJson(fileId, fileName) {
+        try {
+            const { session } = await this.getSession();
+            if (!session) {
+                throw new Error('User not authenticated');
+            }
+
+            const filePath = `${session.user.id}/${fileId}.json`;
+            const result = await this.downloadFile(filePath);
+
+            if (!result || !result.success) {
+                throw new Error(result?.error || 'Failed to download file');
+            }
+            if (!result.data) {
+                throw new Error('File not found or empty.');
+            }
+
+            const blob = (result.data instanceof Blob)
+                ? result.data
+                : new Blob([typeof result.data === 'string' ? result.data : JSON.stringify(result.data)], { type: 'application/json' });
+            
+            const sanitizedFileName = this._sanitizeFileName(fileName);
+            const fileNameWithExt = this._ensureJsonExtension(sanitizedFileName);
+            
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+
+            link.href = url;
+            link.download = fileNameWithExt;
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            alert(`Error downloading file: ${error.message}`);
+            return { success: false, error: error.message };
+        }
+    }
+
+    _sanitizeFileName(fileName) { // todo: move validation & sanitiz from modals to cloud
+        if (!fileName || typeof fileName !== 'string') {
+            return 'untitled';
+        }
+
+        return fileName.trim()
+            .replace(/[<>:"/\\|?*]/g, '_')
+            .replace(/\s+/g, '_')
+            .replace(/_{2,}/g, '_')
+            .replace(/^_+|_+$/g, '') || 'untitled';
+    }
+
+    _ensureJsonExtension(fileName) {
+        if (!fileName || typeof fileName !== 'string') {
+            return 'untitled.json';
+        }
+        
+        return fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+    }
 }
 
 const userManager = new User();
