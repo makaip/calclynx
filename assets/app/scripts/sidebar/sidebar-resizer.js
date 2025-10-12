@@ -9,46 +9,13 @@ export class SidebarResizer {
         this.isResizing = false;
     }
 
-    applyWidthImmediate(width) {
+    applyWidth(width) {
         if (!this.sidebar) return;
         
         const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
-        this.sidebar.style.transition = 'none';
-        this.sidebar.style.width = `${clampedWidth}px`;
-        
-        const isOpen = this.sidebar.classList.contains('show');
-        
-        if (isOpen && this.mainContent) {
-            this.mainContent.style.marginLeft = `${clampedWidth}px`;
-        }
+        this.sidebar.style.setProperty('--bs-offcanvas-width', `${clampedWidth}px`);
         
         this.currentWidth = clampedWidth;
-    }
-
-    applyWidthWithTransition(width) {
-        if (!this.sidebar) return;
-
-        const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
-        this.sidebar.style.transition = 'width 0.3s ease';
-        this.sidebar.style.width = `${clampedWidth}px`;
-        
-        if (this.mainContent) {
-            this.mainContent.style.transition = 'margin-left 0.3s ease';
-        }
-        
-        const isOpen = this.sidebar.classList.contains('show');
-        if (isOpen && this.mainContent) {
-            this.mainContent.style.marginLeft = `${clampedWidth}px`;
-        }
-        
-        this.currentWidth = clampedWidth;
-    }
-
-    syncMainContentMargin() {
-        if (!this.sidebar || !this.mainContent) return;
-
-        const isOpen = this.sidebar.classList.contains('show');
-        this.mainContent.style.marginLeft = isOpen ? `${this.currentWidth}px` : '0';
     }
 
     handleResizeStart(e) {
@@ -60,7 +27,7 @@ export class SidebarResizer {
 
     handleMouseMove(e) {
         if (!this.isResizing) return;
-        this.applyWidthImmediate(e.clientX);
+        this.applyWidth(e.clientX);
     }
 
     handleResizeEnd() {
@@ -69,7 +36,6 @@ export class SidebarResizer {
         document.body.classList.remove('no-select');
         document.onmousemove = null;
         document.onmouseup = null;
-        this.applyWidthWithTransition(this.currentWidth);
     }
 
     init() {
@@ -78,14 +44,7 @@ export class SidebarResizer {
         }
 
         if (this.sidebar) {
-            const handleOffcanvasShow = () => this.syncMainContentMargin();
-            const handleOffcanvasHide = () => this.syncMainContentMargin();
-            
-            this.sidebar.addEventListener('shown.bs.offcanvas', handleOffcanvasShow);
-            this.sidebar.addEventListener('hidden.bs.offcanvas', handleOffcanvasHide);
+            this.sidebar.style.setProperty('--bs-offcanvas-width', `${this.currentWidth}px`);
         }
-
-        this.applyWidthWithTransition(this.currentWidth);
-        this.syncMainContentMargin();
     }
 }

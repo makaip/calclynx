@@ -225,7 +225,6 @@ body {
   color: var(--bs-body-color);
 }
 
-
 .text-secondary {
   color: var(--bs-secondary-color) !important;
 }
