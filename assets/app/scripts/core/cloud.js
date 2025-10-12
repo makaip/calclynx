@@ -1,6 +1,6 @@
 import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 
-class User {
+class User { // todo: split user into cloud (file management) & auth (login/signup)
     constructor() {
         this.client = null;
         this.currentUser = null;
