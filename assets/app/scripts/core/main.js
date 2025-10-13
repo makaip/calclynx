@@ -6,7 +6,7 @@ import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
 import { TextFormatToolbar } from '../ui/toolbar.js';
 import '../ui/contextmenu.js';
-import '../ui/command-palette.js';
+import '../ui/commandpalette.js';
 
 const App = {
   mathBoard: null,
