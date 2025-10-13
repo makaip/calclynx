@@ -1,13 +1,7 @@
-import { BaseModal } from '../modals/base-modal.js';
-
-class CommandPalette extends BaseModal {
+class CommandPalette {
   constructor(options = {}) {
-    super({
-      className: 'command-palette-modal',
-      zIndex: 3000,
-      ...options
-    });
-    
+    this.modalElement = null;
+    this.bootstrapModal = null;
     this.inputElement = null;
     this.optionsElement = null;
     this.selectedIndex = -1;
@@ -17,9 +11,9 @@ class CommandPalette extends BaseModal {
     this.variableInputMode = false;
     this.currentVariablePattern = null;
     
-    // Built-in commands and variable patterns
     this.setupCommands();
     this.setupVariablePatterns();
+    this.initialize();
   }
 
   setupCommands() {
@@ -86,50 +80,41 @@ class CommandPalette extends BaseModal {
     };
   }
 
-  getModalHTML() {
-    return `
-      <div class="command-palette-content modal-content">
-        <input class="command-palette-input" type="text" placeholder="Type a command..." />
-        <div class="command-palette-options"></div>
-      </div>
-    `;
-  }
-
   initialize() {
-    this.modalElement = this.createModalElement();
-    this.contentElement = this.modalElement.querySelector('.modal-content');
-    this.setupCommandPaletteElements();
+    this.getModalReferences();
     this.setupMathFieldTracking();
-    this.setupBaseEvents();
-    this.setupCustomEvents();
+    this.setupEventHandlers();
   }
 
-  setupCommandPaletteElements() {
+  getModalReferences() {
+    this.modalElement = document.getElementById('commandPaletteModal');
     this.inputElement = this.modalElement.querySelector('.command-palette-input');
     this.optionsElement = this.modalElement.querySelector('.command-palette-options');
+    
+    this.bootstrapModal = new bootstrap.Modal(this.modalElement, {
+      backdrop: true,
+      keyboard: false
+    });
   }
 
   setupMathFieldTracking() {
-    document.addEventListener('click', (event) => {
-      const mathField = event.target.closest('.math-field-container');
-      if (mathField) {
-        this.lastFocusedMathField = mathField;
+    this.modalElement.classList.add('command-palette-ready');
+  }
+
+  setupEventHandlers() {
+    this.inputElement.addEventListener('input', () => this.renderOptions());
+    this.inputElement.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    this.modalElement.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        this.hide();
       }
     });
   }
 
-  setupCustomEvents() {
-    if (!this.inputElement) {
-      console.warn('CommandPalette: inputElement not found during setupCustomEvents');
-      return;
-    }
-    
-    this.inputElement.addEventListener('input', () => this.renderOptions());
-    this.inputElement.addEventListener('keydown', (e) => this.handleKeyDown(e));
-  }
-
   handleKeyDown(e) {
     if (e.key === 'Escape') {
+      e.preventDefault();
       this.hide();
       return;
     }
@@ -218,14 +203,10 @@ class CommandPalette extends BaseModal {
       this.inputElement.value = pattern.prefix;
       this.inputElement.classList.add('variable-input-mode');
       this.inputElement.focus();
-      
-      // Position cursor at end
-      setTimeout(() => {
-        this.inputElement.setSelectionRange(
-          this.inputElement.value.length, 
-          this.inputElement.value.length
-        );
-      }, 0);
+      this.inputElement.setSelectionRange(
+        this.inputElement.value.length, 
+        this.inputElement.value.length
+      );
     }
   }
 
@@ -255,10 +236,11 @@ class CommandPalette extends BaseModal {
   }
 
   buildExecutionContext(command = null, variable = null) {
+    const mathFields = document.querySelectorAll('.math-field-container');
     let referenceContainer = this.currentReferenceElement?.closest('.math-field-container');
     
-    if (!referenceContainer && this.lastFocusedMathField) {
-      referenceContainer = this.lastFocusedMathField;
+    if (!referenceContainer && mathFields.length > 0) {
+      referenceContainer = mathFields[mathFields.length - 1];
     }
 
     const context = {
@@ -270,11 +252,9 @@ class CommandPalette extends BaseModal {
     };
 
     if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
-      // Create a new math field after the current one to display the result
       const targetMathField = referenceContainer.parentElement.mathGroup.insertMathFieldAfter(referenceContainer);
       context.targetMathField = targetMathField;
       
-      // Get the LaTeX from the reference container
       const sourceMathFieldInstance = referenceContainer.mathFieldInstance;
       if (sourceMathFieldInstance && sourceMathFieldInstance.editor.getMathField()) {
         context.sourceLatex = sourceMathFieldInstance.editor.getMathField().latex();
@@ -318,19 +298,20 @@ class CommandPalette extends BaseModal {
     const variable = pattern.extractor(query);
     const isValid = variable && pattern.validator(variable);
     
-    const option = document.createElement('div');
-    option.className = 'command-palette-option variable-input-option';
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'list-group-item list-group-item-action variable-input-option';
     option.innerHTML = `
       <span class="variable-input-container">
         <span class="variable-prefix">${pattern.prefix}</span>
-        <span class="variable-placeholder" data-placeholder="${pattern.placeholder}">
-          ${variable || `[${pattern.placeholder}]`}
+        <span class="variable-placeholder badge bg-primary ms-1" data-placeholder="${pattern.placeholder}">
+          ${variable || pattern.placeholder}
         </span>
       </span>
     `;
     
     if (isValid) {
-      option.classList.add('valid');
+      option.classList.add('active');
     }
     
     this.optionsElement.appendChild(option);
@@ -409,8 +390,9 @@ class CommandPalette extends BaseModal {
   createOptionElement(result, index) {
     const { command, match } = result;
     
-    const option = document.createElement('div');
-    option.className = 'command-palette-option';
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'list-group-item list-group-item-action';
     option.dataset.index = index;
     
     if (match && match.type === 'variable' && match.variable) {
@@ -422,7 +404,7 @@ class CommandPalette extends BaseModal {
     } else {
       option.innerHTML = command.label;
       if (command.requiresVariable) {
-        option.innerHTML += ' <span class="variable-indicator">[variable]</span>';
+        option.innerHTML += ' <span class="variable-indicator text-secondary fst-italic small">[variable]</span>';
       }
     }
     
@@ -435,26 +417,32 @@ class CommandPalette extends BaseModal {
   }
 
   updateSelectionVisual() {
-    const options = this.optionsElement.querySelectorAll('.command-palette-option');
+    const options = this.optionsElement.querySelectorAll('.list-group-item');
     
     options.forEach((option, index) => {
       if (index === this.selectedIndex) {
-        option.classList.add('selected');
+        option.classList.add('active');
+        option.scrollIntoView({ block: 'nearest' });
       } else {
-        option.classList.remove('selected');
+        option.classList.remove('active');
       }
     });
   }
 
-  onShow(referenceElement = null) {
+  show(referenceElement = null) {
     this.currentReferenceElement = referenceElement;
     this.inputElement.value = '';
     this.selectedIndex = -1;
     this.variableInputMode = false;
     this.currentVariablePattern = null;
     this.inputElement.classList.remove('variable-input-mode');
-    this.inputElement.focus();
     this.renderOptions();
+    this.bootstrapModal.show();
+    this.inputElement.focus();
+  }
+
+  hide() {
+    this.bootstrapModal.hide();
   }
 
   onHide() {
