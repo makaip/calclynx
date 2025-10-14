@@ -8,6 +8,12 @@ export class RenameFileModal {
         this.button = document.getElementById('confirmRenameFileButton');
         this.error = document.getElementById('rename-error-message');
         this.fileIdToRename = null;
+        
+        if (this.modal) {
+            this.modal.addEventListener('shown.bs.modal', () => {
+                this.input?.focus();
+            });
+        }
     }
 
     show(fileId, currentName) {
@@ -17,8 +23,6 @@ export class RenameFileModal {
         ModalUtils.hideError(this.error);
         const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
         modal.show();
-        
-        setTimeout(() => this.input?.focus(), 100);
     }
 
     async renameFile() {
