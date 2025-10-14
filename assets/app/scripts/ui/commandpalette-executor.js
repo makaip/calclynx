@@ -1,8 +1,20 @@
-import { variablePatterns } from './commandpalette-config.js';
+import { variablePatterns, commands } from './commandpalette-config.js';
 
 export class CommandPaletteExecutor {
   constructor() {
     this.variablePatterns = variablePatterns;
+    this.commandsMap = this.buildCommandsMap();
+  }
+
+  buildCommandsMap() {
+    const map = new Map();
+    commands.forEach(cmd => {
+      map.set(cmd.label.toLowerCase(), cmd);
+      if (cmd.variablePattern) {
+        map.set(cmd.variablePattern, cmd);
+      }
+    });
+    return map;
   }
 
   executeCommand(result, currentReferenceElement) {
@@ -138,37 +150,24 @@ export class CommandPaletteExecutor {
 
     const lowerCommand = commandName.toLowerCase();
     
-    if (lowerCommand.startsWith('solve for ')) {
-      const variable = commandName.substring('solve for '.length).trim();
-      return mgCalc.Solve ? mgCalc.Solve(processedLatex, variable) : mgCalc.Simplify(processedLatex);
+    for (const [patternKey, pattern] of Object.entries(this.variablePatterns)) {
+      if (lowerCommand.startsWith(pattern.prefix.toLowerCase())) {
+        const variable = pattern.extractor(commandName);
+        const command = this.commandsMap.get(patternKey);
+        if (command && command.mgCalcMethod) {
+          const method = mgCalc[command.mgCalcMethod];
+          return method ? method(processedLatex, variable) : mgCalc.Simplify(processedLatex);
+        }
+      }
     }
     
-    if (lowerCommand.startsWith('derivative with respect to ')) {
-      const variable = commandName.substring('derivative with respect to '.length).trim();
-      return mgCalc.Derivative ? mgCalc.Derivative(processedLatex, variable) : mgCalc.Simplify(processedLatex);
+    const command = this.commandsMap.get(lowerCommand);
+    if (command && command.mgCalcMethod) {
+      const method = mgCalc[command.mgCalcMethod];
+      return method ? method(processedLatex) : mgCalc.Simplify(processedLatex);
     }
     
-    if (lowerCommand.startsWith('integrate with respect to ')) {
-      const variable = commandName.substring('integrate with respect to '.length).trim();
-      return mgCalc.Integral ? mgCalc.Integral(processedLatex, variable) : mgCalc.Simplify(processedLatex);
-    }
-    
-    return this.executeStandardMgCalcCommand(commandName, processedLatex);
-  }
-
-  executeStandardMgCalcCommand(commandName, processedLatex) {
-    switch (commandName) {
-      case 'Simplify':
-        return mgCalc.Simplify(processedLatex);
-      case 'Expand':
-        return mgCalc.Expand(processedLatex);
-      case 'Factor':
-        return mgCalc.Factor ? mgCalc.Factor(processedLatex) : mgCalc.Simplify(processedLatex);
-      case 'Integral':
-        return mgCalc.Integral ? mgCalc.Integral(processedLatex, 'x') : mgCalc.Simplify(processedLatex);
-      default:
-        return mgCalc.Simplify(processedLatex);
-    }
+    return mgCalc.Simplify(processedLatex);
   }
 
   processMgTransFallback(processedLatex, targetMathFieldInstance) {

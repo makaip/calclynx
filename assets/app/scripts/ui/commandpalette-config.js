@@ -2,38 +2,44 @@ export const commands = [
   {
     label: 'Simplify',
     category: 'algebra',
-    description: 'Simplify the mathematical expression'
+    description: 'Simplify the mathematical expression',
+    mgCalcMethod: 'Simplify'
   },
   {
     label: 'Expand',
     category: 'algebra',
-    description: 'Expand the mathematical expression'
+    description: 'Expand the mathematical expression',
+    mgCalcMethod: 'Expand'
   },
   {
     label: 'Factor',
     category: 'algebra',
-    description: 'Factor the mathematical expression'
+    description: 'Factor the mathematical expression',
+    mgCalcMethod: 'Factor'
   },
   {
     label: 'Solve for',
     category: 'algebra',
     description: 'Solve equation for a specified variable',
     requiresVariable: true,
-    variablePattern: 'solve for'
+    variablePattern: 'solve for',
+    mgCalcMethod: 'Solve'
   },
   {
     label: 'Derivative with respect to',
     category: 'calculus',
     description: 'Find the derivative with respect to a variable',
     requiresVariable: true,
-    variablePattern: 'derivative with respect to'
+    variablePattern: 'derivative with respect to',
+    mgCalcMethod: 'Derivative'
   },
   {
     label: 'Integrate with respect to',
     category: 'calculus',
     description: 'Find the indefinite integral with respect to a variable',
     requiresVariable: true,
-    variablePattern: 'integrate with respect to'
+    variablePattern: 'integrate with respect to',
+    mgCalcMethod: 'Integral'
   }
 ];
 
