@@ -37,6 +37,12 @@
 
 #commandPaletteModal .modal-dialog {
   max-width: 600px;
+  margin-top: 250px;
+  margin-bottom: auto;
+}
+
+#commandPaletteModal .modal-dialog.modal-dialog-centered {
+  align-items: flex-start;
 }
 
 #commandPaletteModal .modal-content {
@@ -57,13 +63,13 @@
 
 #commandPaletteModal .command-palette-input:focus {
   box-shadow: none;
-  border-bottom-color: var(--bs-primary, #00c59a);
+  /* border-bottom-color: var(--bs-primary, #00c59a); */
   background-color: transparent;
 }
 
 #commandPaletteModal .command-palette-input.variable-input-mode {
   background-color: rgba(0, 197, 154, 0.05);
-  border-bottom-color: var(--bs-primary, #00c59a);
+  /* border-bottom-color: var(--bs-primary, #00c59a); */
 }
 
 #commandPaletteModal .command-palette-options {

@@ -51,6 +51,9 @@ class CommandPalette {
         this.hide();
       }
     });
+    this.modalElement.addEventListener('shown.bs.modal', () => {
+      this.inputElement?.focus();
+    });
   }
 
   handleKeyDown(e) {
@@ -305,7 +308,6 @@ class CommandPalette {
     this.inputElement.classList.remove('variable-input-mode');
     this.renderOptions();
     this.bootstrapModal.show();
-    this.inputElement.focus();
   }
 
   hide() {

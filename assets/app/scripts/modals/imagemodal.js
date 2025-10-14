@@ -17,7 +17,7 @@ export class ImageUrlModal {
         const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
         modal.show();
         
-        setTimeout(() => this.input?.focus(), 100);
+        setTimeout(() => this.input?.focus(), 500);
     }
 
     isValidUrl(url) {

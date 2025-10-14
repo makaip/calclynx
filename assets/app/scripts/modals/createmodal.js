@@ -8,6 +8,12 @@ export class CreateFileModal {
         this.button = document.getElementById('confirmCreateBlankFileButton');
         this.error = document.getElementById('createBlankFile-error-message');
         this.jsonData = null;
+        
+        if (this.modal) {
+            this.modal.addEventListener('shown.bs.modal', () => {
+                this.input?.focus();
+            });
+        }
     }
 
     async createBlankFile() {
@@ -15,7 +21,7 @@ export class CreateFileModal {
 
         if (!fileName) {
             ModalUtils.showError(this.error, 'File name cannot be empty.');
-            this.input?.focus();
+            setTimeout(() => this.input?.focus(), 500); 
             return;
         }
 
@@ -57,13 +63,12 @@ export class CreateFileModal {
 
     setJsonData(data) {
         this.jsonData = data;
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(this.modal);
-        modalInstance.show();
         if (this.input) {
             this.input.value = '';
-            setTimeout(() => this.input.focus(), 100);
         }
         ModalUtils.hideError(this.error);
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(this.modal);
+        modalInstance.show();
     }
 
     reset() {
