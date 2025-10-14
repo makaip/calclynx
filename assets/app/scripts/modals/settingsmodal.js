@@ -4,12 +4,14 @@ import { ModalUtils } from './modalutils.js';
 export class SettingsModal {
     constructor() {
         this.modal = document.getElementById('deleteAccountModal');
-        this.userEmailElement = document.getElementById('userEmailDisplay');
+        this.userEmailElement = document.getElementById('userEmail');
         this.confirmUserEmailElement = document.getElementById('confirmUserEmail');
         this.deleteConfirmInput = document.getElementById('deleteConfirmInput');
         this.button = document.getElementById('confirmDeleteAccountButton');
         this.error = document.getElementById('delete-error-message');
         this.currentUserEmail = null;
+
+        this.loadUserInfo();
     }
 
     async loadUserInfo() {

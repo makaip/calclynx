@@ -203,8 +203,8 @@ const showCommandPalette = () => {
 }; 
 
 const showImageUrlInput = () => {
-  if (window.showImageUrlModal && typeof window.showImageUrlModal === 'function') {
-    window.showImageUrlModal((url) => {
+  if (window.imageUrlModal && typeof window.imageUrlModal.show === 'function') {
+    window.imageUrlModal.show((url) => {
       if (!App?.mathBoard) return;
       const { x: mx, y: my } = App.mathBoard?.mouse ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
       const coords = App.mathBoard ? App.mathBoard.screenToCanvas(mx, my) : { x: 100, y: 100 };

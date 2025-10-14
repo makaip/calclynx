@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label: 'New Image from URL',
         action: () => {
           if (!App?.mathBoard) return;
-          window.showImageUrlModal((url) => {
+          window.imageUrlModal.show((url) => {
             const imageGroup = new ImageGroup(App.mathBoard, canvasCoords.x, canvasCoords.y);
             imageGroup.setImageUrl(url);
             App.mathBoard.fileManager.saveState();
