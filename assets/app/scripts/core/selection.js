@@ -1,5 +1,3 @@
-const BOX_SELECT_STYLE = { position: 'absolute', border: '1px dashed #00c59a', backgroundColor: 'rgba(0, 197, 154, 0.1)', pointerEvents: 'none', };
-
 import { ObjectGroup } from './objectgroup.js';
 
 class BoxSelection {
@@ -70,7 +68,21 @@ class BoxSelection {
 
   createElement(x, y) {
     const el = document.createElement('div');
-    Object.assign(el.style, BOX_SELECT_STYLE, { left: `${x}px`, top: `${y}px`, width: '0px', height: '0px' });
+    Object.assign(
+      el.style, 
+      { 
+        position: 'absolute', 
+        border: '1px dashed #00c59a', 
+        backgroundColor: 'rgba(0, 197, 154, 0.1)', 
+        pointerEvents: 'none', 
+      }, 
+      { 
+        left: `${x}px`, 
+        top: `${y}px`, 
+        width: '0px', 
+        height: '0px' 
+
+      });
     el.className = 'box-select-rect';
     return el;
   }
