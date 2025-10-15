@@ -69,12 +69,15 @@ class MathFieldUtils {
   static getBaseMathQuillConfig() {
     return {
       spaceBehavesLikeTab: false,
-      restrictMismatchedBrackets: false,
+      leftRightIntoCmdGoes: 'up',
+      restrictMismatchedBrackets: true,
       sumStartsWithNEquals: true,
-      charsThatBreakOutOfSupSub: '+-=<>',
-      autoSubscriptNumerals: true,
-      autoCommands: 'pi theta sqrt nthroot int sum prod coprod infty infinity',
-      autoOperatorNames: 'sin cos tan csc sec cot sinh cosh tanh csch sech coth log ln lim mod lcm gcd nPr nCr'
+      supSubsRequireOperand: true,
+      charsThatBreakOutOfSupSub: '=<>',
+      autoSubscriptNumerals: false,
+      autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
+      autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup inf det gcd lcm min max',
+      maxDepth: 10,
     };
   }
 

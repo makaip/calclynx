@@ -1,94 +1,97 @@
 import { TextFieldCompatibility } from './textfield-compatibility.js';
 
 class TextFieldProseMirrorContent {
-  constructor(textField) {
-    this.textField = textField;
-    this.schema = null;
-    this.initSchema();
-  }
+	constructor(textField) {
+		this.textField = textField;
+		this.schema = null;
+		this.initSchema();
+	}
 
-  initSchema() {
-    if (!window.ProseMirror) return;
-    const { Schema, basicSchema } = window.ProseMirror;
+	initSchema() {
+		if (!window.ProseMirror) return;
+		const { Schema, basicSchema } = window.ProseMirror;
 
-    const mathNodeSpec = {
-      inline: true,
-      group: "inline",
-      atom: true,
-      attrs: { latex: { default: "" } },
-      toDOM: (node) => ["span", { 
-        class: "mathquill", 
-        "data-latex": node.attrs.latex 
-      }],
-      parseDOM: [{
-        tag: "span.mathquill",
-        getAttrs: dom => ({ latex: dom.getAttribute("data-latex") || "" })
-      }]
-    };
+		const mathNodeSpec = {
+			inline: true,
+			group: "inline",
+			atom: true,
+			attrs: { latex: { default: "" } },
+			toDOM: (node) => ["span", { 
+				class: "mathquill", 
+				"data-latex": node.attrs.latex 
+			}],
+			parseDOM: [{
+				tag: "span.mathquill",
+				getAttrs: dom => ({ latex: dom.getAttribute("data-latex") || "" })
+			}]
+		};
 
-    this.schema = new Schema({
-      nodes: basicSchema.spec.nodes.addToEnd("math", mathNodeSpec),
-      marks: basicSchema.spec.marks
-    });
-  }
+		this.schema = new Schema({
+			nodes: basicSchema.spec.nodes.addToEnd("math", mathNodeSpec),
+			marks: basicSchema.spec.marks
+		});
+	}
 
-  getContent() {
-    if (!this.textField.proseMirrorView || !this.textField.proseMirrorView.state) {
-      return null;
-    }
-    return this.textField.proseMirrorView.state.doc.toJSON();
-  }
+	getContent() {
+		if (!this.textField.proseMirrorView || !this.textField.proseMirrorView.state) return null;
+		return this.textField.proseMirrorView.state.doc.toJSON();
+	}
 
-  setContent(docJson) {
-    if (!this.textField.proseMirrorView || !this.schema || !docJson) return;
+	setContent(docJson) {
+		if (!this.textField.proseMirrorView || !this.schema || !docJson) return;
 
-    try {
-      const doc = this.schema.nodeFromJSON(docJson);
-      const tr = this.textField.proseMirrorView.state.tr.replaceWith(0, this.textField.proseMirrorView.state.doc.content.size, doc.content);
-      this.textField.proseMirrorView.dispatch(tr);
-    } catch (error) {
-      console.error('Error setting ProseMirror content:', error);
-    }
-  }
+		try {
+			const doc = this.schema.nodeFromJSON(docJson);
+			const tr = this.textField.proseMirrorView.state.tr.replaceWith(0, this.textField.proseMirrorView.state.doc.content.size, doc.content);
+			this.textField.proseMirrorView.dispatch(tr);
+		} catch (error) {
+			console.error('Error setting ProseMirror content:', error);
+		}
+	}
 
-  getOptimizedContent() {
-    if (!this.textField.proseMirrorView) return { text: '', mathFields: [] };
 
-    const content = { text: '', mathFields: [] };
-    const doc = this.textField.proseMirrorView.state.doc;
+	// todo: v2?
+	getOptimizedContent() {
+		if (!this.textField.proseMirrorView) return { text: '', mathFields: [] };
 
-    doc.descendants((node, pos) => {
-      if (node.type.name === 'text') {
-        content.text += node.text;
-      } else if (node.type.name === 'math') {
-        content.mathFields.push({
-          position: content.text.length,
-          latex: node.attrs.latex || ''
-        });
-        content.text += '\uE000'; 
-      } else if (node.type.name === 'paragraph' && node.content.size === 0) {
-        if (content.text.length > 0) {
-          content.text += '\n';
-        }
-      }
-    });
+		const content = { text: '', mathFields: [] };
+		const doc = this.textField.proseMirrorView.state.doc;
 
-    return content;
-  }
+		// walk through every node in editor field
+		// insert \uE000 for MQ nodes, record pos and latex seperately
+		doc.descendants((node, pos) => {
+			if (node.type.name === 'text') {
+				content.text += node.text;
+			} else if (node.type.name === 'math') {
+				content.mathFields.push({
+					position: content.text.length,
+					latex: node.attrs.latex || ''
+				});
+				content.text += '\uE000'; 
+			} else if (node.type.name === 'paragraph' && node.content.size === 0) {
+				if (content.text.length > 0) {
+					content.text += '\n';
+				}
+			}
+		});
 
-  setOptimizedContent(content) {
-    if (!this.textField.proseMirrorView || !this.schema) return;
+		return content;
+	}
 
-    const doc = TextFieldCompatibility.convertV2ToV3(content, this.schema);
-    if (doc) {
-      const tr = this.textField.proseMirrorView.state.tr.replaceWith(
-        0, 
-        this.textField.proseMirrorView.state.doc.content.size, 
-        doc.content
-      );
-      this.textField.proseMirrorView.dispatch(tr);
-    }
-  }
+	setOptimizedContent(content) {
+		if (!this.textField.proseMirrorView || !this.schema) return;
+
+		const doc = TextFieldCompatibility.convertV2ToV3(content, this.schema);
+		if (doc) {
+			const tr = this.textField.proseMirrorView.state.tr.replaceWith(
+				0, 
+				this.textField.proseMirrorView.state.doc.content.size, 
+				doc.content
+			);
+
+			this.textField.proseMirrorView.dispatch(tr);
+		}
+	}
 }
 
 export { TextFieldProseMirrorContent };
