@@ -1,95 +1,95 @@
 .math-field-container {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  position: relative;
-  padding: 0 5px 0 25px;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	position: relative;
+	padding: 0 5px 0 25px;
 }
 
 
 .math-field-container:not(:last-child) {
-  margin-bottom: 1px;
+	margin-bottom: 1px;
 }
 
 
 .math-field-container:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 25px;
-  right: 5px;
-  height: 1px;
-  background: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a);
+	content: '';
+	position: absolute;
+	bottom: -1px;
+	left: 25px;
+	right: 5px;
+	height: 1px;
+	background: linear-gradient(to right, #2a2a2a, #444444, #2a2a2a);
 }
 
 
 .math-field {
-  min-height: 40px;
-  display: inline-block;
-  padding: 5px;
-  font-size: 18px;
-  white-space: nowrap;
-  overflow: hidden;
-  background: transparent;
-  color: var(--bs-body-color, #ffffff);
-  border-radius: 0 !important;
-  flex-grow: 1;
+	min-height: 40px;
+	display: inline-block;
+	padding: 5px;
+	font-size: 18px;
+	white-space: nowrap;
+	overflow: hidden;
+	background: transparent;
+	color: var(--bs-body-color, #ffffff);
+	border-radius: 0 !important;
+	flex-grow: 1;
 }
 
 
 .mq-editable-field,
 .mq-math-mode {
-  background: transparent !important;
-  color: var(--bs-body-color, #ffffff) !important;
-  border: none !important;
-  border-radius: 0 !important;
+	background: transparent !important;
+	color: var(--bs-body-color, #ffffff) !important;
+	border: none !important;
+	border-radius: 0 !important;
 }
 
 .mq-focused {
-  outline: 1px solid var(--bs-primary, #00c59a) !important;
-  border-radius: 0 !important;
+	outline: 1px solid var(--bs-primary, #00c59a) !important;
+	border-radius: 0 !important;
 }
 
 .mq-editable-field .mq-cursor {
-  border-left: 1px solid var(--bs-body-color, #ffffff) !important;
+	border-left: 1px solid var(--bs-body-color, #ffffff) !important;
 }
 
 
 .math-field-container.dragging-field {
-  opacity: 0.6;
-  background-color: rgba(50, 50, 50, 0.5);
-  z-index: 10;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
+	opacity: 0.6;
+	background-color: rgba(50, 50, 50, 0.5);
+	z-index: 10;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
 }
 
 
 .circle-indicator {
-  position: absolute;
-  left: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  pointer-events: none;
-  transition: opacity 0.2s;
+	position: absolute;
+	left: 2px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 8px;
+	height: 8px;
+	border: 2px solid transparent;
+	border-radius: 50%;
+	pointer-events: none;
+	transition: opacity 0.2s;
 }
 
 .math-field-container:hover .circle-indicator {
-  opacity: 0;
+	opacity: 0;
 }
 
 .circle-indicator.identical {
-  border-color: var(--circle-color, #ccc);
+	border-color: var(--circle-color, #ccc);
 }
 
 .circle-indicator.equivalent {
-  border-color: var(--circle-color, #ccc);
-  background: transparent;
+	border-color: var(--circle-color, #ccc);
+	background: transparent;
 }
 
 .identical-editing .circle-indicator.identical {
-  background-color: var(--circle-color, #ccc);
+	background-color: var(--circle-color, #ccc);
 }

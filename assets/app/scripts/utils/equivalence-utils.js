@@ -1,10 +1,10 @@
 class EquivalenceUtils {
-    static updateEquivalenceState() {
-        if (window.expressionEquivalence) {
-            window.expressionEquivalence.logEquivalentExpressions();
-            window.expressionEquivalence.applyIndicatorColors();
-        }
-    }
+	static updateEquivalenceState() {
+		if (window.expressionEquivalence) {
+			window.expressionEquivalence.logEquivalentExpressions();
+			window.expressionEquivalence.applyIndicatorColors();
+		}
+	}
 }
 
 export { EquivalenceUtils };
