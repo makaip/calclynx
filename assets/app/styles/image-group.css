@@ -1,95 +1,95 @@
 .image-container {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: row;
-  position: relative;
-  padding: 0 5px 0 5px;
-  pointer-events: none;
+	display: flex;
+	align-items: flex-start;
+	flex-direction: row;
+	position: relative;
+	padding: 0 5px 0 5px;
+	pointer-events: none;
 }
 
 
 .image-container > * {
-  pointer-events: auto;
+	pointer-events: auto;
 }
 
 
 .image-content {
-  max-width: none;
-  max-height: none;
-  width: auto;
-  height: auto;
-  border-radius: 4px;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  pointer-events: auto;
+	max-width: none;
+	max-height: none;
+	width: auto;
+	height: auto;
+	border-radius: 4px;
+	display: block;
+	user-select: none;
+	-webkit-user-drag: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	pointer-events: auto;
 }
 
 
 .resize-handle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: transparent;
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
-  z-index: 10;
-  pointer-events: auto;
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	background: transparent;
+	border-radius: 2px;
+	opacity: 0;
+	transition: opacity 0.2s ease, background-color 0.2s ease;
+	z-index: 10;
+	pointer-events: auto;
 }
 
 
 .image-group:hover .resize-handle {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
+	opacity: 1;
+	background: rgba(255, 255, 255, 0.05);
 }
 
 
 .image-group.selected .resize-handle {
-  opacity: 1;
-  background: var(--bs-primary, #00c59a);
+	opacity: 1;
+	background: var(--bs-primary, #00c59a);
 }
 
 
 .image-group.dragging .resize-handle {
-  opacity: 1;
-  background: var(--bs-primary, #00c59a);
+	opacity: 1;
+	background: var(--bs-primary, #00c59a);
 }
 
 
 .image-group.resizing .resize-handle {
-  opacity: 1;
-  background: var(--bs-primary, #00c59a);
+	opacity: 1;
+	background: var(--bs-primary, #00c59a);
 }
 
 
 .resize-handle-nw {
-  top: -14px;
-  left: -14px;
-  cursor: nw-resize;
+	top: -14px;
+	left: -14px;
+	cursor: nw-resize;
 }
 
 .resize-handle-ne {
-  top: -14px;
-  right: -14px;
-  cursor: ne-resize;
+	top: -14px;
+	right: -14px;
+	cursor: ne-resize;
 }
 
 .resize-handle-sw {
-  bottom: -14px;
-  left: -14px;
-  cursor: sw-resize;
+	bottom: -14px;
+	left: -14px;
+	cursor: sw-resize;
 }
 
 .resize-handle-se {
-  bottom: -14px;
-  right: -14px;
-  cursor: se-resize;
+	bottom: -14px;
+	right: -14px;
+	cursor: se-resize;
 }
 
 
 .image-group.resizing .image-content {
-  pointer-events: none;
+	pointer-events: none;
 }

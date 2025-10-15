@@ -1,26 +1,26 @@
 button {
-  background-color: var(--bs-surface-primary, #1e1e1e);
-  border: 1px solid #666666;
-  color: var(--bs-body-color, #ffffff);
-  padding: 5px 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.1s ease, transform 0.1s ease;
+	background-color: var(--bs-surface-primary, #1e1e1e);
+	border: 1px solid #666666;
+	color: var(--bs-body-color, #ffffff);
+	padding: 5px 10px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 14px;
+	cursor: pointer;
+	border-radius: 5px;
+	transition: background-color 0.1s ease, transform 0.1s ease;
 }
 
 button:hover {
-  border: 1px solid var(--bs-primary, #00c59a);
+	border: 1px solid var(--bs-primary, #00c59a);
 }
 
 button:active {
-  background: var(--bs-primary, #00c59a);
+	background: var(--bs-primary, #00c59a);
 }
 
 button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+	background-color: #cccccc;
+	cursor: not-allowed;
 }

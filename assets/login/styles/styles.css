@@ -1,169 +1,169 @@
 :root {
-    --primary-color: #00c59a;
-    --primary-hover: #00b38a;
-    --secondary-color: #333333;
-    --dark-color: #1d1d1d;
-    --darker-color: #141414;
-    --light-color: #2c2c2c;
-    --lighter-color: #3a3a3a;
-    --text-color: #ffffff;
-    --text-secondary: #888888;
-    --border-color: #444444;
-    --danger-color: #ff3b30;
-    --success-color: #4cd964;
-    --border-radius: 12px;
-    --button-radius: 8px;
-    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --transition: all 0.2s ease;
-    --google-button-bg: #ffffff; /* Google button specific */
-    --google-button-text: #333333; /* Google button specific */
-    --google-button-border: #dddddd; /* Google button specific */
-    --google-button-hover-bg: #f7f7f7; /* Google button specific */
+	--primary-color: #00c59a;
+	--primary-hover: #00b38a;
+	--secondary-color: #333333;
+	--dark-color: #1d1d1d;
+	--darker-color: #141414;
+	--light-color: #2c2c2c;
+	--lighter-color: #3a3a3a;
+	--text-color: #ffffff;
+	--text-secondary: #888888;
+	--border-color: #444444;
+	--danger-color: #ff3b30;
+	--success-color: #4cd964;
+	--border-radius: 12px;
+	--button-radius: 8px;
+	--box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	--transition: all 0.2s ease;
+	--google-button-bg: #ffffff; /* Google button specific */
+	--google-button-text: #333333; /* Google button specific */
+	--google-button-border: #dddddd; /* Google button specific */
+	--google-button-hover-bg: #f7f7f7; /* Google button specific */
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    color: var(--text-color);
-    line-height: 1.6;
-    background-color: var(--darker-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-weight: 400;
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	color: var(--text-color);
+	line-height: 1.6;
+	background-color: var(--darker-color);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	font-weight: 400;
 }
 
 a {
-    text-decoration: none;
-    color: var(--primary-color);
-    transition: var(--transition);
+	text-decoration: none;
+	color: var(--primary-color);
+	transition: var(--transition);
 }
 
 a:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 
 .auth-container {
-    width: 100%;
-    max-width: 450px;
-    padding: 20px;
+	width: 100%;
+	max-width: 450px;
+	padding: 20px;
 }
 
 .auth-box {
-    background-color: var(--dark-color);
-    padding: 40px;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--box-shadow);
-    text-align: center;
+	background-color: var(--dark-color);
+	padding: 40px;
+	border-radius: var(--border-radius);
+	border: 1px solid var(--border-color);
+	box-shadow: var(--box-shadow);
+	text-align: center;
 }
 
 .logo {
-    display: inline-block;
-    font-weight: 700;
-    font-size: 1.8rem;
-    color: #fff;
-    margin-bottom: 25px;
-    text-decoration: none;
+	display: inline-block;
+	font-weight: 700;
+	font-size: 1.8rem;
+	color: #fff;
+	margin-bottom: 25px;
+	text-decoration: none;
 }
 
 .logo:hover {
-    text-decoration: none;
+	text-decoration: none;
 }
 
 .auth-box h2 {
-    font-size: 1.6rem;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: var(--text-color);
-    text-align: center;
+	font-size: 1.6rem;
+	margin-bottom: 10px;
+	font-weight: 600;
+	color: var(--text-color);
+	text-align: center;
 }
 
 .auth-box .subtitle {
-    color: var(--text-secondary);
-    margin-bottom: 35px; /* Increased margin */
-    font-size: 0.95rem;
-    text-align: center;
+	color: var(--text-secondary);
+	margin-bottom: 35px; /* Increased margin */
+	font-size: 0.95rem;
+	text-align: center;
 }
 
 .google-signin-button {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: var(--google-button-bg);
-    color: var(--google-button-text);
-    border: 1px solid var(--google-button-border);
-    border-radius: var(--button-radius);
-    font-size: 1rem;
-    font-weight: 500; /* Medium weight */
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex; /* Align icon and text */
-    align-items: center;
-    justify-content: center;
-    gap: 10px; /* Space between icon and text */
-    margin-bottom: 25px; /* Add margin below Google button */
+	width: 100%;
+	padding: 12px 15px;
+	background-color: var(--google-button-bg);
+	color: var(--google-button-text);
+	border: 1px solid var(--google-button-border);
+	border-radius: var(--button-radius);
+	font-size: 1rem;
+	font-weight: 500; /* Medium weight */
+	cursor: pointer;
+	transition: var(--transition);
+	display: flex; /* Align icon and text */
+	align-items: center;
+	justify-content: center;
+	gap: 10px; /* Space between icon and text */
+	margin-bottom: 25px; /* Add margin below Google button */
 }
 
 .google-signin-button:hover {
-    background-color: var(--google-button-hover-bg);
-    border-color: #cccccc;
-    color: var(--google-button-text);
+	background-color: var(--google-button-hover-bg);
+	border-color: #cccccc;
+	color: var(--google-button-text);
 }
 
 .google-signin-button:focus,
 .google-signin-button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4); /* Google blue focus */
-    background-color: var(--google-button-bg);
-    border-color: var(--google-button-border);
-    color: var(--google-button-text);
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4); /* Google blue focus */
+	background-color: var(--google-button-bg);
+	border-color: var(--google-button-border);
+	color: var(--google-button-text);
 }
 
 .google-signin-button:active {
-    background-color: var(--google-button-hover-bg);
-    border-color: #cccccc;
-    color: var(--google-button-text);
+	background-color: var(--google-button-hover-bg);
+	border-color: #cccccc;
+	color: var(--google-button-text);
 }
 
 .google-signin-button i.fa-google {
-    font-size: 1.2em;
+	font-size: 1.2em;
 }
 
 .form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background-color: var(--lighter-color);
-    box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3); /* Primary color focus glow */
+	outline: none;
+	border-color: var(--primary-color);
+	background-color: var(--lighter-color);
+	box-shadow: 0 0 0 2px rgba(0, 197, 154, 0.3); /* Primary color focus glow */
 }
 
 .form-control::placeholder {
-    color: var(--text-secondary);
+	color: var(--text-secondary);
 }
 
 .error-message {
-    color: var(--danger-color);
-    font-size: 0.9rem;
-    margin-top: 20px; /* Adjusted margin */
-    min-height: 1.2em;
-    text-align: center;
+	color: var(--danger-color);
+	font-size: 0.9rem;
+	margin-top: 20px; /* Adjusted margin */
+	min-height: 1.2em;
+	text-align: center;
 }
 
 button:focus, a:focus {
-    outline: none;
+	outline: none;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-    .auth-box {
-        padding: 30px 25px;
-    }
-    .auth-box h2 {
-        font-size: 1.5rem;
-    }
+	.auth-box {
+		padding: 30px 25px;
+	}
+	.auth-box h2 {
+		font-size: 1.5rem;
+	}
 }
