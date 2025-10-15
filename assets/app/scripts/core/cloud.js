@@ -1,90 +1,20 @@
 import { getSupabaseClient } from '../auth/initsupabaseapp.js';
+import { userManager } from './user.js';
 
-class User { // todo: split user into cloud (file management) & auth (login/signup)
+class Cloud {
 	constructor() {
 		this.client = null;
-		this.currentUser = null;
-		this.currentSession = null;
 	}
 
 	async ensureClient() {
-		if (!this.client) {
-			this.client = await getSupabaseClient();
-		}
+		if (!this.client) this.client = await getSupabaseClient();
 		return this.client;
 	}
 
-	async getSession() {
-		try {
-			const client = await this.ensureClient();
-			const { data: { session }, error } = await client.auth.getSession();
-			if (error) throw error;
-			
-			this.currentSession = session;
-			this.currentUser = session?.user || null;
-			return { session, user: this.currentUser };
-		} catch (error) {
-			console.error('Error getting session:', error);
-			return { session: null, user: null, error };
-		}
-	}
-
-	async signOut() {
-		try {
-			const client = await this.ensureClient();
-			const { error } = await client.auth.signOut();
-			if (error) throw error;
-			
-			this.currentSession = null;
-			this.currentUser = null;
-			return { success: true };
-		} catch (error) {
-			console.error('Error signing out:', error);
-			return { success: false, error };
-		}
-	}
-
-	async isAuthenticated() {
-		const { session } = await this.getSession();
-		return !!session;
-	}
-
-	async getUserInfo() {
-		const { user } = await this.getSession();
-		return { id: user?.id || null, email: user?.email || null, isLoggedIn: !!user };
-	}
-
-	async deleteAccount() {
-		try {
-			if (!this.currentUser) {
-				await this.getSession();
-			}
-
-			if (!this.currentUser) {
-				throw new Error('No user logged in');
-			}
-
-			const client = await this.ensureClient();
-			const { error } = await client.rpc('delete_user_account');
-			if (error) throw error;
-
-			await this.signOut();
-			
-			return { success: true };
-		} catch (error) {
-			console.error('Error deleting account:', error);
-			return { success: false, error: error.message };
-		}
-	}
-
-	// TODO: Move file management back to the filemanager
-
 	async uploadFile(filePath, fileData) {
 		try {
-			const { session } = await this.getSession();
-			if (!session) {
-				throw new Error('User not authenticated');
-			}
+			if (!session) throw new Error('User not authenticated');
+			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
 			const { error: storageError } = await client.storage
@@ -102,10 +32,8 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async downloadFile(filePath) {
 		try {
-			const { session } = await this.getSession();
-			if (!session) {
-				throw new Error('User not authenticated');
-			}
+			const { session } = await userManager.getSession();
+			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
 			const { data: blob, error } = await client.storage
@@ -123,10 +51,8 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async deleteFile(filePath) {
 		try {
-			const { session } = await this.getSession();
-			if (!session) {
-				throw new Error('User not authenticated');
-			}
+			const { session } = await userManager.getSession();
+			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
 			const { error } = await client.storage
@@ -144,7 +70,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async listUserFiles() {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
@@ -165,7 +91,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async createBlankFile(fileName) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const { exists } = await this.checkFileExists(fileName);
@@ -222,10 +148,8 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async createFileFromJson(fileName, jsonContent) {
 		try {
-			const { session } = await this.getSession();
-			if (!session) {
-				throw new Error('User not authenticated');
-			}
+			const { session } = await userManager.getSession();
+			if (!session) throw new Error('User not authenticated');
 
 			const { exists } = await this.checkFileExists(fileName);
 			if (exists) {
@@ -301,7 +225,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async checkFileExists(fileName) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
@@ -323,7 +247,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async renameFile(fileId, newName) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const validationResult = await this.validateFileName(fileId, newName);
@@ -357,7 +281,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async deleteFileRecord(fileId) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const userId = session.user.id;
@@ -393,7 +317,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async validateFileName(fileId, newName) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 			if (!fileId || !newName) throw new Error('File ID and new name are required');
 
@@ -422,7 +346,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async getFileInfo(fileId) {
 		try {
-			const { session } = await this.getSession();
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();
@@ -482,10 +406,8 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 
 	async downloadFileAsJson(fileId, fileName) {
 		try {
-			const { session } = await this.getSession();
-			if (!session) {
-				throw new Error('User not authenticated');
-			}
+			const { session } = await userManager.getSession();
+			if (!session) throw new Error('User not authenticated');
 
 			const filePath = `${session.user.id}/${fileId}.json`;
 			const result = await this.downloadFile(filePath);
@@ -524,7 +446,7 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 		}
 	}
 
-	_sanitizeFileName(fileName) { // todo: move validation & sanitiz from modals to cloud
+	_sanitizeFileName(fileName) {
 		if (!fileName || typeof fileName !== 'string') {
 			return 'untitled';
 		}
@@ -545,6 +467,6 @@ class User { // todo: split user into cloud (file management) & auth (login/sign
 	}
 }
 
-const userManager = new User();
+const cloudManager = new Cloud();
 
-export { User, userManager };
+export { Cloud, cloudManager };

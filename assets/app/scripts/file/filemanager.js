@@ -1,6 +1,6 @@
 import { FileWriter } from './filewriter.js';
 import { FileReader } from './filereader.js';
-import { userManager } from '../core/cloud.js';
+import { cloudManager } from '../core/cloud.js';
 
 class FileManager {
 	constructor(board) {
@@ -30,7 +30,7 @@ class FileManager {
 			return;
 		}
 		
-		const result = await userManager.updateFileTitle(this.fileId);
+		const result = await cloudManager.updateFileTitle(this.fileId);
 	}
 
 	async saveState() {
@@ -50,7 +50,7 @@ class FileManager {
 	}
 
 	async validateFileName(fileId, newName, userId) {
-		const result = await userManager.validateFileName(fileId, newName);
+		const result = await cloudManager.validateFileName(fileId, newName);
 		
 		if (!result.success) {
 			throw new Error(result.error);
@@ -60,7 +60,7 @@ class FileManager {
 	}
 
 	async renameFile(fileId, newName) {
-		const result = await userManager.renameFile(fileId, newName);
+		const result = await cloudManager.renameFile(fileId, newName);
 		
 		if (!result.success) {
 			throw new Error(result.error);
@@ -78,7 +78,7 @@ class FileManager {
 			throw new Error("File ID is required for deletion.");
 		}
 
-		const result = await userManager.deleteFileRecord(fileId);
+		const result = await cloudManager.deleteFileRecord(fileId);
 		
 		if (!result.success) {
 			throw new Error(result.error);

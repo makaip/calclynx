@@ -1,4 +1,4 @@
-import { userManager } from '../core/cloud.js';
+import { cloudManager } from '../core/cloud.js';
 import { ModalUtils } from './modalutils.js';
 
 export class RenameFileModal {
@@ -39,18 +39,11 @@ export class RenameFileModal {
 			return;
 		}
 
-		const nameValidation = userManager.validateFileName?.(newName);
-		if (nameValidation?.error) {
-			ModalUtils.showError(this.error, nameValidation.error);
-			this.input?.focus();
-			return;
-		}
-
 		ModalUtils.hideError(this.error);
 
 		try {
 			ModalUtils.setButtonLoading(this.button, true, 'Renaming...', 'Rename');
-			const result = await userManager.renameFile(this.fileIdToRename, newName);
+			const result = await cloudManager.renameFile(this.fileIdToRename, newName);
 
 			if (!result.success) throw new Error(result.error);
 
@@ -62,7 +55,7 @@ export class RenameFileModal {
 			const urlParams = new URLSearchParams(window.location.search);
 			const currentFileId = urlParams.get('fileId');
 			if (currentFileId === this.fileIdToRename) {
-				await userManager.updateFileTitle(this.fileIdToRename);
+				await cloudManager.updateFileTitle(this.fileIdToRename);
 			}
 		} catch (error) {
 			console.error('Error renaming file:', error);
