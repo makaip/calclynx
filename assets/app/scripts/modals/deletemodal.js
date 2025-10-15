@@ -1,4 +1,4 @@
-import { userManager } from '../core/cloud.js';
+import { cloudManager } from '../core/cloud.js';
 import { ModalUtils } from './modalutils.js';
 
 export class DeleteFileModal {
@@ -13,14 +13,10 @@ export class DeleteFileModal {
 
 	initDeleteFileModal(fileId, fileName) {
 		this.fileToDelete = fileId;
-		if (this.fileNameElement) {
-			this.fileNameElement.textContent = fileName;
-		}
+		if (this.fileNameElement) this.fileNameElement.textContent = fileName;
 
 		ModalUtils.hideError(this.error);
-		if (this.checkbox) {
-			this.checkbox.checked = false;
-		}
+		if (this.checkbox) this.checkbox.checked = false;
 
 		if (sessionStorage.getItem('doNotAskAgainDeleteFile') === 'true') {
 			this.confirmDeletion();
@@ -32,14 +28,11 @@ export class DeleteFileModal {
 
 	async confirmDeletion() {
 		if (!this.fileToDelete) return;
-
-		if (this.checkbox?.checked) {
-			sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
-		}
+		if (this.checkbox?.checked) sessionStorage.setItem('doNotAskAgainDeleteFile', 'true');
 
 		try {
 			ModalUtils.setButtonLoading(this.button, true, 'Deleting...', 'Delete File');
-			const result = await userManager.deleteFileRecord(this.fileToDelete);
+			const result = await cloudManager.deleteFileRecord(this.fileToDelete);
 			
 			if (!result.success) throw new Error(result.error);
 			
@@ -52,7 +45,7 @@ export class DeleteFileModal {
 			const urlParams = new URLSearchParams(window.location.search);
 			const currentFileId = urlParams.get('fileId');
 			if (currentFileId === this.fileToDelete) {
-				await userManager.updateFileTitle(null);
+				await cloudManager.updateFileTitle(null);
 				window.location.href = '/app.html';
 			}
 

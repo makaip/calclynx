@@ -70,9 +70,7 @@ class MathFieldEditor {
 
 	static clearGroupSelection(container) {
 		const mathGroupEl = container.closest('.math-group');
-		if (mathGroupEl) {
-			mathGroupEl.classList.remove('selected');
-		}
+		if (mathGroupEl) mathGroupEl.classList.remove('selected');
 	}
 
 	static prepareContainerForEdit(container, existingLatex) {

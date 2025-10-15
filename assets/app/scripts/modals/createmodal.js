@@ -1,4 +1,4 @@
-import { userManager } from '../core/cloud.js';
+import { cloudManager } from '../core/cloud.js';
 import { ModalUtils } from './modalutils.js';
 
 export class CreateFileModal {
@@ -31,8 +31,8 @@ export class CreateFileModal {
 			ModalUtils.setButtonLoading(this.button, true, 'Creating...', 'Create File');
 			
 			const result = this.jsonData 
-				? await userManager.createFileFromJson(fileName, this.jsonData)
-				: await userManager.createBlankFile(fileName);
+				? await cloudManager.createFileFromJson(fileName, this.jsonData)
+				: await cloudManager.createBlankFile(fileName);
 			
 			if (!result.success) {
 				throw new Error(result.error);
@@ -63,9 +63,7 @@ export class CreateFileModal {
 
 	setJsonData(data) {
 		this.jsonData = data;
-		if (this.input) {
-			this.input.value = '';
-		}
+		if (this.input) this.input.value = '';
 		ModalUtils.hideError(this.error);
 		const modalInstance = bootstrap.Modal.getOrCreateInstance(this.modal);
 		modalInstance.show();

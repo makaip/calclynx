@@ -26,10 +26,7 @@ class MathFieldContainer {
 	}
 
 	handleContainerMouseDown(event) {
-		if (!MathFieldUtils.isDragHandleClicked(event)) {
-			MathFieldUIManager.clearMathGroupSelections();
-		}
-
+		if (!MathFieldUtils.isDragHandleClicked(event)) MathFieldUIManager.clearMathGroupSelections();
 		MathFieldUIManager.highlightGroupExpressions(this.container);
 	}
 

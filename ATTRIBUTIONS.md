@@ -30,3 +30,23 @@ This project makes use of the following open source software:
 - **License:** MIT  
 - **Citation:**  
   > ProseMirror — by Marijn Haverbeke. A modular toolkit for building rich-text editors on the web. Licensed under MIT. See https://prosemirror.net or https://github.com/ProseMirror/prosemirror.
+
+
+## Bootstrap  
+- **Website:** https://getbootstrap.com/  
+- **Repository:** https://github.com/twbs/bootstrap  
+- **Authors:** The Bootstrap Authors  
+- **Description:** The world’s most popular HTML, CSS, and JS library for responsive, mobile-first front-end web development.  
+- **License:** MIT  
+- **Citation:**  
+  > Bootstrap — by The Bootstrap Authors. The world’s most popular HTML, CSS, and JS library for responsive, mobile-first front-end web development. Licensed under MIT. See https://getbootstrap.com or https://github.com/twbs/bootstrap.
+
+
+## Typed.js  
+- **Website:** https://mattboldt.com/demos/typed-js/  
+- **Repository:** https://github.com/mattboldt/typed.js  
+- **Author:** Matt Boldt  
+- **Description:** A JavaScript library that types out strings to create a typing animation effect.  
+- **License:** MIT  
+- **Citation:**  
+  > Typed.js — by Matt Boldt. A JavaScript library that types out strings to create a typing animation effect. Licensed under MIT. See https://github.com/mattboldt/typed.js or https://mattboldt.com/demos/typed-js/.

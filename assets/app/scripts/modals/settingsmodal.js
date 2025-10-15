@@ -1,4 +1,4 @@
-import { userManager } from '../core/cloud.js';
+import { userManager } from '../core/user.js';
 import { ModalUtils } from './modalutils.js';
 
 export class SettingsModal {

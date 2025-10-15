@@ -1,4 +1,4 @@
-import { userManager } from '../core/cloud.js';
+import { cloudManager } from '../core/cloud.js';
 import { SidebarResizer } from './sidebar-resizer.js';
 
 export class Sidebar {
@@ -104,7 +104,7 @@ export class Sidebar {
 		fileList.innerHTML = this.createIndicator('Loading files...', 'loading');
 		
 		try {
-			const result = await userManager.listUserFiles();
+			const result = await cloudManager.listUserFiles();
 			if (!result.success) throw new Error(result.error);
 			
 			const currentFileId = this.getCurrentFileId();

@@ -22,7 +22,8 @@ export default defineConfig([
 				mgCalculate: "readonly",
 				mgCalc: "readonly",
 
-				userManager: "readonly"
+				userManager: "readonly",
+				cloudManager: "readonly"
 			}
 		} 
 	},
