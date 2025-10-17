@@ -13,11 +13,11 @@ class CommandPalette {
 		this.lastFocusedMathField = null;
 		this.variableInputMode = false;
 		this.currentVariablePattern = null;
-		
+
 		this.commands = commands;
 		this.variablePatterns = variablePatterns;
 		this.executor = new CommandPaletteExecutor();
-		
+
 		this.initialize();
 	}
 
@@ -31,7 +31,7 @@ class CommandPalette {
 		this.modalElement = document.getElementById('commandPaletteModal');
 		this.inputElement = this.modalElement.querySelector('.command-palette-input');
 		this.optionsElement = this.modalElement.querySelector('.command-palette-options');
-		
+
 		this.bootstrapModal = new bootstrap.Modal(this.modalElement, {
 			backdrop: true,
 			keyboard: false
@@ -62,7 +62,7 @@ class CommandPalette {
 			this.hide();
 			return;
 		}
-		
+
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			this.moveSelection(1);
@@ -77,21 +77,21 @@ class CommandPalette {
 
 	moveSelection(direction) {
 		if (this.filteredResults.length === 0) return;
-		
+
 		this.selectedIndex += direction;
-		
+
 		if (this.selectedIndex < 0) {
 			this.selectedIndex = this.filteredResults.length - 1;
 		} else if (this.selectedIndex >= this.filteredResults.length) {
 			this.selectedIndex = 0;
 		}
-		
+
 		this.updateSelectionVisual();
 	}
 
 	selectCurrent() {
 		const typedInput = this.inputElement.value.trim();
-		
+
 		const patternMatch = this.matchesVariablePattern(typedInput);
 		if (patternMatch && patternMatch.isComplete) {
 			this.executor.executeVariableCommand(patternMatch.key, patternMatch.variable, null, this.currentReferenceElement);
@@ -102,7 +102,7 @@ class CommandPalette {
 		if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredResults.length) {
 			const result = this.filteredResults[this.selectedIndex];
 			const executionResult = this.executor.executeCommand(result, this.currentReferenceElement);
-			
+
 			if (executionResult.action === 'enterVariableMode') {
 				this.enterVariableInputMode({
 					key: executionResult.variablePattern,
@@ -125,14 +125,14 @@ class CommandPalette {
 	enterVariableInputMode(patternMatch) {
 		this.variableInputMode = true;
 		this.currentVariablePattern = patternMatch.key;
-		
+
 		const pattern = this.variablePatterns[patternMatch.key];
 		if (pattern) {
 			this.inputElement.value = pattern.prefix;
 			this.inputElement.classList.add('variable-input-mode');
 			this.inputElement.focus();
 			this.inputElement.setSelectionRange(
-				this.inputElement.value.length, 
+				this.inputElement.value.length,
 				this.inputElement.value.length
 			);
 		}
@@ -141,7 +141,7 @@ class CommandPalette {
 	renderOptions() {
 		const query = this.inputElement.value.toLowerCase();
 		this.optionsElement.innerHTML = '';
-		
+
 		if (this.variableInputMode) {
 			this.renderVariableInputMode(query);
 			return;
@@ -154,7 +154,7 @@ class CommandPalette {
 			const option = this.createOptionElement(result, index);
 			this.optionsElement.appendChild(option);
 		});
-		
+
 		if (this.filteredResults.length > 0) {
 			this.selectedIndex = 0;
 			this.updateSelectionVisual();
@@ -167,7 +167,7 @@ class CommandPalette {
 
 		const variable = pattern.extractor(query);
 		const isValid = variable && pattern.validator(variable);
-		
+
 		const option = document.createElement('button');
 		option.type = 'button';
 		option.className = 'list-group-item list-group-item-action variable-input-option';
@@ -179,11 +179,11 @@ class CommandPalette {
 				</span>
 			</span>
 		`;
-		
+
 		if (isValid) {
 			option.classList.add('active');
 		}
-		
+
 		this.optionsElement.appendChild(option);
 	}
 
@@ -197,7 +197,7 @@ class CommandPalette {
 		}
 
 		const results = [];
-		
+
 		for (const command of this.commands) {
 			const match = this.matchCommand(command, query);
 			if (match) {
@@ -217,7 +217,7 @@ class CommandPalette {
 	matchCommand(command, input) {
 		const lowerInput = input.toLowerCase();
 		const lowerLabel = command.label.toLowerCase();
-		
+
 		if (lowerLabel.includes(lowerInput)) {
 			return { score: 1, type: 'label' };
 		}
@@ -225,8 +225,8 @@ class CommandPalette {
 		if (command.requiresVariable) {
 			const match = this.matchesVariablePattern(input);
 			if (match && match.key === command.variablePattern) {
-				return { 
-					score: 0.9, 
+				return {
+					score: 0.9,
 					type: 'variable',
 					variable: match.variable,
 					isComplete: match.isComplete
@@ -259,12 +259,12 @@ class CommandPalette {
 
 	createOptionElement(result, index) {
 		const { command, match } = result;
-		
+
 		const option = document.createElement('button');
 		option.type = 'button';
 		option.className = 'list-group-item list-group-item-action';
 		option.dataset.index = index;
-		
+
 		if (match && match.type === 'variable' && match.variable) {
 			const pattern = this.variablePatterns[command.variablePattern];
 			option.innerHTML = pattern.prefix + match.variable;
@@ -277,18 +277,18 @@ class CommandPalette {
 				option.innerHTML += ' <span class="variable-indicator text-secondary fst-italic small">[variable]</span>';
 			}
 		}
-		
+
 		option.addEventListener('click', () => {
 			this.selectedIndex = index;
 			this.selectCurrent();
 		});
-		
+
 		return option;
 	}
 
 	updateSelectionVisual() {
 		const options = this.optionsElement.querySelectorAll('.list-group-item');
-		
+
 		options.forEach((option, index) => {
 			if (index === this.selectedIndex) {
 				option.classList.add('active');
@@ -322,12 +322,12 @@ class CommandPalette {
 	}
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-		try {
-			window.commandPalette = new CommandPalette();
-		} catch (error) {
-			console.error('Error initializing command palette:', error);
-		}
+document.addEventListener('DOMContentLoaded', function () {
+	try {
+		window.commandPalette = new CommandPalette();
+	} catch (error) {
+		console.error('Error initializing command palette:', error);
+	}
 });
 
 export { CommandPalette };

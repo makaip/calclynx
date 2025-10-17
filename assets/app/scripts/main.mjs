@@ -1,6 +1,5 @@
 import './core/main.js';
 
-// globally exposed singletons
 import { CreateFileModal } from './modals/createmodal.js';
 import { DeleteFileModal } from './modals/deletemodal.js';
 import { RenameFileModal } from './modals/renamemodal.js';

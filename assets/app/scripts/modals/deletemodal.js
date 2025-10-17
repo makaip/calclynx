@@ -33,12 +33,12 @@ export class DeleteFileModal {
 		try {
 			ModalUtils.setButtonLoading(this.button, true, 'Deleting...', 'Delete File');
 			const result = await cloudManager.deleteFileRecord(this.fileToDelete);
-			
+
 			if (!result.success) throw new Error(result.error);
-			
+
 			const modal = bootstrap.Modal.getInstance(this.modal);
 			if (modal) modal.hide();
-			
+
 			// refresh file list
 			if (window.loadUserFiles) window.loadUserFiles();
 

@@ -96,9 +96,9 @@ class Cloud {
 
 			const { exists } = await this.checkFileExists(fileName);
 			if (exists) {
-				return { 
-					success: false, 
-					error: `File named "${fileName}" already exists.` 
+				return {
+					success: false,
+					error: `File named "${fileName}" already exists.`
 				};
 			}
 
@@ -153,9 +153,9 @@ class Cloud {
 
 			const { exists } = await this.checkFileExists(fileName);
 			if (exists) {
-				return { 
-					success: false, 
-					error: `File named "${fileName}" already exists.` 
+				return {
+					success: false,
+					error: `File named "${fileName}" already exists.`
 				};
 			}
 
@@ -216,7 +216,7 @@ class Cloud {
 	}
 
 	generateUUID() {
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 			const r = Math.random() * 16 | 0;
 			const v = c == 'x' ? r : (r & 0x3 | 0x8);
 			return v.toString(16);
@@ -259,19 +259,19 @@ class Cloud {
 			const client = await this.ensureClient();
 			const { error: updateError } = await client
 				.from('files')
-				.update({ 
-					file_name: validatedName, 
-					last_modified: now 
+				.update({
+					file_name: validatedName,
+					last_modified: now
 				})
 				.eq('id', fileId)
 				.eq('user_id', session.user.id);
 
 			if (updateError) throw updateError;
 
-			return { 
-				success: true, 
+			return {
+				success: true,
 				newName: validatedName,
-				message: `File renamed to "${validatedName}"` 
+				message: `File renamed to "${validatedName}"`
 			};
 		} catch (error) {
 			console.error('Error renaming file:', error);
@@ -304,8 +304,8 @@ class Cloud {
 
 			if (dbError) throw dbError;
 
-			return { 
-				success: true, 
+			return {
+				success: true,
 				message: `File deleted successfully`,
 				storageDeleted: !storageError
 			};
@@ -359,9 +359,9 @@ class Cloud {
 
 			if (error) throw error;
 
-			return { 
-				success: true, 
-				file: data || null 
+			return {
+				success: true,
+				file: data || null
 			};
 		} catch (error) {
 			console.error('Error getting file info:', error);
@@ -380,7 +380,7 @@ class Cloud {
 
 		const currentPath = window.location.pathname;
 		const fileNotLoaded = !fileId || (currentPath.endsWith('/app.html') && !fileId);
-		
+
 		if (fileNotLoaded) {
 			fileTitleElement.textContent = 'Untitled';
 			return { success: true, title: 'Untitled' };
@@ -388,7 +388,7 @@ class Cloud {
 
 		try {
 			const result = await this.getFileInfo(fileId);
-			
+
 			if (!result.success || !result.file) {
 				fileTitleElement.textContent = 'Untitled';
 				return { success: true, title: 'Untitled' };
@@ -422,10 +422,10 @@ class Cloud {
 			const blob = (result.data instanceof Blob)
 				? result.data
 				: new Blob([typeof result.data === 'string' ? result.data : JSON.stringify(result.data)], { type: 'application/json' });
-			
+
 			const sanitizedFileName = this._sanitizeFileName(fileName);
 			const fileNameWithExt = this._ensureJsonExtension(sanitizedFileName);
-			
+
 			const link = document.createElement('a');
 			const url = window.URL.createObjectURL(blob);
 
@@ -462,7 +462,7 @@ class Cloud {
 		if (!fileName || typeof fileName !== 'string') {
 			return 'untitled.json';
 		}
-		
+
 		return fileName.endsWith('.json') ? fileName : `${fileName}.json`;
 	}
 }

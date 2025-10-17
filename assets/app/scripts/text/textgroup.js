@@ -4,7 +4,7 @@ import { TextFieldCompatibility } from './textfield-compatibility.js';
 class TextGroup extends ObjectGroup {
 	constructor(board, x, y, data = null) {
 		super(board, x, y, data, 'text');
-		
+
 		let content = '';
 		if (data && data.fields && data.fields.length > 0) {
 			content = data.fields[0];
@@ -13,7 +13,7 @@ class TextGroup extends ObjectGroup {
 		this.initializeTextField(content, data);
 		this.setupClickHandler();
 	}
-	
+
 	async initializeTextField(content, data) {
 		try {
 			if (!TextFieldCompatibility.shouldUseProseMirror()) {
@@ -24,7 +24,7 @@ class TextGroup extends ObjectGroup {
 			const normalizedContent = TextFieldCompatibility.normalizeContent(content, '3.0');
 			this.textField = new TextFieldProseMirror(this, !data, normalizedContent);
 			this.useProseMirror = true;
-			
+
 			if (data && data.widthData && this.textField.setWidthData) {
 				setTimeout(() => {
 					this.textField.setWidthData(data.widthData);
@@ -40,7 +40,7 @@ class TextGroup extends ObjectGroup {
 		this.element.addEventListener('click', (event) => {
 			const isFromTextEditor = event.target.closest('.text-editor') || event.target.closest('.text-field-container');
 			if (isFromTextEditor) return;
-			
+
 			if (this.element.classList.contains('selected')) {
 				event.stopPropagation();
 				if (this.textField && this.textField.focus) {

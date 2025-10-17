@@ -16,9 +16,9 @@ class TextFieldProseMirrorContent {
 			group: "inline",
 			atom: true,
 			attrs: { latex: { default: "" } },
-			toDOM: (node) => ["span", { 
-				class: "mathquill", 
-				"data-latex": node.attrs.latex 
+			toDOM: (node) => ["span", {
+				class: "mathquill",
+				"data-latex": node.attrs.latex
 			}],
 			parseDOM: [{
 				tag: "span.mathquill",
@@ -67,7 +67,7 @@ class TextFieldProseMirrorContent {
 					position: content.text.length,
 					latex: node.attrs.latex || ''
 				});
-				content.text += '\uE000'; 
+				content.text += '\uE000';
 			} else if (node.type.name === 'paragraph' && node.content.size === 0) {
 				if (content.text.length > 0) {
 					content.text += '\n';
@@ -84,8 +84,8 @@ class TextFieldProseMirrorContent {
 		const doc = TextFieldCompatibility.convertV2ToV3(content, this.schema);
 		if (doc) {
 			const tr = this.textField.proseMirrorView.state.tr.replaceWith(
-				0, 
-				this.textField.proseMirrorView.state.doc.content.size, 
+				0,
+				this.textField.proseMirrorView.state.doc.content.size,
 				doc.content
 			);
 

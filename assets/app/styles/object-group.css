@@ -1,5 +1,5 @@
-.math-group, 
-.text-group, 
+.math-group,
+.text-group,
 .image-group {
 	position: absolute;
 	display: flex;

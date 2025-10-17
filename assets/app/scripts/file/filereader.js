@@ -12,7 +12,7 @@ class FileReader {
 
 	async loadState() {
 		if (this.fileManager.fileId) {
-			await this.loadStateFromCloud(); 
+			await this.loadStateFromCloud();
 		} else {
 			console.log("No fileId found. Starting with an empty board.");
 			this.initializeEmptyState();
@@ -37,7 +37,7 @@ class FileReader {
 
 			if (downloadError) {
 				if (downloadError.message && (
-					downloadError.message.includes("Object not found") || 
+					downloadError.message.includes("Object not found") ||
 					downloadError.message.includes("The resource was not found") ||
 					downloadError.statusCode === 404
 				)) {
@@ -56,7 +56,7 @@ class FileReader {
 
 			const fileContentText = await blob.text();
 			this.importData(fileContentText, false); // Pass flag to prevent immediate re-save
-			
+
 			await this.fileManager.updateFileTitle();
 
 		} catch (error) {
@@ -81,7 +81,7 @@ class FileReader {
 
 			console.log(`Loading data format version: ${parsedData.version}`);
 			this.board.canvas.innerHTML = '';
-			
+
 			parsedData.groups.forEach((groupData) => {
 				if (groupData.type === 'text') {
 					new TextGroup(this.board, 0, 0, groupData);

@@ -197,7 +197,7 @@ class MathNodeView {
 		}
 
 		if (event.type === 'paste' || event.type === 'input' || event.type === 'beforeinput' ||
-			event.type === 'compositionstart' || event.type === 'compositionend' || 
+			event.type === 'compositionstart' || event.type === 'compositionend' ||
 			event.type === 'compositionupdate') {
 			return true;
 		}

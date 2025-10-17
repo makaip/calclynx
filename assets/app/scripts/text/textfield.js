@@ -10,12 +10,12 @@ class TextFieldProseMirror {
 		this.textGroup = textGroup;
 		this.proseMirrorView = null;
 		this.saveTimeout = null;
-		
+
 		this.schemaManager = new TextFieldProseMirrorSchema();
 		this.eventHandler = null;
 		this.content = new TextFieldProseMirrorContent(this);
 		this.resizeHandler = null;
-		
+
 		if (window.proseMirrorReady) {
 			this.initialize(isNewField, content);
 		} else {
@@ -30,22 +30,22 @@ class TextFieldProseMirror {
 			console.error('ProseMirror not available, cannot initialize TextFieldProseMirror');
 			return;
 		}
-		
+
 		this.createContainer();
 		this.createProseMirrorEditor(content);
 		this.attachEventListeners();
-		
+
 		if (isNewField) setTimeout(() => this.focus(), 10);
 	}
 
 	getFormattingKeymap(schema) {
 		const { toggleMark } = window.ProseMirror;
 		const keymap = {};
-		
+
 		if (schema.marks.strong) keymap['Mod-b'] = toggleMark(schema.marks.strong);
 		if (schema.marks.em) keymap['Mod-i'] = toggleMark(schema.marks.em);
 		if (schema.marks.underline) keymap['Mod-u'] = toggleMark(schema.marks.underline);
-		
+
 		return keymap;
 	}
 
@@ -77,7 +77,7 @@ class TextFieldProseMirror {
 
 		const schema = this.schemaManager.createSchema();
 		this.content.schema = schema;
-		
+
 		this.editorElement = document.createElement('div');
 		this.editorElement.className = 'text-editor prosemirror-editor';
 		this.editorElement.tabIndex = 0;
@@ -100,8 +100,8 @@ class TextFieldProseMirror {
 							for (const field of mathFields) {
 								if (field.mathquillObject) {
 									const hasFocus = field.contains(document.activeElement) ||
-																	field === document.activeElement;
-									
+										field === document.activeElement;
+
 									if (hasFocus) {
 										return false;
 									}
@@ -133,16 +133,16 @@ class TextFieldProseMirror {
 			handleClick: (view, pos, event) => {
 				const target = event.target;
 				const mathField = target.closest('.mathquill');
-				
+
 				if (mathField) {
 					ObjectGroup.clearAllSelections();
 					return true;
 				}
-				
+
 				if (this.eventHandler) {
 					this.eventHandler.blurAllMathFields(view);
 				}
-				
+
 				ObjectGroup.clearAllSelections();
 				return false;
 			},
@@ -152,13 +152,13 @@ class TextFieldProseMirror {
 			handlePaste: (view, event, slice) => {
 				const target = event.target;
 				const mathField = target.closest('.mathquill');
-				
+
 				if (mathField) {
 					event.preventDefault();
 					event.stopPropagation();
 					return true;
 				}
-				
+
 				return false;
 			},
 			handleDOMEvents: {
@@ -201,12 +201,12 @@ class TextFieldProseMirror {
 			dispatchTransaction: (tr) => {
 				const newState = this.proseMirrorView.state.apply(tr);
 				this.proseMirrorView.updateState(newState);
-				
+
 				const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
 				if (toolbar && toolbar.activeTextField === this) {
-						toolbar.updateButtonStates();
+					toolbar.updateButtonStates();
 				}
-				
+
 				clearTimeout(this.saveTimeout);
 				this.saveTimeout = setTimeout(() => {
 					this.textGroup.board.fileManager.saveState();
@@ -222,21 +222,21 @@ class TextFieldProseMirror {
 					const focusedElement = document.activeElement;
 					const hasProseMirrorFocus = document.querySelector('.ProseMirror:focus-within');
 					const isFocusInTextEditor = focusedElement && (
-						focusedElement.closest('.text-editor') || 
+						focusedElement.closest('.text-editor') ||
 						focusedElement.closest('.prosemirror-editor') ||
 						focusedElement.classList.contains('ProseMirror')
 					);
-					
+
 					if (!hasProseMirrorFocus && !isFocusInTextEditor) {
 						toolbar.hide();
 					}
-				}, 50); 
+				}, 50);
 			}
 		});
 
 		this.editorElement.addEventListener('focus', () => {
 			ObjectGroup.clearAllSelections();
-			
+
 			const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
 			if (toolbar) {
 				toolbar.show(this);
@@ -246,15 +246,15 @@ class TextFieldProseMirror {
 		this.editorElement.addEventListener('click', (event) => {
 			event.stopPropagation();
 			const mathField = event.target.closest('.mathquill');
-			
+
 			if (!mathField) {
 				ObjectGroup.clearAllSelections();
-				
+
 				if (!this.proseMirrorView.hasFocus()) {
 					this.proseMirrorView.focus();
 				}
 			}
-			
+
 			const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
 			if (toolbar) {
 				toolbar.show(this);
@@ -266,7 +266,7 @@ class TextFieldProseMirror {
 		if (this.proseMirrorView) {
 			ObjectGroup.clearAllSelections();
 			this.proseMirrorView.focus();
-			
+
 			if (this.proseMirrorView.state.doc.content.size <= 2) {
 				const { TextSelection } = window.ProseMirror;
 				const tr = this.proseMirrorView.state.tr.setSelection(
@@ -274,7 +274,7 @@ class TextFieldProseMirror {
 				);
 				this.proseMirrorView.dispatch(tr);
 			}
-			
+
 			const toolbar = window.getTextFormatToolbar && window.getTextFormatToolbar();
 			if (toolbar) {
 				setTimeout(() => {
@@ -294,7 +294,7 @@ class TextFieldProseMirror {
 	}
 
 	getContent() {
-		return this.content.getContent(); 
+		return this.content.getContent();
 	}
 
 	setContent(content) {

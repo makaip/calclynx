@@ -44,7 +44,7 @@ class MathBoard {
 		this.fileManager = new FileManager(this);
 		this.clipboard = new Clipboard(this);
 		this.initEventListeners();
-		
+
 		this.fileManager.loadState();
 		this.navigation = new Navigation(this);
 		this.navigation.init();
@@ -78,7 +78,7 @@ class MathBoard {
 		const hasModifiers = e.ctrlKey || e.altKey || e.metaKey;
 		const isEditingMath = document.querySelector('.mq-focused');
 		const isEditingText = document.activeElement.closest('.text-editor');
-		
+
 		if (!isDeleteKey || hasModifiers || isEditingMath || isEditingText) {
 			return;
 		}
@@ -111,17 +111,17 @@ class MathBoard {
 	}
 
 	isUserCurrentlyEditing() {
-		const isTextEditorFocused = document.activeElement && 
-			(document.activeElement.closest('.text-editor') || 
-			 document.activeElement.classList.contains('text-editor'));
+		const isTextEditorFocused = document.activeElement &&
+			(document.activeElement.closest('.text-editor') ||
+				document.activeElement.classList.contains('text-editor'));
 		const isMathFieldFocused = document.querySelector('.mq-focused');
-		const isImageUrlInputFocused = document.activeElement && 
+		const isImageUrlInputFocused = document.activeElement &&
 			document.activeElement.closest('.image-url-input');
-		
-		const isModalInputFocused = document.activeElement && 
+
+		const isModalInputFocused = document.activeElement &&
 			(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') &&
 			document.activeElement.closest('.modal');
-		
+
 		return isTextEditorFocused || isMathFieldFocused || isImageUrlInputFocused || isModalInputFocused;
 	}
 
@@ -152,28 +152,28 @@ class MathBoard {
 	}
 
 	handleEditableFieldClick(event) {
-		if (event.target.closest('.mq-editable-field') || 
-				event.target.closest('.text-editor')) {
-			return true; 
+		if (event.target.closest('.mq-editable-field') ||
+			event.target.closest('.text-editor')) {
+			return true;
 		}
 		return false;
 	}
 
 	handleContainerClick(event) {
 		const containers = [
-			{ 
-				selector: '.math-field-container', 
-				action: (container) => MathFieldEditor.edit(container) 
+			{
+				selector: '.math-field-container',
+				action: (container) => MathFieldEditor.edit(container)
 			},
-			{ 
-				selector: '.text-field-container', 
+			{
+				selector: '.text-field-container',
 				action: (container) => {
 
 					container.textFieldInstance?.focus();
 				}
 			},
-			{ 
-				selector: '.image-container', 
+			{
+				selector: '.image-container',
 				action: (container) => {
 					const imageGroup = container.closest('.image-group');
 					if (imageGroup) {
@@ -191,7 +191,7 @@ class MathBoard {
 				}
 				event.stopPropagation();
 				action(container);
-				return true; 
+				return true;
 			}
 		}
 
@@ -201,7 +201,7 @@ class MathBoard {
 
 	cleanupContainerSelections(event) {
 		const containerSelectors = ['.math-field-container', '.text-field-container', '.image-container'];
-		const isOutsideContainers = !containerSelectors.some(selector => 
+		const isOutsideContainers = !containerSelectors.some(selector =>
 			event.target.closest(selector)
 		);
 
@@ -219,7 +219,7 @@ class MathBoard {
 
 		if (groupTarget) {
 			BoxSelection.selectGroup(groupTarget, event.shiftKey);
-			return true; 
+			return true;
 		}
 		return false;
 	}
@@ -289,7 +289,7 @@ class MathBoard {
 						newCanvasX = Math.round(newCanvasX / this.drag.gridSize) * this.drag.gridSize;
 						newCanvasY = Math.round(newCanvasY / this.drag.gridSize) * this.drag.gridSize;
 					}
-					
+
 					const screenCoords = this.canvasToScreen(newCanvasX, newCanvasY);
 					item.group.style.left = `${screenCoords.x}px`;
 					item.group.style.top = `${screenCoords.y}px`;
@@ -313,7 +313,7 @@ class MathBoard {
 			if (event.target.closest('.math-group') || event.target.closest('.text-group') || event.target.closest('.image-group')) return;
 			if (this.pan.active) return;
 			const coords = this.screenToCanvas(event.clientX, event.clientY);
-			
+
 			if (event.shiftKey) {
 				new TextGroup(this, coords.x, coords.y);
 			} else {

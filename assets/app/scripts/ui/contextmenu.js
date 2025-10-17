@@ -33,12 +33,12 @@ class ContextMenu {
 				anchor.className = 'dropdown-item';
 				anchor.href = '#';
 				anchor.textContent = item.label;
-				
+
 				if (item.disabled) {
 					anchor.classList.add('disabled');
 					anchor.setAttribute('aria-disabled', 'true');
 				}
-				
+
 				anchor.addEventListener('click', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -47,7 +47,7 @@ class ContextMenu {
 					}
 					this.hide();
 				});
-				
+
 				li.appendChild(anchor);
 				this.menuElement.appendChild(li);
 			}
@@ -56,18 +56,18 @@ class ContextMenu {
 		this.menuElement.style.left = x + 'px';
 		this.menuElement.style.top = y + 'px';
 		this.menuElement.style.display = 'block';
-		
+
 		const menuRect = this.menuElement.getBoundingClientRect();
 		let adjustedX = x;
 		let adjustedY = y;
-		
+
 		if (x + menuRect.width > window.innerWidth) {
 			adjustedX = window.innerWidth - menuRect.width - 10;
 		}
 		if (y + menuRect.height > window.innerHeight) {
 			adjustedY = window.innerHeight - menuRect.height - 10;
 		}
-		
+
 		this.menuElement.style.left = adjustedX + 'px';
 		this.menuElement.style.top = adjustedY + 'px';
 	}
@@ -79,10 +79,10 @@ class ContextMenu {
 
 document.addEventListener('DOMContentLoaded', () => {
 	const contextMenu = new ContextMenu(document.getElementById('context-menu'));
-	
+
 	document.addEventListener('contextmenu', function (e) {
 		e.preventDefault();
-	
+
 		// Check if the right-click is on a math group, text group, or image group element.
 		const targetMathGroupElement = e.target.closest('.math-group');
 		const targetTextGroupElement = e.target.closest('.text-group');
@@ -91,12 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		const isAnythingSelected = ObjectGroup.getSelectedGroups().length > 0;
 		const canPerformClipboardAction = targetGroupElement || isAnythingSelected;
 		const canPaste = App?.mathBoard && App.mathBoard.clipboard;
-	
+
 		// Convert the screen coordinates to canvas coordinates.
 		const canvasCoords = App?.mathBoard
 			? App.mathBoard.screenToCanvas(e.pageX, e.pageY)
 			: { x: e.pageX, y: e.pageY };
-	
+
 		// Build the menu items array.
 		const menuItems = [
 			{
@@ -161,13 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
 				label: 'Copy',
 				disabled: !canPerformClipboardAction,
 				action: () => {
-					 if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
-						 // If right-clicked on a non-selected group, select only it before copying
-						 ObjectGroup.clearAllSelections();
-						 targetGroupElement.classList.add('selected');
-					 }
-					 if (!App?.mathBoard) return;
-					 App.mathBoard.copySelectedGroups();
+					if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
+						// If right-clicked on a non-selected group, select only it before copying
+						ObjectGroup.clearAllSelections();
+						targetGroupElement.classList.add('selected');
+					}
+					if (!App?.mathBoard) return;
+					App.mathBoard.copySelectedGroups();
 				}
 			},
 			{
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				disabled: !canPaste,
 				action: () => {
 					if (!App?.mathBoard) return;
-					App.mathBoard.pasteGroups(); 
+					App.mathBoard.pasteGroups();
 				}
 			},
 			{ separator: true },
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				action: () => {
 					if (targetGroupElement && !targetGroupElement.classList.contains('selected')) {
 						// If right-clicked on a non-selected group, delete only it
-						 targetGroupElement.remove();
+						targetGroupElement.remove();
 					} else {
 						// Otherwise, delete all selected groups (math, text, and image).
 						const selectedGroups = ObjectGroup.getSelectedGroups();
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 		);
-	
+
 		contextMenu.show(e.pageX, e.pageY, menuItems);
 	});
 });

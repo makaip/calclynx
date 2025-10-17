@@ -108,7 +108,7 @@ class Zoom {
 
 	handleZoomWheel(e) {
 		if (!this.shouldZoom(e)) return;
-		
+
 		e.preventDefault();
 		const zoomData = this.calculateZoomData(e);
 		this.applyZoom(zoomData.newScale, e.clientX, e.clientY, zoomData.logical);
@@ -123,7 +123,7 @@ class Zoom {
 		const delta = this.normalizeWheelDelta(e);
 		const factor = Math.pow(ZOOM.FACTOR, -delta / 3);
 		const newScale = this.clampScale(this.board.canvasState.scale * factor);
-		
+
 		return { logical, newScale };
 	}
 

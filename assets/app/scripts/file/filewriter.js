@@ -30,7 +30,7 @@ class FileWriter {
 			const top = group.style.top;
 			const fields = [];
 			let widthData = null;
-			
+
 			const containers = group.querySelectorAll('.text-field-container');
 			containers.forEach((container) => {
 				const field = container.textFieldInstance;
@@ -41,7 +41,7 @@ class FileWriter {
 				} else {
 					fields.push(field.getOptimizedContent());
 				}
-				
+
 				if (field.getWidthData) {
 					const fieldWidthData = field.getWidthData();
 					if (fieldWidthData) {
@@ -49,12 +49,12 @@ class FileWriter {
 					}
 				}
 			});
-			
+
 			const groupData = { type: 'text', left, top, fields };
 			if (widthData) {
 				groupData.widthData = widthData;
 			}
-			
+
 			saveData.groups.push(groupData);
 		});
 	}
@@ -67,7 +67,7 @@ class FileWriter {
 			const imageUrl = group.imageGroup ? group.imageGroup.imageUrl : null;
 			const imageWidth = group.imageGroup ? group.imageGroup.imageWidth : null;
 			const imageHeight = group.imageGroup ? group.imageGroup.imageHeight : null;
-			
+
 			saveData.groups.push({ type: 'image', left, top, imageUrl, imageWidth, imageHeight });
 		});
 	}
@@ -75,27 +75,27 @@ class FileWriter {
 	async saveState() {
 		let version = "3.0";
 		let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
-		
+
 		if (!hasProseMirrorCapability) {
 			version = "2.0";
 			console.warn("ProseMirror not available, saving as v2.0 format");
 		}
-		
+
 		const saveData = {
-			version: version, 
+			version: version,
 			groups: []
 		};
-		
+
 		this.saveMathGroups(saveData);
 		this.saveTextGroups(saveData);
 		this.saveImageGroups(saveData);
-		
+
 		const stateString = JSON.stringify(saveData);
-		
+
 		if (!this.fileManager.fileId) {
 			console.warn("No fileId found, skipping cloud save.");
 			EquivalenceUtils.updateEquivalenceState();
-			return; 
+			return;
 		}
 
 		const client = await getSupabaseClient();
@@ -106,16 +106,16 @@ class FileWriter {
 		}
 
 		const userId = session.user.id;
-		const fileId = this.fileManager.fileId; 
+		const fileId = this.fileManager.fileId;
 		const filePath = `${userId}/${fileId}.json`;
 		const fileBlob = new Blob([stateString], { type: 'application/json' });
-		
+
 		if (this.syncIndicator) {
 			this.syncIndicator.classList.add('syncing');
 		}
 
 		try {
-			console.log(`Starting cloud save for fileId: ${fileId} (version ${version})...`); 
+			console.log(`Starting cloud save for fileId: ${fileId} (version ${version})...`);
 			const { error: uploadError } = await client.storage
 				.from('storage')
 				.upload(filePath, fileBlob, { upsert: true }); // upsert to overwrite
@@ -127,8 +127,8 @@ class FileWriter {
 			const now = new Date().toISOString();
 			const { error: dbError } = await client
 				.from('files')
-				.update({ 
-					last_modified: now, 
+				.update({
+					last_modified: now,
 					file_size: fileBlob.size,
 					version: parseInt(version)
 				})
@@ -155,21 +155,21 @@ class FileWriter {
 	exportData() {
 		let version = "3.0";
 		let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
-		
+
 		if (!hasProseMirrorCapability) {
 			version = "2.0";
 			console.warn("ProseMirror not available, exporting as v2.0 format");
 		}
-		
+
 		const exportData = {
 			version: version,
 			groups: []
 		};
-		
+
 		this.saveMathGroups(exportData);
 		this.saveTextGroups(exportData);
 		this.saveImageGroups(exportData);
-		
+
 		const dataStr = JSON.stringify(exportData, null, 2);
 		const blob = new Blob([dataStr], { type: "application/json" });
 		const url = URL.createObjectURL(blob);

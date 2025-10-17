@@ -17,7 +17,7 @@ class MathFieldStateManager {
 			this.handleEmptyField();
 			return;
 		}
-		
+
 		this.updateLatexData(latex);
 		this.editor.replaceWithStaticMath(latex);
 		this.saveState();
@@ -32,8 +32,8 @@ class MathFieldStateManager {
 		this.saveState();
 	}
 
-	updateLatexData(latex) { 
-		this.container.dataset.latex = latex; 
+	updateLatexData(latex) {
+		this.container.dataset.latex = latex;
 	}
 
 	saveState() {

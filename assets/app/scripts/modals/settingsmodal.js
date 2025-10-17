@@ -34,13 +34,13 @@ export class SettingsModal {
 
 	async deleteAccount() {
 		const confirmationEmail = this.deleteConfirmInput?.value.trim() || '';
-		
+
 		if (!confirmationEmail) {
 			ModalUtils.showError(this.error, 'Please enter your email address.');
 			this.deleteConfirmInput?.focus();
 			return;
 		}
-		
+
 		if (confirmationEmail !== this.currentUserEmail) {
 			ModalUtils.showError(this.error, 'Email does not match your account email.');
 			this.deleteConfirmInput?.focus();

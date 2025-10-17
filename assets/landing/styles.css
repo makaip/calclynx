@@ -36,7 +36,8 @@ body {
 	overflow-x: hidden;
 	font-weight: 400;
 	position: relative;
-	padding-top: 76px; /* for fixed navbar */
+	padding-top: 76px;
+	/* for fixed navbar */
 }
 
 /* typed.js cursor customization */
@@ -173,6 +174,7 @@ body {
 	background-color: var(--dark-color) !important;
 	border-top: 1px solid var(--border-color);
 }
+
 .footer-link {
 	color: var(--text-secondary) !important;
 	text-decoration: none;
@@ -180,16 +182,19 @@ body {
 	font-weight: 500;
 	padding: 0;
 }
+
 .footer-link:hover,
 .footer-link:focus {
 	color: var(--primary-color) !important;
 	text-decoration: underline;
 }
+
 .footer-dark h5 {
 	color: var(--text-color) !important;
 	font-weight: 600;
 	margin-bottom: 1rem;
 }
+
 .footer-icon-link {
 	color: var(--text-secondary) !important;
 	font-size: 1.5rem;
@@ -202,6 +207,7 @@ body {
 	height: 2.5rem;
 	background: none;
 }
+
 .footer-icon-link:hover,
 .footer-icon-link:focus {
 	color: var(--primary-color) !important;

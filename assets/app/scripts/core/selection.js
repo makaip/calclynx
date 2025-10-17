@@ -69,18 +69,18 @@ class BoxSelection {
 	createElement(x, y) {
 		const el = document.createElement('div');
 		Object.assign(
-			el.style, 
-			{ 
-				position: 'absolute', 
-				border: '1px dashed #00c59a', 
-				backgroundColor: 'rgba(0, 197, 154, 0.1)', 
-				pointerEvents: 'none', 
-			}, 
-			{ 
-				left: `${x}px`, 
-				top: `${y}px`, 
-				width: '0px', 
-				height: '0px' 
+			el.style,
+			{
+				position: 'absolute',
+				border: '1px dashed #00c59a',
+				backgroundColor: 'rgba(0, 197, 154, 0.1)',
+				pointerEvents: 'none',
+			},
+			{
+				left: `${x}px`,
+				top: `${y}px`,
+				width: '0px',
+				height: '0px'
 
 			});
 		el.className = 'box-select-rect';

@@ -7,7 +7,7 @@ export const ModalUtils = {
 
 	showError(element, message) {
 		if (!element) return;
-		
+
 		if (message) {
 			element.textContent = message;
 			element.style.display = 'block';
@@ -23,9 +23,9 @@ export const ModalUtils = {
 
 	setButtonLoading(button, isLoading, loadingText = 'Loading...', normalText = 'Submit') {
 		if (!button) return;
-		
+
 		button.disabled = isLoading;
-		button.innerHTML = isLoading 
+		button.innerHTML = isLoading
 			? `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`
 			: normalText;
 	},
@@ -46,7 +46,7 @@ export const ModalUtils = {
 		if (!fileName || typeof fileName !== 'string') {
 			return 'untitled.json';
 		}
-		
+
 		return fileName.endsWith('.json') ? fileName : `${fileName}.json`;
 	}
 }

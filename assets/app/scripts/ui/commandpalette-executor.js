@@ -20,7 +20,7 @@ export class CommandPaletteExecutor {
 	executeCommand(result, currentReferenceElement) {
 		const { command, match } = result;
 		const matchVariable = match && match.variable;
-		
+
 		if (command.requiresVariable && !matchVariable) {
 			return {
 				action: 'enterVariableMode',
@@ -29,7 +29,7 @@ export class CommandPaletteExecutor {
 		}
 
 		const context = this.buildExecutionContext(command, matchVariable, currentReferenceElement);
-		
+
 		if (command.requiresVariable && matchVariable) {
 			this.executeVariableCommand(command.variablePattern, matchVariable, context);
 		} else {
@@ -43,7 +43,7 @@ export class CommandPaletteExecutor {
 		if (!context) {
 			context = this.buildExecutionContext(null, variable, currentReferenceElement);
 		}
-		
+
 		const pattern = this.variablePatterns[patternKey];
 		if (pattern) {
 			const commandName = pattern.prefix + variable;
@@ -62,7 +62,7 @@ export class CommandPaletteExecutor {
 	buildExecutionContext(command = null, variable = null, currentReferenceElement = null) {
 		const mathFields = document.querySelectorAll('.math-field-container');
 		let referenceContainer = currentReferenceElement?.closest('.math-field-container');
-		
+
 		if (!referenceContainer && mathFields.length > 0) {
 			referenceContainer = mathFields[mathFields.length - 1];
 		}
@@ -78,7 +78,7 @@ export class CommandPaletteExecutor {
 		if (referenceContainer && referenceContainer.parentElement?.mathGroup) {
 			const targetMathField = referenceContainer.parentElement.mathGroup.insertMathFieldAfter(referenceContainer);
 			context.targetMathField = targetMathField;
-			
+
 			const sourceMathFieldInstance = referenceContainer.mathFieldInstance;
 			if (sourceMathFieldInstance && sourceMathFieldInstance.editor.getMathField()) {
 				context.sourceLatex = sourceMathFieldInstance.editor.getMathField().latex();
@@ -97,7 +97,7 @@ export class CommandPaletteExecutor {
 
 		try {
 			const processedLatex = this.preprocessLatex(commandName, sourceLatex);
-			
+
 			if (typeof mgCalc !== 'undefined') {
 				this.processMgCalc(commandName, processedLatex, targetMathFieldInstance);
 			} else if (typeof mgTrans !== 'undefined' && typeof mgCalculate !== 'undefined') {
@@ -133,13 +133,13 @@ export class CommandPaletteExecutor {
 
 	processMgCalc(commandName, processedLatex, targetMathFieldInstance) {
 		const resultMg = this.executeMgCalcOperation(commandName, processedLatex);
-		
+
 		if (!resultMg || !resultMg.latex) {
 			console.error("MathGene operation returned invalid result.");
 			this.setErrorMessage(targetMathFieldInstance, 'Invalid calculation result');
 			return;
 		}
-		
+
 		targetMathFieldInstance.editor.getMathField().latex(resultMg.latex);
 	}
 
@@ -149,7 +149,7 @@ export class CommandPaletteExecutor {
 		}
 
 		const lowerCommand = commandName.toLowerCase();
-		
+
 		for (const [patternKey, pattern] of Object.entries(this.variablePatterns)) {
 			if (lowerCommand.startsWith(pattern.prefix.toLowerCase())) {
 				const variable = pattern.extractor(commandName);
@@ -160,13 +160,13 @@ export class CommandPaletteExecutor {
 				}
 			}
 		}
-		
+
 		const command = this.commandsMap.get(lowerCommand);
 		if (command && command.mgCalcMethod) {
 			const method = mgCalc[command.mgCalcMethod];
 			return method ? method(processedLatex) : mgCalc.Simplify(processedLatex);
 		}
-		
+
 		return mgCalc.Simplify(processedLatex);
 	}
 
@@ -174,7 +174,7 @@ export class CommandPaletteExecutor {
 		const sourceMg = mgTrans.texImport(processedLatex);
 		const resultMg = mgCalculate.Simplify(sourceMg);
 		const mathGeneResult = mgTrans.Output(resultMg);
-		
+
 		if (mathGeneResult && mathGeneResult.latex) {
 			targetMathFieldInstance.editor.getMathField().latex(mathGeneResult.latex);
 		} else {

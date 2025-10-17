@@ -10,75 +10,75 @@ class Clipboard {
 	}
 
 	copySelectedGroups() {
-	const selectedGroups = Array.from(ObjectGroup.getSelectedGroups());
-	if (selectedGroups.length === 0) {
-		this.clipboardData = null;
-		return;
-	}
+		const selectedGroups = Array.from(ObjectGroup.getSelectedGroups());
+		if (selectedGroups.length === 0) {
+			this.clipboardData = null;
+			return;
+		}
 
-	let minX = Infinity;
-	let minY = Infinity;
+		let minX = Infinity;
+		let minY = Infinity;
 
-	selectedGroups.forEach(group => {
-		const left = parseInt(group.style.left, 10);
-		const top = parseInt(group.style.top, 10);
-		if (left < minX) minX = left;
-		if (top < minY) minY = top;
-	});
-
-	this.clipboardData = selectedGroups.map(group => {
-		const left = parseInt(group.style.left, 10);
-		const top = parseInt(group.style.top, 10);
-		
-		if (group.classList.contains('math-group')) {
-		const fields = [];
-		group.querySelectorAll('.math-field-container').forEach(container => {
-			if (container.dataset.latex) {
-			fields.push(container.dataset.latex);
-			}
+		selectedGroups.forEach(group => {
+			const left = parseInt(group.style.left, 10);
+			const top = parseInt(group.style.top, 10);
+			if (left < minX) minX = left;
+			if (top < minY) minY = top;
 		});
 
-		return { 
-			type: 'math',
-			relativeLeft: left - minX, 
-			relativeTop: top - minY, 
-			fields 
-		};
-		} else if (group.classList.contains('text-group')) {
-			const fields = [];
-			let widthData = null;
-			const container = group.querySelector('.text-field-container');
-			if (container && container.textFieldInstance) {
-				fields.push(container.textFieldInstance.getContent());
-				
-				if (container.textFieldInstance.getWidthData) {
-				widthData = container.textFieldInstance.getWidthData();
-				}
-			}
+		this.clipboardData = selectedGroups.map(group => {
+			const left = parseInt(group.style.left, 10);
+			const top = parseInt(group.style.top, 10);
 
-			const result = { 
-				type: 'text',
-				relativeLeft: left - minX, 
-				relativeTop: top - minY, 
-				fields 
-			};
-			
-			if (widthData) {
-				result.widthData = widthData;
-			}
-			
-			return result;
+			if (group.classList.contains('math-group')) {
+				const fields = [];
+				group.querySelectorAll('.math-field-container').forEach(container => {
+					if (container.dataset.latex) {
+						fields.push(container.dataset.latex);
+					}
+				});
+
+				return {
+					type: 'math',
+					relativeLeft: left - minX,
+					relativeTop: top - minY,
+					fields
+				};
+			} else if (group.classList.contains('text-group')) {
+				const fields = [];
+				let widthData = null;
+				const container = group.querySelector('.text-field-container');
+				if (container && container.textFieldInstance) {
+					fields.push(container.textFieldInstance.getContent());
+
+					if (container.textFieldInstance.getWidthData) {
+						widthData = container.textFieldInstance.getWidthData();
+					}
+				}
+
+				const result = {
+					type: 'text',
+					relativeLeft: left - minX,
+					relativeTop: top - minY,
+					fields
+				};
+
+				if (widthData) {
+					result.widthData = widthData;
+				}
+
+				return result;
 			} else if (group.classList.contains('image-group')) {
-			return { 
-				type: 'image',
-				relativeLeft: left - minX, 
-				relativeTop: top - minY, 
-				imageUrl: group.imageGroup.imageUrl,
-				imageWidth: group.imageGroup.imageWidth,
-				imageHeight: group.imageGroup.imageHeight
-			};
-		}
-	});
+				return {
+					type: 'image',
+					relativeLeft: left - minX,
+					relativeTop: top - minY,
+					imageUrl: group.imageGroup.imageUrl,
+					imageWidth: group.imageGroup.imageWidth,
+					imageHeight: group.imageGroup.imageHeight
+				};
+			}
+		});
 	}
 
 	cutSelectedGroups() {
@@ -111,7 +111,7 @@ class Clipboard {
 				imageHeight: groupData.imageHeight,
 				widthData: groupData.widthData
 			};
-			
+
 			let newGroupInstance;
 
 			switch (groupData.type) {

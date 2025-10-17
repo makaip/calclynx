@@ -1,7 +1,7 @@
 async function loadProseMirrorModules() {
 	try {
 		console.log('Loading ProseMirror modules...');
-		
+
 		const [
 			{ Schema },
 			{ EditorState, TextSelection },

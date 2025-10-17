@@ -13,10 +13,10 @@ export class ImageUrlModal {
 		this.callback = callback;
 		if (this.input) this.input.value = '';
 		ModalUtils.hideError(this.error);
-		
+
 		const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
 		modal.show();
-		
+
 		setTimeout(() => this.input?.focus(), 500);
 	}
 

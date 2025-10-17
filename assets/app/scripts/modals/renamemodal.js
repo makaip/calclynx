@@ -8,7 +8,7 @@ export class RenameFileModal {
 		this.button = document.getElementById('confirmRenameFileButton');
 		this.error = document.getElementById('rename-error-message');
 		this.fileIdToRename = null;
-		
+
 		if (this.modal) {
 			this.modal.addEventListener('shown.bs.modal', () => {
 				this.input?.focus();
@@ -19,7 +19,7 @@ export class RenameFileModal {
 	show(fileId, currentName) {
 		this.fileIdToRename = fileId;
 		if (this.input) this.input.value = currentName || '';
-		
+
 		ModalUtils.hideError(this.error);
 		const modal = bootstrap.Modal.getOrCreateInstance(this.modal);
 		modal.show();
@@ -27,7 +27,7 @@ export class RenameFileModal {
 
 	async renameFile() {
 		const newName = this.input?.value.trim() || '';
-		
+
 		if (!this.fileIdToRename) {
 			ModalUtils.showError(this.error, 'No file selected to rename.');
 			return;
@@ -49,9 +49,9 @@ export class RenameFileModal {
 
 			const modal = bootstrap.Modal.getInstance(this.modal);
 			if (modal) modal.hide();
-			
+
 			if (window.loadUserFiles) window.loadUserFiles();
-			
+
 			const urlParams = new URLSearchParams(window.location.search);
 			const currentFileId = urlParams.get('fileId');
 			if (currentFileId === this.fileIdToRename) {
