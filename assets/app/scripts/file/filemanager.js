@@ -8,13 +8,13 @@ class FileManager {
 
 		const urlParams = new URLSearchParams(window.location.search);
 		this.fileId = urlParams.get('fileId');
-		
+
 		this.fileReader = new FileReader(board, this);
 		this.fileWriter = new FileWriter(board, this);
-		
+
 		this.updateFileTitle();
 	}
-  
+
 	async updateFileTitle() {
 		const fileTitleElement = document.getElementById('file-title');
 		if (!fileTitleElement) return;
@@ -29,7 +29,7 @@ class FileManager {
 			fileTitleElement.style.display = '';
 			return;
 		}
-		
+
 		const result = await cloudManager.updateFileTitle(this.fileId);
 	}
 
@@ -51,23 +51,23 @@ class FileManager {
 
 	async validateFileName(fileId, newName, userId) {
 		const result = await cloudManager.validateFileName(fileId, newName);
-		
+
 		if (!result.success) {
 			throw new Error(result.error);
 		}
-		
+
 		return result.name;
 	}
 
 	async renameFile(fileId, newName) {
 		const result = await cloudManager.renameFile(fileId, newName);
-		
+
 		if (!result.success) {
 			throw new Error(result.error);
 		}
 
 		console.log(`File ${fileId} renamed to ${result.newName}`);
-		
+
 		if (this.fileId === fileId) {
 			await this.updateFileTitle();
 		}
@@ -79,7 +79,7 @@ class FileManager {
 		}
 
 		const result = await cloudManager.deleteFileRecord(fileId);
-		
+
 		if (!result.success) {
 			throw new Error(result.error);
 		}

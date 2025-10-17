@@ -43,7 +43,7 @@ async function initializeAppCore() {
 	setupImportInput(document.getElementById('importInput'));
 
 	document.addEventListener('keydown', onKeyDown, true);
-	
+
 	try {
 		const client = await getSupabaseClient();
 		client.auth.onAuthStateChange(() => {
@@ -59,13 +59,13 @@ const toggleTextFieldWidth = () => { // i feel like theres a better place to put
 	try {
 		const activeElement = document.activeElement;
 		if (!activeElement) return;
-		
+
 		const textEditor = activeElement.closest('.text-editor');
 		if (!textEditor) return;
-		
+
 		const container = textEditor.closest('.text-field-container');
 		if (!container || !container.textFieldInstance) return;
-		
+
 		const textField = container.textFieldInstance;
 		if (textField.resizeHandler && typeof textField.resizeHandler.toggleFreeWidth === 'function') {
 			textField.resizeHandler.toggleFreeWidth();
@@ -176,10 +176,10 @@ const setupImportInput = (el) => {
 					alert('The selected file does not contain valid JSON. Please check the file format and try again.');
 					return;
 				}
-				
+
 				if (window.isCreateFromJsonMode) {
 					window.isCreateFromJsonMode = false;
-					
+
 					if (window.createFileModal) {
 						window.createFileModal.setJsonData(jsonData);
 					}
@@ -200,7 +200,7 @@ const showCommandPalette = () => {
 		const refElement = document.activeElement?.closest('.math-field-container');
 		window.commandPalette.show(refElement);
 	}
-}; 
+};
 
 const showImageUrlInput = () => {
 	if (window.imageUrlModal && typeof window.imageUrlModal.show === 'function') {

@@ -15,10 +15,10 @@ export class Sidebar {
 		if (!dateString) return 'N/A';
 		try {
 			const date = new Date(dateString);
-			return date.toLocaleDateString(undefined, { 
-				month: 'short', 
-				day: 'numeric', 
-				year: 'numeric' 
+			return date.toLocaleDateString(undefined, {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric'
 			});
 		} catch (e) {
 			console.error('Error formatting date:', e);
@@ -94,30 +94,30 @@ export class Sidebar {
 					</ul>
 				</div>
 			</div>
-		`; 
+		`;
 	}
 
 	async loadUserFiles() {
 		const fileList = document.getElementById('sidebar-file-list');
 		if (!fileList) return;
-		
+
 		fileList.innerHTML = this.createIndicator('Loading files...', 'loading');
-		
+
 		try {
 			const result = await cloudManager.listUserFiles();
 			if (!result.success) throw new Error(result.error);
-			
+
 			const currentFileId = this.getCurrentFileId();
-			
+
 			if (!result.files?.length) {
 				fileList.innerHTML = this.createIndicator('No files found.', 'info');
 				return;
 			}
-			
+
 			fileList.innerHTML = result.files
 				.map(file => this.createFileItem(file, file.id === currentFileId))
 				.join('');
-				
+
 		} catch (error) {
 			console.error('Error loading files:', error);
 			fileList.innerHTML = this.createIndicator('Error loading files.', 'error');

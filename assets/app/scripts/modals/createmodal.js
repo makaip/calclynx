@@ -8,7 +8,7 @@ export class CreateFileModal {
 		this.button = document.getElementById('confirmCreateBlankFileButton');
 		this.error = document.getElementById('createBlankFile-error-message');
 		this.jsonData = null;
-		
+
 		if (this.modal) {
 			this.modal.addEventListener('shown.bs.modal', () => {
 				this.input?.focus();
@@ -21,7 +21,7 @@ export class CreateFileModal {
 
 		if (!fileName) {
 			ModalUtils.showError(this.error, 'File name cannot be empty.');
-			setTimeout(() => this.input?.focus(), 500); 
+			setTimeout(() => this.input?.focus(), 500);
 			return;
 		}
 
@@ -29,11 +29,11 @@ export class CreateFileModal {
 
 		try {
 			ModalUtils.setButtonLoading(this.button, true, 'Creating...', 'Create File');
-			
-			const result = this.jsonData 
+
+			const result = this.jsonData
 				? await cloudManager.createFileFromJson(fileName, this.jsonData)
 				: await cloudManager.createBlankFile(fileName);
-			
+
 			if (!result.success) {
 				throw new Error(result.error);
 			}
@@ -41,7 +41,7 @@ export class CreateFileModal {
 			console.log("File created successfully:", fileName);
 			const modalInstance = bootstrap.Modal.getInstance(this.modal);
 			if (modalInstance) modalInstance.hide();
-			
+
 			window.location.href = `/app.html?fileId=${result.fileId}`;
 		} catch (error) {
 			console.error('Create file failed:', error);

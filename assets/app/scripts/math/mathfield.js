@@ -10,7 +10,7 @@ export class MathField {
 		this.containerManager = new MathFieldContainer(mathGroup);
 		this.container = this.containerManager.getContainer();
 		this.container.mathFieldInstance = this;
-		
+
 		this.editor = new MathFieldEditor(this.container, mathGroup);
 		this.eventHandler = new MathFieldEventHandler(this);
 		this.stateManager = new MathFieldStateManager(this);

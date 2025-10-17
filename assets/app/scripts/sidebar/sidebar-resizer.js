@@ -11,10 +11,10 @@ export class SidebarResizer {
 
 	applyWidth(width) {
 		if (!this.sidebar) return;
-		
+
 		const clampedWidth = Math.max(this.minWidth, Math.min(width, this.maxWidth));
 		this.sidebar.style.setProperty('--bs-offcanvas-width', `${clampedWidth}px`);
-		
+
 		this.currentWidth = clampedWidth;
 	}
 

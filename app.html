@@ -1,316 +1,338 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>CalcLynx</title>
-	
+
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+		rel="stylesheet">
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-	<link rel="stylesheet" href="assets/app/styles/main.css" /> 
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+	<link rel="stylesheet" href="assets/app/styles/main.css" />
 </head>
+
 <body data-bs-theme="dark">
 	<div id="menu-container" class="text-white">
-	<button id="hamburgerBtn" class="text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">☰</button>
-	<div id="file-title" class="text-white">Untitled</div>
+		<button id="hamburgerBtn" class="text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar"
+			aria-controls="sidebar">☰</button>
+		<div id="file-title" class="text-white">Untitled</div>
 	</div>
 
-	<!-- Bootstrap Offcanvas Sidebar -->
-	<div class="offcanvas offcanvas-start show" 
-		 data-bs-scroll="true" 
-		 tabindex="-1" 
-		 id="sidebar" 
-		 aria-labelledby="sidebarLabel">
-	<div id="sidebar-resizer"></div>
-	
-	<div class="offcanvas-header" style="padding: 24px;">
-		<div class="d-flex flex-column">
-		<h2 class="offcanvas-title fw-semibold mb-0" id="sidebarLabel">Calclynx</h2>
-		<div id="user-email-display" class="small text-secondary"></div>
-		</div>
-	</div>
-	
-	<div class="offcanvas-body d-flex flex-column pt-0" style="padding: 0 24px 24px 24px;"> 
-		
-		<div class="d-flex justify-content-between align-items-center mb-2 mt-3">
-		<h6 class="text-uppercase fw-medium mb-0 text-secondary" 
-			style="font-size: 0.9rem; letter-spacing: 0.5px;">Your Files</h6> 
-		<div class="dropdown">
-			<button class="btn btn-primary btn-sm dropdown-toggle" 
-					type="button" 
-					id="newFileBtnSidebar" 
-					data-bs-toggle="dropdown" 
-					aria-expanded="false">
-			New File
-			</button>
-			<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-			<li><a class="dropdown-item" href="#" id="createBlankFileSidebarOpt" data-bs-toggle="modal" data-bs-target="#createBlankFileModal">Blank File</a></li>
-			<li><a class="dropdown-item" href="#" id="createFromJsonSidebarOpt" onclick="createFileModal.openFromJson()">From JSON</a></li>
-			</ul>
-		</div>
-		</div>
-		
-		<div class="list-group list-group-flush flex-grow-1" id="sidebar-file-list">
-		<!-- File list will be populated here -->
-		<div class="list-group-item text-secondary">
-			<span class="loading-text">Loading files...</span>
-		</div>
+	<div class="offcanvas offcanvas-start show" data-bs-scroll="true" tabindex="-1" id="sidebar"
+		aria-labelledby="sidebarLabel">
+		<div id="sidebar-resizer"></div>
+
+		<div class="offcanvas-header" style="padding: 24px;">
+			<div class="d-flex flex-column">
+				<h2 class="offcanvas-title fw-semibold mb-0" id="sidebarLabel">Calclynx</h2>
+				<div id="user-email-display" class="small text-secondary"></div>
+			</div>
 		</div>
 
-		<div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
-		<a href="#" id="settings-link" class="text-decoration-none" title="Settings" data-bs-toggle="modal" data-bs-target="#settings-modal">
-			<i class="fas fa-cog"></i>
-		</a>
-		<span id="user-status-text" class="text-secondary small"></span>
-		<button id="auth-button" class="btn btn-outline-secondary btn-sm">Sign In</button>
+		<div class="offcanvas-body d-flex flex-column pt-0" style="padding: 0 24px 24px 24px;">
+			<div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+				<h6 class="text-uppercase fw-medium mb-0 text-secondary"
+					style="font-size: 0.9rem; letter-spacing: 0.5px;">Your Files</h6>
+				<div class="dropdown">
+					<button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="newFileBtnSidebar"
+						data-bs-toggle="dropdown" aria-expanded="false">New File</button>
+					<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+						<li><a class="dropdown-item" href="#" id="createBlankFileSidebarOpt" data-bs-toggle="modal"
+								data-bs-target="#createBlankFileModal">Blank File</a></li>
+						<li><a class="dropdown-item" href="#" id="createFromJsonSidebarOpt"
+								onclick="createFileModal.openFromJson()">From JSON</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="list-group list-group-flush flex-grow-1" id="sidebar-file-list">
+				<!-- File list will be populated here -->
+				<div class="list-group-item text-secondary">
+					<span class="loading-text">Loading files...</span>
+				</div>
+			</div>
+
+			<div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+				<a href="#" id="settings-link" class="text-decoration-none" title="Settings" data-bs-toggle="modal"
+					data-bs-target="#settings-modal">
+					<i class="fas fa-cog"></i>
+				</a>
+				<span id="user-status-text" class="text-secondary small"></span>
+				<button id="auth-button" class="btn btn-outline-secondary btn-sm">Sign In</button>
+			</div>
 		</div>
 	</div>
-	</div>
 
-	<!-- Main Content Area -->
 	<div id="main-content">
-	<div id="sync-indicator">
-		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud">
-		<polyline points="16 16 12 12 8 16"></polyline>
-		<line x1="12" y1="12" x2="12" y2="21"></line>
-		<path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
-		<polyline points="16 16 12 12 8 16"></polyline>
-		</svg>
-	</div>
-
-	<!-- Toolbar -->
-	<div id="toolbar" class="toolbar" style="display: none;">
-		<button class="format-btn" data-format="bold" title="Bold">
-		<i class="fa-solid fa-bold"></i>
-		</button>
-		<button class="format-btn" data-format="italic" title="Italic">
-		<i class="fa-solid fa-italic"></i>
-		</button>
-		<button class="format-btn" data-format="underline" title="Underline">
-		<i class="fa-solid fa-underline"></i>
-		</button>
-		<button class="format-btn" data-format="heading" title="Heading">
-		<i class="fa-solid fa-heading"></i>
-		</button>
-		<button class="format-btn" data-format="equation" title="Insert Equation">
-		<i class="fa-solid fa-equals"></i>
-		</button>
-		<button class="format-btn" data-format="bullet-list" title="Bullet List">
-		<i class="fa-solid fa-list-ul"></i>
-		</button>
-		<button class="format-btn" data-format="number-list" title="Numbered List">
-		<i class="fa-solid fa-list-ol"></i>
-		</button>
-	</div>
-
-	<!-- Zoom Controls -->
-	<div id="zoom-controls" class="zoom-controls">
-		<div class="btn-group" role="group" aria-label="Zoom controls">
-		<button id="zoom-out-btn" class="btn btn-outline-secondary zoom-btn" type="button">−</button>
-		<button id="zoom-percentage-btn" class="btn btn-outline-secondary zoom-percentage" type="button">100%</button>
-		<input id="zoom-input" class="form-control zoom-input d-none" type="number" min="30" max="333" value="100">
-		<button id="zoom-in-btn" class="btn btn-outline-secondary zoom-btn" type="button">+</button>
+		<div id="sync-indicator">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+				class="feather feather-upload-cloud">
+				<polyline points="16 16 12 12 8 16"></polyline>
+				<line x1="12" y1="12" x2="12" y2="21"></line>
+				<path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+				<polyline points="16 16 12 12 8 16"></polyline>
+			</svg>
 		</div>
-	</div>
 
-	<div id="canvas"></div>
-	<ul id="context-menu" class="dropdown-menu dropdown-menu-dark "></ul>
-	<input type="file" id="importInput" accept=".json" style="display: none;">
-	</div>
+		<div id="toolbar" class="toolbar" style="display: none;">
+			<button class="format-btn" data-format="bold" title="Bold">
+				<i class="fa-solid fa-bold"></i>
+			</button>
+			<button class="format-btn" data-format="italic" title="Italic">
+				<i class="fa-solid fa-italic"></i>
+			</button>
+			<button class="format-btn" data-format="underline" title="Underline">
+				<i class="fa-solid fa-underline"></i>
+			</button>
+			<button class="format-btn" data-format="heading" title="Heading">
+				<i class="fa-solid fa-heading"></i>
+			</button>
+			<button class="format-btn" data-format="equation" title="Insert Equation">
+				<i class="fa-solid fa-equals"></i>
+			</button>
+			<button class="format-btn" data-format="bullet-list" title="Bullet List">
+				<i class="fa-solid fa-list-ul"></i>
+			</button>
+			<button class="format-btn" data-format="number-list" title="Numbered List">
+				<i class="fa-solid fa-list-ol"></i>
+			</button>
+		</div>
 
+		<div id="zoom-controls" class="zoom-controls">
+			<div class="btn-group" role="group" aria-label="Zoom controls">
+				<button id="zoom-out-btn" class="btn btn-outline-secondary zoom-btn" type="button">−</button>
+				<button id="zoom-percentage-btn" class="btn btn-outline-secondary zoom-percentage"
+					type="button">100%</button>
+				<input id="zoom-input" class="form-control zoom-input d-none" type="number" min="30" max="333"
+					value="100">
+				<button id="zoom-in-btn" class="btn btn-outline-secondary zoom-btn" type="button">+</button>
+			</div>
+		</div>
+
+		<div id="canvas"></div>
+		<ul id="context-menu" class="dropdown-menu dropdown-menu-dark "></ul>
+		<input type="file" id="importInput" accept=".json" style="display: none;">
+	</div>
 
 	<div class="modal fade" id="settings-modal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-settings-modal"></button>
-		</div>
-		<div class="modal-body">
-			<div class="settings-section">
-			<h6>Account Management</h6>
-			<div class="settings-info">
-				<p>Your email address: <strong id="userEmail">Loading...</strong></p>
-			</div>
-			</div>
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						id="close-settings-modal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="settings-section">
+						<h6>Account Management</h6>
+						<div class="settings-info">
+							<p>Your email address: <strong id="userEmail">Loading...</strong></p>
+						</div>
+					</div>
 
-			<div class="settings-section danger-zone mt-4">
-			<h6 class="text-danger">Danger Zone</h6>
-			<div class="settings-info">
-				<p>Permanently delete your account and all associated data (including saved files). This action cannot be undone.</p>
-				<button class="btn btn-danger" id="deleteAccountButton" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Delete My Account</button>
-			</div>
-			</div>
-		</div>
-		</div>
-	</div>
-	</div>
-
-
-	<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="settingsModal.reset()"></button>
-		</div>
-		<div class="modal-body">
-			<p>This action is irreversible. All your files and data will be permanently deleted.</p>
-			<p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box below:</p>
-			<div class="mb-3">
-			<label for="deleteConfirmInput" class="form-label">Confirm Email:</label>
-			<input type="email" class="form-control" id="deleteConfirmInput" placeholder="Enter your email address" onkeypress="if(event.key==='Enter') settingsModal.deleteAccount()">
-			<div id="delete-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
+					<div class="settings-section danger-zone mt-4">
+						<h6 class="text-danger">Danger Zone</h6>
+						<div class="settings-info">
+							<p>Permanently delete your account and all associated data (including saved files). This
+								action cannot be undone.</p>
+							<button class="btn btn-danger" id="deleteAccountButton" data-bs-toggle="modal"
+								data-bs-target="#deleteAccountModal">Delete My Account</button>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-			<button type="button" class="btn btn-danger" id="confirmDeleteAccountButton" onclick="settingsModal.deleteAccount()">Delete Account Permanently</button>
-		</div>
-		</div>
-	</div>
 	</div>
 
-
-	<div class="modal fade" id="createBlankFileModal" tabindex="-1" aria-labelledby="createBlankFileModalLabel" aria-hidden="true" data-bs-target="createFileModal.reset()">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="createBlankFileModalLabel">Create New Blank File</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCreateBlankFileModal" onclick="createFileModal.reset()"></button>
-		</div>
-		<div class="modal-body">
-			<p>Enter the name for your new blank file:</p>
-			<input type="text" class="form-control" id="newBlankFileNameInput" placeholder="File name" onkeypress="if(event.key==='Enter') createFileModal.createBlankFile()">
-			<div id="createBlankFile-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelCreateBlankFileButton">Cancel</button>
-			<button type="button" class="btn btn-primary" id="confirmCreateBlankFileButton" onclick="createFileModal.createBlankFile()">Create File</button>
-		</div>
-		</div>
-	</div>
-	</div>
-
-
-	<div class="modal fade" id="renameFileModal" tabindex="-1" aria-labelledby="renameFileModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="renameFileModalLabel">Rename File</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="renameFileModal.reset()"></button>
-		</div>
-		<div class="modal-body">
-			<p>Enter the new name for the file:</p>
-			<input type="text" class="form-control" id="newFileNameInput" placeholder="New file name" onkeypress="if(event.key==='Enter') renameFileModal.renameFile()">
-			<div id="rename-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-			<button type="button" class="btn btn-primary" id="confirmRenameFileButton" onclick="renameFileModal.renameFile()">Rename</button>
-		</div>
-		</div>
-	</div>
-	</div>
-
-
-	<div class="modal fade" id="deleteSidebarFileModal" tabindex="-1" aria-labelledby="deleteSidebarFileModalLabel" aria-hidden="true" data-bs-target="deleteFileModal.reset()">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="deleteSidebarFileModalLabel">Confirm File Deletion</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeDeleteSidebarFileModal" onclick="deleteFileModal.reset()"></button>
-		</div>
-		<div class="modal-body">
-			<p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This action cannot be undone.</p>
-			<div class="form-check">
-			<input class="form-check-input" type="checkbox" value="" id="doNotAskAgainDeleteFile">
-			<label class="form-check-label" for="doNotAskAgainDeleteFile">
-				Do not ask again
-			</label>
+	<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						onclick="settingsModal.reset()"></button>
+				</div>
+				<div class="modal-body">
+					<p>This action is irreversible. All your files and data will be permanently deleted.</p>
+					<p>To confirm, please type your email address (<strong id="confirmUserEmail"></strong>) in the box
+						below:</p>
+					<div class="mb-3">
+						<label for="deleteConfirmInput" class="form-label">Confirm Email:</label>
+						<input type="email" class="form-control" id="deleteConfirmInput"
+							placeholder="Enter your email address"
+							onkeypress="if(event.key==='Enter') settingsModal.deleteAccount()">
+						<div id="delete-error-message" class="invalid-feedback d-block"
+							style="display: none !important;"></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-danger" id="confirmDeleteAccountButton"
+						onclick="settingsModal.deleteAccount()">Delete Account Permanently</button>
+				</div>
 			</div>
-			<div id="delete-sidebar-file-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteSidebarFileButton">Cancel</button>
-			<button type="button" class="btn btn-danger" id="confirmDeleteSidebarFileButton" onclick="deleteFileModal.confirmDeletion()">Delete File</button>
-		</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="createBlankFileModal" tabindex="-1" aria-labelledby="createBlankFileModalLabel"
+		aria-hidden="true" data-bs-target="createFileModal.reset()">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="createBlankFileModalLabel">Create New Blank File</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						id="closeCreateBlankFileModal" onclick="createFileModal.reset()"></button>
+				</div>
+				<div class="modal-body">
+					<p>Enter the name for your new blank file:</p>
+					<input type="text" class="form-control" id="newBlankFileNameInput" placeholder="File name"
+						onkeypress="if(event.key==='Enter') createFileModal.createBlankFile()">
+					<div id="createBlankFile-error-message" class="invalid-feedback d-block"
+						style="display: none !important;"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+						id="cancelCreateBlankFileButton">Cancel</button>
+					<button type="button" class="btn btn-primary" id="confirmCreateBlankFileButton"
+						onclick="createFileModal.createBlankFile()">Create File</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="renameFileModal" tabindex="-1" aria-labelledby="renameFileModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="renameFileModalLabel">Rename File</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						onclick="renameFileModal.reset()"></button>
+				</div>
+				<div class="modal-body">
+					<p>Enter the new name for the file:</p>
+					<input type="text" class="form-control" id="newFileNameInput" placeholder="New file name"
+						onkeypress="if(event.key==='Enter') renameFileModal.renameFile()">
+					<div id="rename-error-message" class="invalid-feedback d-block" style="display: none !important;">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="confirmRenameFileButton"
+						onclick="renameFileModal.renameFile()">Rename</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="deleteSidebarFileModal" tabindex="-1" aria-labelledby="deleteSidebarFileModalLabel"
+		aria-hidden="true" data-bs-target="deleteFileModal.reset()">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteSidebarFileModalLabel">Confirm File Deletion</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						id="closeDeleteSidebarFileModal" onclick="deleteFileModal.reset()"></button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to delete "<strong id="fileNameToDeleteSidebar">this file</strong>"? This
+						action cannot be undone.</p>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="doNotAskAgainDeleteFile">
+						<label class="form-check-label" for="doNotAskAgainDeleteFile">
+							Do not ask again
+						</label>
+					</div>
+					<div id="delete-sidebar-file-error-message" class="invalid-feedback d-block"
+						style="display: none !important;"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+						id="cancelDeleteSidebarFileButton">Cancel</button>
+					<button type="button" class="btn btn-danger" id="confirmDeleteSidebarFileButton"
+						onclick="deleteFileModal.confirmDeletion()">Delete File</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 
 	<div class="modal fade" id="imageUrlModal" tabindex="-1" aria-labelledby="imageUrlModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-header">
-			<h5 class="modal-title" id="imageUrlModalLabel">Add Image from URL</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="imageUrlModal.reset()"></button>
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="imageUrlModalLabel">Add Image from URL</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						onclick="imageUrlModal.reset()"></button>
+				</div>
+				<div class="modal-body">
+					<p>Enter the URL of the image you want to add:</p>
+					<input type="url" class="form-control" id="imageUrlInput"
+						placeholder="https://example.com/image.jpg"
+						onkeypress="if(event.key==='Enter') imageUrlModal.addImageFromUrl()">
+					<div id="imageUrl-error-message" class="invalid-feedback d-block" style="display: none !important;">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="confirmImageUrlButton"
+						onclick="imageUrlModal.addImageFromUrl()">Add Image</button>
+				</div>
+			</div>
 		</div>
-		<div class="modal-body">
-			<p>Enter the URL of the image you want to add:</p>
-			<input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg" onkeypress="if(event.key==='Enter') imageUrlModal.addImageFromUrl()">
-			<div id="imageUrl-error-message" class="invalid-feedback d-block" style="display: none !important;"></div>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-			<button type="button" class="btn btn-primary" id="confirmImageUrlButton" onclick="imageUrlModal.addImageFromUrl()">Add Image</button>
-		</div>
-		</div>
-	</div>
 	</div>
 
 	<div class="modal fade" id="commandPaletteModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		<div class="modal-body p-0">
-			<div class="input-group">
-			<input type="text" class="form-control command-palette-input" 
-					 placeholder="Type a command..." 
-					 aria-label="Command input">
-			</div>
-			<div class="list-group list-group-flush command-palette-options" role="tablist">
-
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-body p-0">
+					<div class="input-group">
+						<input type="text" class="form-control command-palette-input" placeholder="Type a command..."
+							aria-label="Command input">
+					</div>
+					<div class="list-group list-group-flush command-palette-options" role="tablist">
+						<!-- command options populated here -->
+					</div>
+				</div>
 			</div>
 		</div>
-		</div>
-	</div>
 	</div>
 
-
-	<!-- External Libraries -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
-	<script>
-	window.proseMirrorReady = false;
-	
-	(async function loadProseMirror() {
-		try {
-		await import('./assets/app/scripts/text/prosemirror-imports.js');
-		console.log('ProseMirror modules loaded successfully');
-		} catch (err) {
-		console.warn('ProseMirror modules failed to load, falling back to legacy TextField:', err);
-		window.proseMirrorLoadFailed = true;
-		}
-	})();
-	</script>
-
-	<!-- MathGene Library -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+		crossorigin="anonymous"></script>
 	<script src="libs/mathgene/mg_translate.js"></script>
 	<script src="libs/mathgene/mg_calculate.js"></script>
-	
-	<!-- ES Modules -->
+
+	<script>
+		window.proseMirrorReady = false;
+
+		(async function loadProseMirror() { // todo: make this not in app.html
+			try {
+				await import('./assets/app/scripts/text/prosemirror-imports.js');
+				console.log('ProseMirror modules loaded successfully');
+			} catch (err) {
+				console.warn('ProseMirror modules failed to load, falling back to legacy TextField:', err);
+				window.proseMirrorLoadFailed = true;
+			}
+		})();
+	</script>
+
 	<script type="module" src="assets/app/scripts/main.mjs"></script>
-	
-	<!-- MathGene worker -->
 	<script src="assets/app/scripts/utils/mathgene-worker.js"></script>
 </body>
+
 </html>

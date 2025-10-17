@@ -11,7 +11,7 @@ class TextFieldCompatibility {
 
 		try {
 			const legacyContent = { text: '', mathFields: [] };
-			
+
 			const convertNode = (node) => {
 				if (node.type === 'text') {
 					legacyContent.text += node.text || '';
@@ -43,7 +43,7 @@ class TextFieldCompatibility {
 			};
 		} catch (error) {
 			console.error('Error converting v3.0 content to legacy format:', error);
-			return groupData; 
+			return groupData;
 		}
 	}
 
@@ -51,7 +51,7 @@ class TextFieldCompatibility {
 		if (!schema || !content) return null;
 
 		const { text, mathFields } = content;
-		
+
 		const mathFieldMap = new Map();
 		mathFields.forEach(field => {
 			mathFieldMap.set(field.position, field.latex);
@@ -73,7 +73,7 @@ class TextFieldCompatibility {
 						paragraphContent.push(schema.text(textBuffer));
 						textBuffer = '';
 					}
-					
+
 					const mathLatex = mathFieldMap.get(globalPos) || '';
 					paragraphContent.push(schema.nodes.math.create({ latex: mathLatex }));
 				} else {
@@ -105,11 +105,11 @@ class TextFieldCompatibility {
 
 	static detectContentFormat(content) {
 		if (!content) return 'empty';
-		
+
 		if (typeof content === 'string') {
 			return 'legacy-string';
 		}
-		
+
 		if (typeof content === 'object') {
 			if (content.type && content.content) {
 				return 'prosemirror-v3';
@@ -117,7 +117,7 @@ class TextFieldCompatibility {
 				return 'optimized-v2';
 			}
 		}
-		
+
 		return 'unknown';
 	}
 
@@ -130,7 +130,7 @@ class TextFieldCompatibility {
 
 	static shouldUseProseMirror() {
 		const proseMirrorModulesReady = window.proseMirrorReady && window.ProseMirror;
-		
+
 		return proseMirrorModulesReady;
 	}
 
@@ -149,7 +149,7 @@ class TextFieldCompatibility {
 
 	static normalizeContent(content, targetVersion, schema = null) {
 		const format = this.detectContentFormat(content);
-		
+
 		if (targetVersion === '3.0') {
 			switch (format) {
 				case 'prosemirror-v3':
@@ -175,7 +175,7 @@ class TextFieldCompatibility {
 					return { text: '', mathFields: [] };
 			}
 		}
-		
+
 		return content;
 	}
 }

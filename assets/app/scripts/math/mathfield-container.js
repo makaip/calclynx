@@ -11,7 +11,7 @@ class MathFieldContainer {
 		this.container.className = 'math-field-container';
 		this.container.dataset.latex = '';
 		this.container.mathFieldInstance = this;
-		
+
 		const circleIndicator = MathFieldUtils.createCircleIndicator();
 		this.container.appendChild(circleIndicator);
 
@@ -37,7 +37,7 @@ class MathFieldContainer {
 		}
 
 		event.stopPropagation();
-		
+
 		if (!MathFieldUIManager.isCurrentlyEditing(this.container)) {
 			MathFieldUIManager.clearMathGroupSelections();
 			MathFieldEditor.edit(this.container);

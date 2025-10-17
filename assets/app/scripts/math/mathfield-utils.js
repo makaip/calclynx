@@ -11,13 +11,13 @@ class MathFieldUtils {
 	static createDragHandle() {
 		const dragHandle = document.createElement('div');
 		dragHandle.className = 'drag-handle';
-		
+
 		for (let i = 0; i < 6; i++) {
 			const dot = document.createElement('span');
 			dot.className = 'drag-handle-dot';
 			dragHandle.appendChild(dot);
 		}
-		
+
 		return dragHandle;
 	}
 

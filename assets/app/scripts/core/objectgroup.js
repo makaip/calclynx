@@ -3,25 +3,25 @@ class ObjectGroup {
 		if (this.constructor === ObjectGroup) {
 			throw new Error("ObjectGroup is an abstract class and cannot be instantiated directly");
 		}
-		
+
 		if (!board || !board.canvas) {
 			throw new Error("ObjectGroup requires a valid board object with a canvas property");
 		}
-		
+
 		this.board = board;
 		this.groupType = groupType;
-		
+
 		this.element = document.createElement('div');
 		this.element.className = `${groupType}-group`;
-		
+
 		const left = data ? data.left : `${x}px`;
 		const top = data ? data.top : `${y}px`;
 		this.element.style.left = left;
 		this.element.style.top = top;
-		
+
 		this.element.tabIndex = -1;
 		this.element[`${groupType}Group`] = this; // like element.mathGroup = this
-		
+
 		board.canvas.appendChild(this.element);
 	}
 

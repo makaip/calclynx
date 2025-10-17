@@ -5,7 +5,7 @@ class TextFieldResizeHandler {
 		this.resizeHandle = null;
 		this.resizeStartData = null;
 		this.isFixedWidth = false;
-		
+
 		this.boundHandleResize = this.handleResize.bind(this);
 		this.boundEndResize = this.endResize.bind(this);
 	}
@@ -30,27 +30,27 @@ class TextFieldResizeHandler {
 		this.setupVisibilityListeners(container);
 		this.updateHandleVisibility();
 	}
-	
+
 	setupVisibilityListeners(container) {
 		const textGroup = this.textField.textGroup.element;
-		
+
 		const observer = new MutationObserver(() => {
 			this.updateHandleVisibility();
 		});
-		
+
 		observer.observe(textGroup, {
 			attributes: true,
 			attributeFilter: ['class']
 		});
-		
+
 		textGroup.addEventListener('mouseenter', () => {
 			this.updateHandleVisibility();
 		});
-		
+
 		textGroup.addEventListener('mouseleave', () => {
 			this.updateHandleVisibility();
 		});
-		
+
 		this.visibilityObserver = observer;
 	}
 
@@ -64,7 +64,7 @@ class TextFieldResizeHandler {
 
 	toggleFreeWidth() {
 		this.isFixedWidth = !this.isFixedWidth;
-		
+
 		if (!this.isFixedWidth) {
 			const editor = this.textField.editorElement;
 			if (editor) {
@@ -81,7 +81,7 @@ class TextFieldResizeHandler {
 				editor.style.maxWidth = `${currentWidth}px`;
 			}
 		}
-		
+
 		this.updateHandleVisibility();
 		this.textField.textGroup.board.fileManager.saveState();
 	}
@@ -90,7 +90,7 @@ class TextFieldResizeHandler {
 		const container = this.textField.container;
 		const textGroup = this.textField.textGroup.element;
 		const handles = container.querySelectorAll('.text-resize-handle');
-		
+
 		handles.forEach(handle => {
 			if (this.isFixedWidth && textGroup.matches(':hover')) {
 				handle.style.display = 'flex';
@@ -104,18 +104,18 @@ class TextFieldResizeHandler {
 	startResize(e, position) {
 		e.preventDefault();
 		e.stopPropagation();
-		
+
 		if (!this.isFixedWidth) return;
-		
+
 		this.isResizing = true;
 		this.resizeHandle = position;
-		
+
 		const editor = this.textField.editorElement;
 		const container = this.textField.container;
 		const textGroup = this.textField.textGroup;
 		const editorRect = editor.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
-		
+
 		this.resizeStartData = {
 			startX: e.clientX,
 			startWidth: editorRect.width,
@@ -125,26 +125,26 @@ class TextFieldResizeHandler {
 			minWidth: 100,
 			maxWidth: window.innerWidth * 0.8
 		};
-		
+
 		document.addEventListener('mousemove', this.boundHandleResize);
 		document.addEventListener('mouseup', this.boundEndResize);
-		
+
 		container.classList.add('text-resizing');
 		document.body.classList.add('text-resize-cursor');
 	}
 
 	handleResize(e) {
 		if (!this.isResizing || !this.resizeStartData) return;
-		
+
 		e.preventDefault();
-		
+
 		const deltaX = e.clientX - this.resizeStartData.startX;
 		const snapToGrid = e.ctrlKey || e.metaKey;
 		const gridSize = this.textField.textGroup.board.drag.gridSize || 20;
-		
+
 		let newWidth;
 		let newPos;
-		
+
 		if (this.resizeHandle === 'right') {
 			newWidth = this.resizeStartData.startWidth + deltaX;
 			if (snapToGrid) newWidth = Math.round(newWidth / gridSize) * gridSize;
@@ -152,24 +152,24 @@ class TextFieldResizeHandler {
 		} else { // left handle
 			newWidth = this.resizeStartData.startWidth - deltaX;
 			newPos = this.resizeStartData.textGroupX + deltaX;
-			
+
 			if (snapToGrid) {
 				newPos = Math.round(newPos / gridSize) * gridSize;
 				newWidth = Math.round(newWidth / gridSize) * gridSize;
 			}
-			
+
 			if (newPos < 0) {
 				newPos = 0;
 				newWidth = this.resizeStartData.startWidth + this.resizeStartData.textGroupX;
 			}
-			
+
 			if (newWidth < this.resizeStartData.minWidth) {
 				newWidth = this.resizeStartData.minWidth;
 				const maxPos = this.resizeStartData.textGroupX + (this.resizeStartData.startWidth - this.resizeStartData.minWidth);
 				newPos = Math.min(newPos, maxPos);
 			}
 		}
-		
+
 		newWidth = Math.max(this.resizeStartData.minWidth, Math.min(newWidth, this.resizeStartData.maxWidth));
 
 		const editor = this.textField.editorElement;
@@ -188,18 +188,18 @@ class TextFieldResizeHandler {
 
 	endResize(e) {
 		if (!this.isResizing) return;
-		
+
 		this.isResizing = false;
 		this.resizeHandle = null;
 		this.resizeStartData = null;
-		
+
 		document.removeEventListener('mousemove', this.boundHandleResize);
 		document.removeEventListener('mouseup', this.boundEndResize);
-		
+
 		const container = this.textField.container;
 		container.classList.remove('text-resizing');
 		document.body.classList.remove('text-resize-cursor');
-		
+
 		this.textField.textGroup.board.fileManager.saveState();
 	}
 
@@ -207,7 +207,7 @@ class TextFieldResizeHandler {
 		if (!this.isFixedWidth) {
 			return null;
 		}
-		
+
 		const editor = this.textField.editorElement;
 		if (editor) {
 			return {
@@ -215,7 +215,7 @@ class TextFieldResizeHandler {
 				width: parseFloat(editor.style.width) || null
 			};
 		}
-		
+
 		return null;
 	}
 
@@ -225,9 +225,9 @@ class TextFieldResizeHandler {
 			this.updateHandleVisibility();
 			return;
 		}
-		
+
 		this.isFixedWidth = data.isFixedWidth || false;
-		
+
 		if (this.isFixedWidth && data.width && data.width > 0) {
 			const editor = this.textField.editorElement;
 			if (editor) {
@@ -236,7 +236,7 @@ class TextFieldResizeHandler {
 				editor.style.maxWidth = `${data.width}px`;
 			}
 		}
-		
+
 		this.updateHandleVisibility();
 	}
 
@@ -245,11 +245,11 @@ class TextFieldResizeHandler {
 			document.removeEventListener('mousemove', this.boundHandleResize);
 			document.removeEventListener('mouseup', this.boundEndResize);
 		}
-		
+
 		if (this.visibilityObserver) {
 			this.visibilityObserver.disconnect();
 		}
-		
+
 		if (this.textField.container) {
 			this.textField.container.querySelectorAll('.text-resize-handle').forEach(h => h.remove());
 		}

@@ -164,7 +164,7 @@ body.sidebar-open #file-title {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	padding: 4px 0px; 
+	padding: 4px 0px;
 }
 
 .file-title {
@@ -280,7 +280,7 @@ body.sidebar-open #file-title {
 	background-color: #2a2a2a;
 }
 
-#sidebar .sidebar-list li.active > a {
+#sidebar .sidebar-list li.active>a {
 	font-weight: 500;
 	text-decoration: underline;
 	text-decoration-color: var(--bs-primary, #00c59a);
@@ -293,7 +293,7 @@ body.sidebar-open #file-title {
 }
 
 
-.sidebar-list > li > .file-actions-menu {
+.sidebar-list>li>.file-actions-menu {
 	display: none;
 	position: absolute;
 	top: 35px;
@@ -325,7 +325,9 @@ body.sidebar-open #file-title {
 }
 
 
-.loading-text, .error-text, .info-text {
+.loading-text,
+.error-text,
+.info-text {
 	font-style: italic;
 	padding: 0.5rem;
 }

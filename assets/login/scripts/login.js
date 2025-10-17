@@ -7,7 +7,6 @@ const passwordInput = document.getElementById('password');
 const errorMessageDiv = document.getElementById('auth-error-message');
 const loginButton = document.getElementById('login-button');
 
-// Function to display error messages
 function displayError(message) {
 	if (errorMessageDiv) {
 		errorMessageDiv.textContent = message;
@@ -15,7 +14,6 @@ function displayError(message) {
 	}
 }
 
-// Function to clear error messages
 function clearError() {
 	if (errorMessageDiv) {
 		errorMessageDiv.textContent = '';
@@ -23,48 +21,46 @@ function clearError() {
 	}
 }
 
-// Email/Password Sign-in (only if form exists)
+// Email/Password Sign-in
 if (emailPasswordForm) {
 	emailPasswordForm.addEventListener('submit', async (e) => {
-	e.preventDefault();
-	clearError();
-	
-	if (!emailInput || !passwordInput) {
-		displayError('Form elements not found.');
-		return;
-	}
-	
-	const email = emailInput.value.trim();
-	const password = passwordInput.value.trim();
+		e.preventDefault();
+		clearError();
 
-	if (!email || !password) {
-		displayError('Please enter both email and password.');
-		return;
-	}
-
-	// Disable button
-	if (loginButton) {
-		loginButton.disabled = true;
-		loginButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging In...';
-	}
-
-	const client = await getSupabaseClient();
-	const { data, error } = await client.auth.signInWithPassword({
-		email: email,
-		password: password,
-	});
-
-	if (error) {
-		displayError(error.message);
-		if (loginButton) {
-			loginButton.disabled = false;
-			loginButton.innerHTML = 'Login';
+		if (!emailInput || !passwordInput) {
+			displayError('Form elements not found.');
+			return;
 		}
-	} else {
-		// Redirect to app.html
-		window.location.href = '/app.html';
-	}
-});
+
+		const email = emailInput.value.trim();
+		const password = passwordInput.value.trim();
+
+		if (!email || !password) {
+			displayError('Please enter both email and password.');
+			return;
+		}
+
+		if (loginButton) {
+			loginButton.disabled = true;
+			loginButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging In...';
+		}
+
+		const client = await getSupabaseClient();
+		const { data, error } = await client.auth.signInWithPassword({
+			email: email,
+			password: password,
+		});
+
+		if (error) {
+			displayError(error.message);
+			if (loginButton) {
+				loginButton.disabled = false;
+				loginButton.innerHTML = 'Login';
+			}
+		} else {
+			window.location.href = '/app.html';
+		}
+	});
 }
 
 // Google Sign-in
@@ -106,13 +102,10 @@ async function checkLoginStatus() {
 	try {
 		const client = await getSupabaseClient();
 		const { data: { session } } = await client.auth.getSession();
-		if (session) {
-			window.location.href = '/app.html';
-		}
+		if (session) window.location.href = '/app.html';
 	} catch (error) {
 		console.error('Error checking login status:', error);
 	}
 }
 
-// Call on page load
 checkLoginStatus();

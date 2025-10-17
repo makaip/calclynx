@@ -2,7 +2,7 @@
 html,
 body,
 [data-bs-theme="dark"] {
-	
+
 	--bs-primary: #00c59a;
 	--bs-primary-rgb: 0, 197, 154;
 	--bs-secondary: #444444;
@@ -11,29 +11,29 @@ body,
 	--bs-danger: #dc3545;
 	--bs-warning: #ffcc00;
 	--bs-info: #00c59a;
-	
-	
+
+
 	--bs-body-bg: #1d1d1d;
 	--bs-body-color: #ffffff;
 	--bs-secondary-color: #bbbbbb;
 	--bs-tertiary-color: #888888;
-	
-	
+
+
 	--bs-border-color: #444444;
 	--bs-border-color-translucent: rgba(68, 68, 68, 0.5);
-	
-	
+
+
 	--bs-surface-primary: #171717;
 	--bs-surface-secondary: #2c2c2c;
 	--bs-surface-tertiary: #333333;
-	
-	
+
+
 	--bs-focus-ring-color: rgba(0, 197, 154, 0.25);
-	
-	
+
+
 	--bs-link-color: #00c59a;
 	--bs-link-hover-color: #00b38a;
-	
+
 	color-scheme: dark;
 }
 

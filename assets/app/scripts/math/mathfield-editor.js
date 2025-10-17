@@ -21,7 +21,7 @@ class MathFieldEditor {
 		const MQ = window.MathQuill.getInterface(2);
 		this.mathFieldElement = MathFieldUtils.createMathFieldElement();
 		MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
-		this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig()); 
+		this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig());
 	}
 
 	hasMathField() {
@@ -60,9 +60,9 @@ class MathFieldEditor {
 	// existicng math field editing methods
 	static edit(container) {
 		const existingLatex = container.dataset.latex || '';
-		
+
 		if (!MathFieldUtils.canEdit(container)) return;
-		
+
 		MathFieldEditor.clearGroupSelection(container);
 		MathFieldEditor.prepareContainerForEdit(container, existingLatex);
 		MathFieldEditor.attachEditEventListeners(container);
@@ -76,13 +76,13 @@ class MathFieldEditor {
 	static prepareContainerForEdit(container, existingLatex) {
 		MathFieldEditor.removeStaticMath(container);
 		MathFieldEditor.ensureContainerStructure(container);
-		
+
 		const mathFieldElement = MathFieldEditor.createEditableMathField(container);
 		const mathField = MathFieldEditor.initializeEditableMathField(mathFieldElement, existingLatex, container);
-		
+
 		MathFieldUIManager.highlightGroupExpressions(container);
 		mathField.focus();
-		
+
 		return { mathFieldElement, mathField };
 	}
 
@@ -141,11 +141,11 @@ class MathFieldEditor {
 	static attachEditKeydownListener(mathFieldElement, container) {
 		mathFieldElement.addEventListener('keydown', (event) => {
 			const mathField = MQ(mathFieldElement);
-			
+
 			if (event.key === 'Backspace') {
 				MathFieldEditor.handleStaticBackspace(event, mathField, container);
 			}
-			
+
 			if (event.key === 'Enter') {
 				MathFieldEditor.handleStaticEnter(event, mathField, container);
 			}
@@ -190,11 +190,11 @@ class MathFieldEditor {
 			group.mathGroup.remove();
 		}
 	}
-	
+
 	static handleStaticEnter(event, mathField, container) {
 		event.preventDefault();
 		const latex = mathField.latex().trim();
-		
+
 		const group = container.parentElement;
 		if (!latex) {
 			const wasLast = (group?.querySelectorAll('.math-field-container')?.length ?? 0) === 1;
@@ -202,7 +202,7 @@ class MathFieldEditor {
 			if (group && wasLast) group.remove();
 			return;
 		}
-		
+
 		container.dataset.latex = latex;
 		MathFieldUtils.recreateStaticContainer(container, latex);
 		MathFieldEditor.handleStaticEnterNavigation(container);
@@ -222,7 +222,7 @@ class MathFieldEditor {
 			setTimeout(() => {
 				const mathField = MQ(mathFieldElement);
 				const latexValue = mathField.latex().trim();
-				
+
 				if (!latexValue) {
 					MathFieldEditor.handleStaticEmptyBlur(container);
 				} else {
@@ -242,10 +242,10 @@ class MathFieldEditor {
 
 	static handleStaticBlur(container, latexValue) {
 		const hasText = MathFieldUtils.hasTextContent(latexValue);
-		
+
 		container.dataset.latex = latexValue;
 		MathFieldUtils.recreateStaticContainer(container, latexValue);
-		
+
 		const group = container.parentElement;
 		if (group && group.mathGroup) {
 			group.mathGroup.board.fileManager.saveState();

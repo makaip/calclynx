@@ -6,18 +6,18 @@ class User {
 		this.currentUser = null;
 		this.currentSession = null;
 	}
-	
+
 	async ensureClient() {
 		if (!this.client) this.client = await getSupabaseClient();
 		return this.client;
 	}
-	
+
 	async getSession() {
 		try {
 			const client = await this.ensureClient();
 			const { data: { session }, error } = await client.auth.getSession();
 			if (error) throw error;
-			
+
 			this.currentSession = session;
 			this.currentUser = session?.user || null;
 			return { session, user: this.currentUser };
@@ -32,7 +32,7 @@ class User {
 			const client = await this.ensureClient();
 			const { error } = await client.auth.signOut();
 			if (error) throw error;
-			
+
 			this.currentSession = null;
 			this.currentUser = null;
 			return { success: true };
@@ -61,7 +61,7 @@ class User {
 			const { error } = await client.rpc('delete_user_account');
 			if (error) throw error;
 			await this.signOut();
-			
+
 			return { success: true };
 		} catch (error) {
 			console.error('Error deleting account:', error);

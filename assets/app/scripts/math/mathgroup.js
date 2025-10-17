@@ -6,7 +6,7 @@ const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
 export class MathGroup extends ObjectGroup {
 	constructor(board, x, y, data = null) {
 		super(board, x, y, data, 'math');
-		
+
 		this.attachFocusOutHandler();
 		this.mathFieldInstances = [];
 
@@ -17,7 +17,7 @@ export class MathGroup extends ObjectGroup {
 
 		if (data && data.fields && data.fields.length) {
 			data.fields.forEach((latex) => {
-				const mathFieldInstance = new MathField(this, false); 
+				const mathFieldInstance = new MathField(this, false);
 				mathFieldInstance.container.dataset.latex = latex;
 
 				const staticMath = document.createElement('div');
@@ -26,11 +26,11 @@ export class MathGroup extends ObjectGroup {
 				const handle = mathFieldInstance.container.querySelector(':scope > .drag-handle');
 				mathFieldInstance.container.insertBefore(staticMath, handle.nextSibling);
 				MQ.StaticMath(staticMath).latex(latex);
-				
+
 				this.mathFieldInstances.push(mathFieldInstance);
 			});
 		} else {
-			this.addMathField(true); 
+			this.addMathField(true);
 		}
 
 		this.attachFieldDragListener();
@@ -72,11 +72,11 @@ export class MathGroup extends ObjectGroup {
 		const newFieldInstance = new MathField(this, true); // Create new editable field
 		const refIndex = this.mathFieldInstances.findIndex(mf => mf.container === referenceContainer);
 		this.element.insertBefore(newFieldInstance.container, referenceContainer.nextSibling);
-		
+
 		if (refIndex !== -1) {
-				this.mathFieldInstances.splice(refIndex + 1, 0, newFieldInstance);
+			this.mathFieldInstances.splice(refIndex + 1, 0, newFieldInstance);
 		} else {
-				this.mathFieldInstances.push(newFieldInstance); // Fallback: add to end
+			this.mathFieldInstances.push(newFieldInstance); // Fallback: add to end
 		}
 
 		const mathField = newFieldInstance.editor.getMathField();
@@ -87,99 +87,99 @@ export class MathGroup extends ObjectGroup {
 	}
 
 	attachFieldDragListener() {
-			this.element.addEventListener('mousedown', (e) => {
-					const handle = e.target.closest('.drag-handle');
-					if (handle && this.element.contains(handle)) {
-							const fieldContainer = handle.closest('.math-field-container');
-							if (fieldContainer) {
-									this.handleFieldDragStart(e, fieldContainer);
-							}
-					}
-			}, true);
+		this.element.addEventListener('mousedown', (e) => {
+			const handle = e.target.closest('.drag-handle');
+			if (handle && this.element.contains(handle)) {
+				const fieldContainer = handle.closest('.math-field-container');
+				if (fieldContainer) {
+					this.handleFieldDragStart(e, fieldContainer);
+				}
+			}
+		}, true);
 	}
 
 	handleFieldDragStart(e, fieldContainer) {
-			if (e.button !== 0) return;
-			e.preventDefault(); 
-			e.stopPropagation(); 
+		if (e.button !== 0) return;
+		e.preventDefault();
+		e.stopPropagation();
 
-			this.draggedFieldElement = fieldContainer;
-			this.fieldDragStartY = e.clientY;
-			this.fieldDragInitialTop = this.draggedFieldElement.offsetTop; 
+		this.draggedFieldElement = fieldContainer;
+		this.fieldDragStartY = e.clientY;
+		this.fieldDragInitialTop = this.draggedFieldElement.offsetTop;
 
-			this.fieldPlaceholder = document.createElement('div');
-			this.fieldPlaceholder.className = 'drop-placeholder';
-			this.fieldPlaceholder.style.height = `${this.draggedFieldElement.offsetHeight}px`; 
+		this.fieldPlaceholder = document.createElement('div');
+		this.fieldPlaceholder.className = 'drop-placeholder';
+		this.fieldPlaceholder.style.height = `${this.draggedFieldElement.offsetHeight}px`;
 
-			this.setDraggedFieldStyles(true);
-			
-			this.draggedFieldElement.parentElement.insertBefore(this.fieldPlaceholder, this.draggedFieldElement); 
+		this.setDraggedFieldStyles(true);
 
-			// Use bind to ensure 'this' refers to the MathGroup instance
-			this.boundHandleFieldDragMove = this.handleFieldDragMove.bind(this);
-			this.boundHandleFieldDragEnd = this.handleFieldDragEnd.bind(this);
+		this.draggedFieldElement.parentElement.insertBefore(this.fieldPlaceholder, this.draggedFieldElement);
 
-			document.addEventListener('mousemove', this.boundHandleFieldDragMove);
-			document.addEventListener('mouseup', this.boundHandleFieldDragEnd, { once: true });
+		// Use bind to ensure 'this' refers to the MathGroup instance
+		this.boundHandleFieldDragMove = this.handleFieldDragMove.bind(this);
+		this.boundHandleFieldDragEnd = this.handleFieldDragEnd.bind(this);
+
+		document.addEventListener('mousemove', this.boundHandleFieldDragMove);
+		document.addEventListener('mouseup', this.boundHandleFieldDragEnd, { once: true });
 	}
 
 	handleFieldDragMove(e) {
-			if (!this.draggedFieldElement) return;
+		if (!this.draggedFieldElement) return;
 
-			const currentY = e.clientY;
-			const deltaY = currentY - this.fieldDragStartY;
-			
-			this.draggedFieldElement.style.top = `${this.fieldDragInitialTop + deltaY}px`;
+		const currentY = e.clientY;
+		const deltaY = currentY - this.fieldDragStartY;
 
-			const parent = this.fieldPlaceholder.parentElement;
-			const siblings = Array.from(parent.children).filter(child =>
-					child !== this.draggedFieldElement && child.classList.contains('math-field-container')
-			);
+		this.draggedFieldElement.style.top = `${this.fieldDragInitialTop + deltaY}px`;
 
-			let nextSibling = null; 
-			const draggedRect = this.draggedFieldElement.getBoundingClientRect();
-			const draggedMidpoint = draggedRect.top + draggedRect.height / 2;
+		const parent = this.fieldPlaceholder.parentElement;
+		const siblings = Array.from(parent.children).filter(child =>
+			child !== this.draggedFieldElement && child.classList.contains('math-field-container')
+		);
 
-			for (const sibling of siblings) {
-					if (sibling === this.fieldPlaceholder) continue; 
-					const rect = sibling.getBoundingClientRect();
-					const siblingMidpoint = rect.top + rect.height / 2;
-					if (draggedMidpoint > siblingMidpoint) {
-							nextSibling = sibling.nextElementSibling; 
-					} else {
-							nextSibling = sibling;
-							break; 
-					}
+		let nextSibling = null;
+		const draggedRect = this.draggedFieldElement.getBoundingClientRect();
+		const draggedMidpoint = draggedRect.top + draggedRect.height / 2;
+
+		for (const sibling of siblings) {
+			if (sibling === this.fieldPlaceholder) continue;
+			const rect = sibling.getBoundingClientRect();
+			const siblingMidpoint = rect.top + rect.height / 2;
+			if (draggedMidpoint > siblingMidpoint) {
+				nextSibling = sibling.nextElementSibling;
+			} else {
+				nextSibling = sibling;
+				break;
 			}
-			parent.insertBefore(this.fieldPlaceholder, nextSibling); 
+		}
+		parent.insertBefore(this.fieldPlaceholder, nextSibling);
 	}
 
 	handleFieldDragEnd() {
-			if (!this.draggedFieldElement || !this.fieldPlaceholder) return;
+		if (!this.draggedFieldElement || !this.fieldPlaceholder) return;
 
-			this.fieldPlaceholder.parentElement.insertBefore(this.draggedFieldElement, this.fieldPlaceholder);
+		this.fieldPlaceholder.parentElement.insertBefore(this.draggedFieldElement, this.fieldPlaceholder);
 
-			this.setDraggedFieldStyles(false);
+		this.setDraggedFieldStyles(false);
 
-			this.fieldPlaceholder.remove();
-			this.draggedFieldElement = null;
-			this.fieldPlaceholder = null;
+		this.fieldPlaceholder.remove();
+		this.draggedFieldElement = null;
+		this.fieldPlaceholder = null;
 
-			document.removeEventListener('mousemove', this.boundHandleFieldDragMove);
-			this.updateInstanceOrder(); 
-			this.board.fileManager.saveState();
+		document.removeEventListener('mousemove', this.boundHandleFieldDragMove);
+		this.updateInstanceOrder();
+		this.board.fileManager.saveState();
 	}
 
 	updateInstanceOrder() {
-			const orderedContainers = Array.from(this.element.querySelectorAll('.math-field-container'));
-			this.mathFieldInstances = orderedContainers
-					.map(container => container.mathFieldInstance)
-					.filter(instance => instance); // Filter out any undefined if linking failed
+		const orderedContainers = Array.from(this.element.querySelectorAll('.math-field-container'));
+		this.mathFieldInstances = orderedContainers
+			.map(container => container.mathFieldInstance)
+			.filter(instance => instance); // Filter out any undefined if linking failed
 	}
-	
+
 	setDraggedFieldStyles(isDragging) {
 		const el = this.draggedFieldElement;
-		
+
 		if (isDragging) {
 			el.classList.add('dragging-field');
 			Object.assign(el.style, {
