@@ -20,15 +20,19 @@ class Clipboard {
 		let minY = Infinity;
 
 		selectedGroups.forEach(group => {
-			const left = parseInt(group.style.left, 10);
-			const top = parseInt(group.style.top, 10);
+			let left = parseFloat(group.style.left);
+			if (isNaN(left)) left = group.offsetLeft;
+			let top = parseFloat(group.style.top);
+			if (isNaN(top)) top = group.offsetTop;
 			if (left < minX) minX = left;
 			if (top < minY) minY = top;
 		});
 
 		this.clipboardData = selectedGroups.map(group => {
-			const left = parseInt(group.style.left, 10);
-			const top = parseInt(group.style.top, 10);
+			let left = parseFloat(group.style.left);
+			if (isNaN(left)) left = group.offsetLeft;
+			let top = parseFloat(group.style.top);
+			if (isNaN(top)) top = group.offsetTop;
 
 			if (group.classList.contains('math-group')) {
 				const fields = [];
@@ -77,8 +81,10 @@ class Clipboard {
 					imageWidth: group.imageGroup.imageWidth,
 					imageHeight: group.imageGroup.imageHeight
 				};
+			} else {
+				console.warn('Unknown group type:', group);
 			}
-		});
+		}).filter(Boolean);
 	}
 
 	cutSelectedGroups() {

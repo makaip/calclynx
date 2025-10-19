@@ -53,9 +53,12 @@ body {
 	--bs-btn-hover-border-color: #00b38a;
 	--bs-btn-active-bg: #00a37e;
 	--bs-btn-active-border-color: #00a37e;
+	--bs-btn-disabled-bg: var(--bs-primary);
+	--bs-btn-disabled-border-color: var(--bs-primary);
 	--bs-btn-color: #141414;
 	--bs-btn-hover-color: #141414;
 	--bs-btn-active-color: #141414;
+	--bs-btn-disabled-color: #141414;
 }
 
 .btn-secondary {
