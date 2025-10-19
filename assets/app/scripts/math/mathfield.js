@@ -18,10 +18,14 @@ export class MathField {
 
 		if (isNewField) {
 			this.editor.createMathField();
-			this.eventHandler.attachEventListeners();
+		}
 
-			if (this.editor.getMathField() && typeof this.editor.getMathField().focus === 'function') {
-				this.editor.getMathField().focus();
+		this.eventHandler.attachEventListeners();
+
+		if (isNewField) {
+			const mathField = this.editor.getMathField();
+			if (mathField && typeof mathField.focus === 'function') {
+				mathField.focus();
 			}
 		}
 	}

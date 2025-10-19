@@ -13,7 +13,7 @@ class Cloud {
 
 	async uploadFile(filePath, fileData) {
 		try {
-			if (!session) throw new Error('User not authenticated');
+			const { session } = await userManager.getSession();
 			if (!session) throw new Error('User not authenticated');
 
 			const client = await this.ensureClient();

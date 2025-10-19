@@ -39,7 +39,7 @@ class FileReader {
 				if (downloadError.message && (
 					downloadError.message.includes("Object not found") ||
 					downloadError.message.includes("The resource was not found") ||
-					downloadError.statusCode === 404
+					(typeof downloadError.status === 'number' && downloadError.status === 404)
 				)) {
 					console.warn(`File ${this.fileManager.fileId} not found in cloud storage. Starting with an empty board.`);
 					this.initializeEmptyState();
