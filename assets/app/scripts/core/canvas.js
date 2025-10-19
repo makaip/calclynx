@@ -227,16 +227,25 @@ class MathBoard {
 	initGroupDragging() {
 		document.addEventListener('mousedown', (event) => {
 			// Ignore if not left click, if space is down, or if clicking inside an editable field
-			if (event.button !== 0 || this.pan.spaceDown || event.target.closest('.mq-editable-field') || event.target.closest('.text-editor')) return;
+			if (event.button !== 0 ||
+				this.pan.spaceDown ||
+				event.target.closest('.mq-editable-field') ||
+				event.target.closest('.text-editor')) return;
 			// Ignore clicks starting on the field drag handle
 			if (event.target.closest('.drag-handle')) return;
 
 			let target = event.target;
-			while (target && !target.classList.contains('math-group') && !target.classList.contains('text-group') && !target.classList.contains('image-group')) {
+			while (target && !target.classList.contains('math-group') &&
+				!target.classList.contains('text-group') &&
+				!target.classList.contains('image-group')) {
 				target = target.parentElement;
 			}
 
-			if (target && (target.classList.contains('math-group') || target.classList.contains('text-group') || target.classList.contains('image-group'))) {
+			if (target && (
+				target.classList.contains('math-group') ||
+				target.classList.contains('text-group') ||
+				target.classList.contains('image-group'))) {
+
 				let groups;
 				if (target.classList.contains('selected')) {
 					groups = Array.from(ObjectGroup.getSelectedGroups());
@@ -310,7 +319,9 @@ class MathBoard {
 
 	initDoubleClickHandler() {
 		document.addEventListener('dblclick', (event) => {
-			if (event.target.closest('.math-group') || event.target.closest('.text-group') || event.target.closest('.image-group')) return;
+			if (event.target.closest('.math-group') ||
+				event.target.closest('.text-group') ||
+				event.target.closest('.image-group')) return;
 			if (this.pan.active) return;
 			const coords = this.screenToCanvas(event.clientX, event.clientY);
 

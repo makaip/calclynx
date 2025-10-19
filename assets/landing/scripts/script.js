@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../app/scripts/auth/initsupabaseapp.js';
+import { getSupabaseClient } from '../../app/scripts/auth/initsupabaseapp.js';
 
 async function checkSessionAndRedirect() {
 	try {
