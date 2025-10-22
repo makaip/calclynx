@@ -110,7 +110,12 @@ class Cloud {
 
 			const fileId = this.generateUUID();
 			const filePath = `${session.user.id}/${fileId}.json`;
-			const initialContent = JSON.stringify({});
+
+			const initialContent = JSON.stringify({
+				version: initialVersion === 3 ? "3.0" : "2.0",
+				groups: []
+			});
+
 			const initialBlob = new Blob([initialContent], { type: 'application/json' });
 			const initialFileSize = initialBlob.size;
 
@@ -142,6 +147,67 @@ class Cloud {
 			return { success: true, fileId };
 		} catch (error) {
 			console.error('Error creating blank file:', error);
+			return { success: false, error: error.message };
+		}
+	}
+
+	async createFileWithContent(fileName, jsonContent) {
+		try {
+			const { session } = await userManager.getSession();
+			if (!session) throw new Error('User not authenticated');
+
+			const { exists } = await this.checkFileExists(fileName);
+			if (exists) {
+				return {
+					success: false,
+					error: `File named "${fileName}" already exists.`
+				};
+			}
+
+			let parsedContent;
+			let fileVersion = 3;
+
+			try {
+				parsedContent = JSON.parse(jsonContent);
+				if (parsedContent.version === "2.0") fileVersion = 2;
+			} catch (parseError) {
+				console.error('Error parsing content:', parseError);
+				return await this.createBlankFile(fileName);
+			}
+
+			const fileId = this.generateUUID();
+			const filePath = `${session.user.id}/${fileId}.json`;
+			const contentBlob = new Blob([jsonContent], { type: 'application/json' });
+			const fileSize = contentBlob.size;
+
+			const client = await this.ensureClient();
+			const { error: storageError } = await client.storage
+				.from('storage')
+				.upload(filePath, contentBlob);
+
+			if (storageError) throw storageError;
+
+			const now = new Date().toISOString();
+			const { error: dbError } = await client
+				.from('files')
+				.insert({
+					id: fileId,
+					user_id: session.user.id,
+					file_name: fileName,
+					created_at: now,
+					last_modified: now,
+					file_size: fileSize,
+					version: fileVersion
+				});
+
+			if (dbError) {
+				await client.storage.from('storage').remove([filePath]);
+				throw dbError;
+			}
+
+			return { success: true, fileId };
+		} catch (error) {
+			console.error('Error creating file with content:', error);
 			return { success: false, error: error.message };
 		}
 	}
@@ -217,7 +283,7 @@ class Cloud {
 
 	generateUUID() {
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-			const r = Math.random() * 16 | 0;
+			const r = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
 			const v = c == 'x' ? r : (r & 0x3 | 0x8);
 			return v.toString(16);
 		});

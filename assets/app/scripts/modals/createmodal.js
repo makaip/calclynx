@@ -30,13 +30,19 @@ export class CreateFileModal {
 		try {
 			ModalUtils.setButtonLoading(this.button, true, 'Creating...', 'Create File');
 
-			const result = this.jsonData
-				? await cloudManager.createFileFromJson(fileName, this.jsonData)
-				: await cloudManager.createBlankFile(fileName);
-
-			if (!result.success) {
-				throw new Error(result.error);
+			let result;
+			if (this.jsonData) {
+				result = await cloudManager.createFileFromJson(fileName, this.jsonData);
+			} else {
+				const currentCanvasData = this.getCurrentCanvasData();
+				if (currentCanvasData) {
+					result = await cloudManager.createFileWithContent(fileName, currentCanvasData);
+				} else {
+					result = await cloudManager.createBlankFile(fileName);
+				}
 			}
+
+			if (!result.success) throw new Error(result.error);
 
 			console.log("File created successfully:", fileName);
 			const modalInstance = bootstrap.Modal.getInstance(this.modal);
@@ -50,6 +56,30 @@ export class CreateFileModal {
 		} finally {
 			ModalUtils.setButtonLoading(this.button, false, 'Creating...', 'Create File');
 		}
+	}
+
+	getCurrentCanvasData() {
+		if (window.App && window.App.mathBoard && window.App.mathBoard.fileManager) {
+			const fileWriter = window.App.mathBoard.fileManager.fileWriter;
+			if (fileWriter) {
+				let version = "3.0";
+				let hasProseMirrorCapability = window.proseMirrorReady && window.ProseMirror;
+				if (!hasProseMirrorCapability) version = "2.0";
+
+				const saveData = {
+					version: version,
+					groups: []
+				};
+
+				fileWriter.saveMathGroups(saveData);
+				fileWriter.saveTextGroups(saveData);
+				fileWriter.saveImageGroups(saveData);
+
+				if (saveData.groups.length > 0) return JSON.stringify(saveData);
+			}
+		}
+
+		return null;
 	}
 
 	openFromJson() {

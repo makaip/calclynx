@@ -6,6 +6,11 @@ class FileWriter {
 		this.board = board;
 		this.fileManager = fileManager;
 		this.syncIndicator = document.getElementById('sync-indicator');
+		this.saveButton = null;
+	}
+
+	setSaveButton(saveButton) {
+		this.saveButton = saveButton;
 	}
 
 	saveMathGroups(saveData) {
@@ -92,9 +97,13 @@ class FileWriter {
 
 		const stateString = JSON.stringify(saveData);
 
+		if (!this.fileManager.fileId && this.saveButton) this.saveButton.setSyncing(true);
+
 		if (!this.fileManager.fileId) {
 			console.warn("No fileId found, skipping cloud save.");
 			EquivalenceUtils.updateEquivalenceState();
+			if (this.saveButton) this.saveButton.setSyncing(false);
+
 			return;
 		}
 

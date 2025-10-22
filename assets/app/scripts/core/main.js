@@ -82,6 +82,9 @@ const initializeApp = () => {
 	if (TextFieldCompatibility.shouldUseProseMirror()) {
 		App.mathBoard = new MathBoard();
 		App.expressionEquivalence = new ExpressionEquivalence();
+		if (window.saveButton && App.mathBoard?.fileManager?.fileWriter) {
+			App.mathBoard.fileManager.fileWriter.setSaveButton(window.saveButton);
+		}
 	} else {
 		setTimeout(initializeApp, 100);
 	}
@@ -127,6 +130,8 @@ async function updateUserStatus() {
 					authButton.textContent = 'Sign Out';
 				}
 			};
+
+			if (window.saveButton) window.saveButton.onAuthStateChange();
 		} else {
 			userEmailDisplay.textContent = '';
 			userEmailDisplay.title = '';
@@ -138,6 +143,7 @@ async function updateUserStatus() {
 
 			const fileList = document.getElementById('sidebar-file-list');
 			if (fileList) fileList.innerHTML = '';
+			if (window.saveButton) window.saveButton.onAuthStateChange();
 		}
 	} catch (err) {
 		console.error('Exception checking auth status:', err);
@@ -215,13 +221,9 @@ const showImageUrlInput = () => {
 	}
 };
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-	await initializeAppCore();
-});
-
-// Set up internal references
+initializeAppCore();
 App.updateUserStatus = updateUserStatus;
+window.App = App;
 
 export { App, updateUserStatus, initializeApp };
 export default { App, updateUserStatus, initializeApp };

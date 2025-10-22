@@ -27,10 +27,13 @@ class FileManager {
 		if (fileNotLoaded) {
 			fileTitleElement.textContent = 'Untitled';
 			fileTitleElement.style.display = '';
+			if (window.saveButton) window.saveButton.onFileStateChange(null);
+
 			return;
 		}
 
 		const result = await cloudManager.updateFileTitle(this.fileId);
+		if (window.saveButton) window.saveButton.onFileStateChange(this.fileId);
 	}
 
 	async saveState() {
