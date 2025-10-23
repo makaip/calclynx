@@ -10,7 +10,7 @@ class MathFieldStateManager {
 	}
 
 	finalize() {
-		const mf = this.editor?.getMathField ? this.editor.getMathField() : null;
+		const mf = this.editor?.mathField;
 		if (!mf) return;
 		const latex = mf.latex().trim();
 		if (!this.isValidLatex(latex)) {
@@ -19,16 +19,24 @@ class MathFieldStateManager {
 		}
 
 		this.updateLatexData(latex);
-		this.editor.replaceWithStaticMath(latex);
+		this.replaceWithStaticMath(latex);
 		this.saveState();
 		this.handleEquivalenceProcessing(latex);
 	}
 
+	replaceWithStaticMath(latex) {
+		const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
+		const mathFieldElement = this.container.querySelector('.math-field');
+		if (mathFieldElement) mathFieldElement.remove();
+
+		const staticMath = MathFieldUtils.createMathFieldElement();
+		MathFieldUtils.insertElementAfterHandle(this.container, staticMath);
+		if (MQ) MQ.StaticMath(staticMath).latex(latex);
+	}
+
 	handleEmptyField() {
 		this.container.remove();
-		if (!this.mathGroup.element.querySelector('.math-field-container')) {
-			this.mathGroup.remove();
-		}
+		if (!this.mathGroup.element.querySelector('.math-field-container')) this.mathGroup.remove();
 		this.saveState();
 	}
 
@@ -37,9 +45,7 @@ class MathFieldStateManager {
 	}
 
 	saveState() {
-		if (this.mathGroup.board && this.mathGroup.board.fileManager) {
-			this.mathGroup.board.fileManager.saveState();
-		}
+		if (this.mathGroup.board && this.mathGroup.board.fileManager) this.mathGroup.board.fileManager.saveState();
 	}
 
 	handleEquivalenceProcessing(latex) {
@@ -55,11 +61,9 @@ class MathFieldStateManager {
 		return MathFieldUtils.isEmpty(latex);
 	}
 
-	hasTextContent(latex) { // most useless function ever
+	hasTextContent(latex) {
 		return MathFieldUtils.hasTextContent(latex);
 	}
-
-	// TODO: find more vestigial usueless functions to delete
 
 	getLatexData() {
 		return this.container.dataset.latex || '';

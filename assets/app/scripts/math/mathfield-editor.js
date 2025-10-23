@@ -13,15 +13,17 @@ class MathFieldEditor {
 
 	createMathField() {
 		if (this.hasMathField()) return;
+
 		if (!window.MathQuill) {
 			console.warn('MathQuill not loaded, cannot create math field');
 			return;
 		}
 
-		const MQ = window.MathQuill.getInterface(2);
-		this.mathFieldElement = MathFieldUtils.createMathFieldElement();
-		MathFieldUtils.insertElementAfterHandle(this.container, this.mathFieldElement);
-		this.mathField = MQ.MathField(this.mathFieldElement, this.getMathQuillConfig());
+		this.mathFieldElement = MathFieldEditor.createEditableMathField(this.container);
+		this.mathField = MQ.MathField(
+			this.mathFieldElement,
+			this.getMathQuillConfig()
+		);
 	}
 
 	hasMathField() {
@@ -29,35 +31,34 @@ class MathFieldEditor {
 	}
 
 	getMathQuillConfig() {
-		const baseConfig = MathFieldUtils.getBaseMathQuillConfig();
+		return MathFieldEditor.buildMathQuillConfig((latex) => {
+			this.container.dataset.latex = latex;
+		});
+	}
+
+	// Shared MathQuill configuration builder
+	static buildMathQuillConfig(onEditCallback) {
 		return {
-			...baseConfig,
+			spaceBehavesLikeTab: false,
+			leftRightIntoCmdGoes: 'up',
+			restrictMismatchedBrackets: true,
+			sumStartsWithNEquals: true,
+			supSubsRequireOperand: true,
+			charsThatBreakOutOfSupSub: '=<>',
+			autoSubscriptNumerals: false,
+			autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
+			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup inf det gcd lcm min max',
+			maxDepth: 10,
 			handlers: {
-				edit: () => {
-					this.container.dataset.latex = this.mathField.latex().trim();
+				edit: function() {
+					const latex = this.latex().trim();
+					onEditCallback(latex);
 				}
 			}
 		};
 	}
 
-	replaceWithStaticMath(latex) {
-		const mathFieldElement = this.container.querySelector('.math-field');
-		if (mathFieldElement) mathFieldElement.remove();
-
-		const staticMath = MathFieldUtils.createStaticMathElement();
-		MathFieldUtils.insertElementAfterHandle(this.container, staticMath);
-		MQ.StaticMath(staticMath).latex(latex);
-	}
-
-	getMathField() {
-		return this.mathField;
-	}
-
-	getMathFieldElement() {
-		return this.mathFieldElement;
-	}
-
-	// existicng math field editing methods
+	// Static methods for editing existing math field containers
 	static edit(container) {
 		const existingLatex = container.dataset.latex || '';
 
@@ -93,10 +94,8 @@ class MathFieldEditor {
 
 	static ensureContainerStructure(container) {
 		const handle = container.querySelector(':scope > .drag-handle');
-		if (!handle) {
-			console.warn("Handle missing during edit, recreating.");
-			MathFieldEditor.recreateContainerStructure(container);
-		}
+
+		if (!handle) MathFieldEditor.recreateContainerStructure(container);
 	}
 
 	static recreateContainerStructure(container) {
@@ -108,24 +107,20 @@ class MathFieldEditor {
 		const mathFieldElement = MathFieldUtils.createMathFieldElement();
 		const handle = container.querySelector(':scope > .drag-handle');
 		container.insertBefore(mathFieldElement, handle.nextSibling);
+		
 		return mathFieldElement;
 	}
 
 	static initializeEditableMathField(mathFieldElement, existingLatex, container) {
-		if (!window.MathQuill) {
-			console.warn('MathQuill not loaded, cannot initialize editable math field');
-			return null;
-		}
-		const MQ = window.MathQuill.getInterface(2);
-		const baseConfig = MathFieldUtils.getEditMathQuillConfig();
-		const mathField = MQ.MathField(mathFieldElement, {
-			...baseConfig,
-			handlers: {
-				edit: () => {
-					container.dataset.latex = mathField.latex().trim();
-				}
-			}
-		});
+		if (!window.MathQuill) return null;
+
+		const mathField = MQ.MathField(
+			mathFieldElement, 
+			MathFieldEditor.buildMathQuillConfig((latex) => {
+				container.dataset.latex = latex;
+			})
+		);
+
 		mathField.latex(existingLatex);
 		return mathField;
 	}
@@ -154,40 +149,34 @@ class MathFieldEditor {
 
 	static handleStaticBackspace(event, mathField, container) {
 		if (event.ctrlKey) {
-			MathFieldEditor.handleStaticCtrlBackspace(event, container);
-		} else if (!mathField.latex().trim()) {
-			MathFieldEditor.handleStaticEmptyBackspace(event, container);
-		}
-	}
-
-	static handleStaticCtrlBackspace(event, container) {
-		event.preventDefault();
-		const group = container.parentElement;
-		if (event.shiftKey) {
-			group?.remove();
-			return;
-		}
-		container.remove();
-		if (group && !group.querySelector('.math-field-container')) {
-			group.remove();
-		}
-	}
-
-	static handleStaticEmptyBackspace(event, container) {
-		const previousContainer = container.previousElementSibling;
-		const group = container.parentElement;
-		const wasLast = group?.querySelectorAll('.math-field-container').length === 1;
-		if (previousContainer && previousContainer.classList.contains('math-field-container')) {
 			event.preventDefault();
-			const currentLatex = container.dataset.latex;
-			container.remove();
-			MathFieldEditor.edit(previousContainer);
-			if (currentLatex && group?.mathGroup) {
-				group.mathGroup.board.fileManager.saveState();
+			const group = container.parentElement;
+
+			if (event.shiftKey) {
+				group?.remove();
+				return;
 			}
-		} else if (group?.mathGroup && wasLast) {
-			event.preventDefault();
-			group.mathGroup.remove();
+
+			container.remove();
+			if (group && !group.querySelector('.math-field-container')) group.remove();
+
+		} else if (!mathField.latex().trim()) {
+			const previousContainer = container.previousElementSibling;
+			const group = container.parentElement;
+			const wasLast = group?.querySelectorAll('.math-field-container').length === 1;
+
+			if (previousContainer && previousContainer.classList.contains('math-field-container')) {
+				event.preventDefault();
+
+				const currentLatex = container.dataset.latex;
+				container.remove();
+				MathFieldEditor.edit(previousContainer);
+
+				if (currentLatex && group?.mathGroup) group.mathGroup.board.fileManager.saveState();
+			} else if (group?.mathGroup && wasLast) {
+				event.preventDefault();
+				group.mathGroup.remove();
+			}
 		}
 	}
 
@@ -224,33 +213,23 @@ class MathFieldEditor {
 				const latexValue = mathField.latex().trim();
 
 				if (!latexValue) {
-					MathFieldEditor.handleStaticEmptyBlur(container);
+					const group = container.parentElement;
+					container.remove();
+					if (group && !group.querySelector('.math-field-container')) group.remove();
 				} else {
-					MathFieldEditor.handleStaticBlur(container, latexValue);
+					const hasText = MathFieldUtils.hasTextContent(latexValue);
+
+					container.dataset.latex = latexValue;
+					MathFieldUtils.recreateStaticContainer(container, latexValue);
+
+					const group = container.parentElement;
+					if (group && group.mathGroup) {
+						group.mathGroup.board.fileManager.saveState();
+						MathFieldUIManager.processEquivalenceColors(container, hasText);
+					}
 				}
 			}, 50);
 		});
-	}
-
-	static handleStaticEmptyBlur(container) {
-		const group = container.parentElement;
-		container.remove();
-		if (group && !group.querySelector('.math-field-container')) {
-			group.remove();
-		}
-	}
-
-	static handleStaticBlur(container, latexValue) {
-		const hasText = MathFieldUtils.hasTextContent(latexValue);
-
-		container.dataset.latex = latexValue;
-		MathFieldUtils.recreateStaticContainer(container, latexValue);
-
-		const group = container.parentElement;
-		if (group && group.mathGroup) {
-			group.mathGroup.board.fileManager.saveState();
-			MathFieldUIManager.processEquivalenceColors(container, hasText);
-		}
 	}
 }
 

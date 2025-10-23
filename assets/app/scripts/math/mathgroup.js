@@ -79,7 +79,7 @@ export class MathGroup extends ObjectGroup {
 			this.mathFieldInstances.push(newFieldInstance); // Fallback: add to end
 		}
 
-		const mathField = newFieldInstance.editor.getMathField();
+		const mathField = newFieldInstance.editor.mathField;
 		if (mathField && typeof mathField.focus === 'function') {
 			mathField.focus();
 		}

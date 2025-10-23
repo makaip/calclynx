@@ -6,52 +6,9 @@ class MathFieldUIManager {
 		this.editor = mathField.editor;
 	}
 
-	clearMathGroupSelections() {
-		document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
-	}
-
-	clearSelectedFields() {
-		document.querySelectorAll('.math-field-container.selected-field')
-			.forEach(el => el.classList.remove('selected-field'));
-	}
-
-	markContainerAsSelected(container = this.container) {
-		this.clearSelectedFields();
-		container.classList.add('selected-field');
-	}
-
-	clearGroupSelection(container = this.container) {
-		const mathGroupEl = container.closest('.math-group');
-		if (mathGroupEl) {
-			mathGroupEl.classList.remove('selected');
-		}
-	}
-
-	highlightGroupExpressions(container = this.container) {
-		if (window.expressionEquivalence && container.dataset.groupKey) {
-			window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, true);
-		}
-	}
-
-	processEquivalenceColors(container = this.container, hasText = false) {
-		if (window.expressionEquivalence && !hasText) {
-			window.expressionEquivalence.applyIndicatorColors();
-			if (container.dataset.groupKey) {
-				window.expressionEquivalence.highlightGroupExpressions(container.dataset.groupKey, false);
-			} else {
-				window.expressionEquivalence.removeAllHighlights();
-			}
-		}
-	}
-
-	removeAllHighlights() {
-		if (window.expressionEquivalence) {
-			window.expressionEquivalence.removeAllHighlights();
-		}
-	}
-
 	static clearMathGroupSelections() {
-		document.querySelectorAll('.math-group').forEach((group) => group.classList.remove('selected'));
+		document.querySelectorAll('.math-group')
+			.forEach((group) => group.classList.remove('selected'));
 	}
 
 	static clearSelectedFields() {

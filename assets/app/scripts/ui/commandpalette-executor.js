@@ -80,8 +80,8 @@ export class CommandPaletteExecutor {
 			context.targetMathField = targetMathField;
 
 			const sourceMathFieldInstance = referenceContainer.mathFieldInstance;
-			if (sourceMathFieldInstance && sourceMathFieldInstance.editor.getMathField()) {
-				context.sourceLatex = sourceMathFieldInstance.editor.getMathField().latex();
+			if (sourceMathFieldInstance && sourceMathFieldInstance.editor.mathField) {
+				context.sourceLatex = sourceMathFieldInstance.editor.mathField.latex();
 			} else if (referenceContainer.dataset.latex) {
 				context.sourceLatex = referenceContainer.dataset.latex;
 			}

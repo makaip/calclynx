@@ -23,7 +23,7 @@ export class MathField {
 		this.eventHandler.attachEventListeners();
 
 		if (isNewField) {
-			const mathField = this.editor.getMathField();
+			const mathField = this.editor.mathField;
 			if (mathField && typeof mathField.focus === 'function') {
 				mathField.focus();
 			}

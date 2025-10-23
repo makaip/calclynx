@@ -21,12 +21,6 @@ class MathFieldUtils {
 		return dragHandle;
 	}
 
-	static createStaticMathElement() {
-		const staticMath = document.createElement('div');
-		staticMath.className = 'math-field';
-		return staticMath;
-	}
-
 	static createMathFieldElement() {
 		const mathFieldElement = document.createElement('div');
 		mathFieldElement.className = 'math-field';
@@ -66,28 +60,6 @@ class MathFieldUtils {
 		return event.target.closest('.drag-handle');
 	}
 
-	static getBaseMathQuillConfig() {
-		return {
-			spaceBehavesLikeTab: false,
-			leftRightIntoCmdGoes: 'up',
-			restrictMismatchedBrackets: true,
-			sumStartsWithNEquals: true,
-			supSubsRequireOperand: true,
-			charsThatBreakOutOfSupSub: '=<>',
-			autoSubscriptNumerals: false,
-			autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
-			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup inf det gcd lcm min max',
-			maxDepth: 10,
-		};
-	}
-
-	static getEditMathQuillConfig() {
-		return {
-			spaceBehavesLikeTab: false,
-			handlers: {}
-		};
-	}
-
 	static validateMathGroupElement(mathGroup) {
 		if (!mathGroup?.element) {
 			throw new Error('MathGroup element is required');
@@ -100,7 +72,7 @@ class MathFieldUtils {
 
 	static recreateStaticContainer(container, latex) {
 		this.recreateContainerStructure(container);
-		const staticMath = this.createStaticMathElement();
+		const staticMath = this.createMathFieldElement();
 		container.appendChild(staticMath);
 
 		if (MQ) MQ.StaticMath(staticMath).latex(latex);

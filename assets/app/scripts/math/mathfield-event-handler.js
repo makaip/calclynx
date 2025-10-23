@@ -11,7 +11,7 @@ class MathFieldEventHandler {
 	}
 
 	attachEventListeners() {
-		const mathFieldElement = this.editor.getMathFieldElement();
+		const mathFieldElement = this.editor.mathFieldElement;
 		if (!mathFieldElement) return;
 		if (mathFieldElement.dataset.listenersAttached === 'true') return;
 		mathFieldElement.dataset.listenersAttached = 'true';
@@ -40,7 +40,7 @@ class MathFieldEventHandler {
 	}
 
 	handleRegularBackspace(event) {
-		const latexContent = this.editor.getMathField().latex().trim();
+		const latexContent = this.editor.mathField.latex().trim();
 		if (!MathFieldUtils.isEmpty(latexContent)) return;
 
 		const groupElement = this.mathGroup.element;
