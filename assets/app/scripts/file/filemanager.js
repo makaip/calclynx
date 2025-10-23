@@ -32,7 +32,7 @@ class FileManager {
 			return;
 		}
 
-		const result = await cloudManager.updateFileTitle(this.fileId);
+		// const result = await cloudManager.updateFileTitle(this.fileId);
 		if (window.saveButton) window.saveButton.onFileStateChange(this.fileId);
 	}
 
@@ -52,7 +52,7 @@ class FileManager {
 		return this.fileReader.importData(jsonData, shouldSave);
 	}
 
-	async validateFileName(fileId, newName, userId) {
+	async validateFileName(fileId, newName) {
 		const result = await cloudManager.validateFileName(fileId, newName);
 
 		if (!result.success) {

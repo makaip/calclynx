@@ -1,3 +1,4 @@
+/* global bootstrap */
 import { cloudManager } from '../core/cloud.js';
 import { ModalUtils } from './modalutils.js';
 

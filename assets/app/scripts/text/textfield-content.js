@@ -59,7 +59,7 @@ class TextFieldProseMirrorContent {
 
 		// walk through every node in editor field
 		// insert \uE000 for MQ nodes, record pos and latex seperately
-		doc.descendants((node, pos) => {
+		doc.descendants((node) => {
 			if (node.type.name === 'text') {
 				content.text += node.text;
 			} else if (node.type.name === 'math') {

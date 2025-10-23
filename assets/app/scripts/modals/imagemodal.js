@@ -1,3 +1,4 @@
+/* global bootstrap */
 import { ModalUtils } from './modalutils.js';
 
 export class ImageUrlModal {
@@ -24,7 +25,7 @@ export class ImageUrlModal {
 		try {
 			new URL(url);
 			return true;
-		} catch (e) {
+		} catch {
 			return false;
 		}
 	}

@@ -7,8 +7,6 @@ import { MathFieldEditor } from '../math/mathfield-editor.js';
 import { TextGroup } from '../text/textgroup.js';
 import { MathGroup } from '../math/mathgroup.js';
 
-const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
-
 class MathBoard {
 	constructor() {
 		this.canvas = document.getElementById('canvas');

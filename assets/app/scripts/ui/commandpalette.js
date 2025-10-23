@@ -1,8 +1,9 @@
+/* global bootstrap */
 import { commands, variablePatterns } from './commandpalette-config.js';
 import { CommandPaletteExecutor } from './commandpalette-executor.js';
 
 class CommandPalette {
-	constructor(options = {}) {
+	constructor() {
 		this.modalElement = null;
 		this.bootstrapModal = null;
 		this.inputElement = null;

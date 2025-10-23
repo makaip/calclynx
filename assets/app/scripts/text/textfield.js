@@ -73,7 +73,7 @@ class TextFieldProseMirror {
 			return;
 		}
 
-		const { EditorState, EditorView, TextSelection, history, keymap, baseKeymap } = window.ProseMirror;
+		const { EditorState, EditorView, history, keymap, baseKeymap } = window.ProseMirror;
 
 		const schema = this.schemaManager.createSchema();
 		this.content.schema = schema;
@@ -149,7 +149,7 @@ class TextFieldProseMirror {
 			handleKeyDown: (view, event) => {
 				return this.eventHandler ? this.eventHandler.handleKeyDown(view, event) : false;
 			},
-			handlePaste: (view, event, slice) => {
+			handlePaste: (view, event) => {
 				const target = event.target;
 				const mathField = target.closest('.mathquill');
 

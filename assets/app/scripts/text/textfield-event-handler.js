@@ -123,7 +123,7 @@ class TextFieldProseMirrorEventHandler {
 			if (domNode && domNode.classList && domNode.classList.contains('mathquill')) {
 				return domNode;
 			}
-		} catch (e) {
+		} catch {
 			// nodeDOM might fail, continue with other approaches
 		}
 
@@ -151,7 +151,7 @@ class TextFieldProseMirrorEventHandler {
 				}
 				sibling = sibling.nextElementSibling;
 			}
-		} catch (e) {
+		} catch {
 			// Continue with fallback approach
 		}
 
@@ -173,7 +173,7 @@ class TextFieldProseMirrorEventHandler {
 							bestDistance = distance;
 							bestMatch = field;
 						}
-					} catch (e) {
+					} catch {
 						// If we can't determine position, just use this field if latex matches
 						if (!bestMatch) {
 							bestMatch = field;
@@ -198,7 +198,7 @@ class TextFieldProseMirrorEventHandler {
 					if (domNode && domNode.classList && domNode.classList.contains('mathquill')) {
 						return domNode;
 					}
-				} catch (e) {
+				} catch {
 					// nodeDOM might fail, continue with other approaches
 				}
 
@@ -234,7 +234,7 @@ class TextFieldProseMirrorEventHandler {
 						if (Math.abs(elementPos - pos) <= 1) {
 							return element;
 						}
-					} catch (e) {
+					} catch {
 						// Continue searching
 					}
 				}

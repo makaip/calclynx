@@ -1,3 +1,4 @@
+/* global bootstrap */
 import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 
 class SaveButton {

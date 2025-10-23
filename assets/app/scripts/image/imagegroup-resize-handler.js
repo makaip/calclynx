@@ -93,7 +93,7 @@ class ImageGroupResizeHandler {
 		this.imageGroup.element.style.top = newTop + 'px';
 	}
 
-	endResize(e) {
+	endResize() {
 		if (!this.isResizing) return;
 
 		this.isResizing = false;

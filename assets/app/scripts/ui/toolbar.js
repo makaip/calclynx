@@ -61,7 +61,6 @@ class TextFormatToolbar {
 		}
 
 		const view = this.activeTextField.proseMirrorView;
-		const { state, dispatch } = view;
 
 		switch (format) {
 			case 'bold':
@@ -252,10 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	getToolbarInstance();
 });
 
-if (document.readyState === 'loading') {
-} else {
+document.addEventListener('DOMContentLoaded', () => {
 	getToolbarInstance();
-}
+});
 
 window.TextFormatToolbar = TextFormatToolbar;
 

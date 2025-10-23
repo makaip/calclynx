@@ -1,3 +1,4 @@
+/* global bootstrap */
 export const ModalUtils = {
 	toggleModal(modalId) {
 		const modalElement = document.getElementById(modalId);

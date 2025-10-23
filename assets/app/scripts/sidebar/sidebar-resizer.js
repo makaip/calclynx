@@ -18,7 +18,7 @@ export class SidebarResizer {
 		this.currentWidth = clampedWidth;
 	}
 
-	handleResizeStart(e) {
+	handleResizeStart() {
 		this.isResizing = true;
 		document.body.classList.add('no-select');
 		document.onmousemove = this.handleMouseMove.bind(this);

@@ -231,7 +231,7 @@ class Cloud {
 			} catch (parseError) {
 				return {
 					success: false,
-					error: 'Invalid JSON content. Please ensure the file contains valid JSON.'
+					error: `Invalid JSON content: ${parseError.message}`
 				};
 			}
 

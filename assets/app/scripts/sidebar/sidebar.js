@@ -132,7 +132,7 @@ export class Sidebar {
 		};
 
 		const missingElements = Object.entries(this.elements)
-			.filter(([key, element]) => !element)
+			.filter(([, element]) => !element)
 			.map(([key]) => key);
 
 		if (missingElements.length > 0) {

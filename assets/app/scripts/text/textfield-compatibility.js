@@ -147,7 +147,7 @@ class TextFieldCompatibility {
 		}
 	}
 
-	static normalizeContent(content, targetVersion, schema = null) {
+	static normalizeContent(content, targetVersion) {
 		const format = this.detectContentFormat(content);
 
 		if (targetVersion === '3.0') {

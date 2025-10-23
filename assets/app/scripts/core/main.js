@@ -4,7 +4,7 @@ import { TextFieldCompatibility } from '../text/textfield-compatibility.js';
 import { ImageGroup } from '../image/imagegroup.js';
 import { getSupabaseClient } from '../auth/initsupabaseapp.js';
 import { loadUserFiles } from '../sidebar/sidebar.js';
-import { TextFormatToolbar } from '../ui/toolbar.js';
+
 import '../ui/contextmenu.js';
 import '../ui/commandpalette.js';
 
@@ -179,7 +179,7 @@ const setupImportInput = (el) => {
 				try {
 					JSON.parse(jsonData);
 				} catch (parseError) {
-					alert('The selected file does not contain valid JSON. Please check the file format and try again.');
+					alert(`The selected file does not contain valid JSON: ${parseError.message}`);
 					return;
 				}
 

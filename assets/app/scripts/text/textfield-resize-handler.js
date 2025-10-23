@@ -31,7 +31,7 @@ class TextFieldResizeHandler {
 		this.updateHandleVisibility();
 	}
 
-	setupVisibilityListeners(container) {
+	setupVisibilityListeners() {
 		const textGroup = this.textField.textGroup.element;
 
 		const observer = new MutationObserver(() => {
@@ -54,7 +54,7 @@ class TextFieldResizeHandler {
 		this.visibilityObserver = observer;
 	}
 
-	handleHandleClick(e, position) {
+	handleHandleClick(e) {
 		if (e.altKey) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -186,7 +186,7 @@ class TextFieldResizeHandler {
 		}
 	}
 
-	endResize(e) {
+	endResize() {
 		if (!this.isResizing) return;
 
 		this.isResizing = false;

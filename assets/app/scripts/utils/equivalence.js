@@ -42,7 +42,7 @@ class ExpressionEquivalence {
             this.workerAvailable = false; // Worker failed, disable equivalence features
 
             // Reject all pending promises by resolving them with null
-            this.pendingNormalizations.forEach(({ resolve, timeoutHandle, originalLatex }, id) => {
+            this.pendingNormalizations.forEach(({ resolve, timeoutHandle, originalLatex }) => {
                 clearTimeout(timeoutHandle);
                 console.warn(`Resolving normalization for ${originalLatex} as null due to worker error.`);
                 this.normalizationCache.set(originalLatex, null); // Cache failure
@@ -122,7 +122,6 @@ class ExpressionEquivalence {
     const mathGroups = document.querySelectorAll('.math-group');
     const identicalMap = new Map();
     const normalizedMap = new Map(); // Map<normalizedLatex, Array<location>>
-    let groupCounter = 0;
 
     const fieldsToProcess = [];
     mathGroups.forEach((group, groupIndex) => {
@@ -176,10 +175,9 @@ class ExpressionEquivalence {
 
 
     // --- Logging Logic ---
-    let loggedSomething = false;
 
     // Log Identical Groups
-    for (const [_, locations] of identicalMap) {
+    for (const [, locations] of identicalMap) {
       if (locations.length > 1) {
         const formattedGroup = {};
         locations.forEach(loc => {
@@ -187,14 +185,13 @@ class ExpressionEquivalence {
           formattedGroup[key] = loc.expression;
         });
         // console.log(`Identical Group ${++groupCounter}:`, formattedGroup); // Example logging
-        loggedSomething = true;
       }
     }
 
     // Log Equivalent Groups (that are not purely identical)
     // Only proceed if the worker was available and normalization could have happened
     if (this.workerAvailable) {
-        for (const [normalizedKey, locations] of normalizedMap) {
+        for (const [, locations] of normalizedMap) {
           if (locations.length > 1) {
             // Check if all expressions in this normalized group are identical to the first one
             const firstOriginalExpr = locations[0].expression;
@@ -213,15 +210,10 @@ class ExpressionEquivalence {
                     formattedGroup[key] = loc.expression;
                 });
                 // console.log(`Equivalent Group ${++groupCounter} (Normalized: ${normalizedKey}):`, formattedGroup); // Example logging
-                loggedSomething = true;
             }
           }
         }
     }
-
-    // if (!loggedSomething) {
-    //     console.log("No identical or equivalent groups found."); // Example logging
-    // }
   }
 
   getRandomColor() {
