@@ -3,7 +3,7 @@ import { ObjectGroup } from './objectgroup.js';
 import { BoxSelection } from './selection.js';
 import { Clipboard } from './clipboard.js';
 import { Navigation } from './navigation.js';
-import { MathFieldEditor } from '../math/mathfield-editor.js';
+// import { MathFieldEditor } from '../math/mathfield-editor.js';
 import { TextGroup } from '../text/textgroup.js';
 import { MathGroup } from '../math/mathgroup.js';
 
@@ -159,10 +159,10 @@ class MathBoard {
 
 	handleContainerClick(event) {
 		const containers = [
-			{
+			/*{
 				selector: '.math-field-container',
 				action: (container) => MathFieldEditor.edit(container)
-			},
+			},*/
 			{
 				selector: '.text-field-container',
 				action: (container) => {
