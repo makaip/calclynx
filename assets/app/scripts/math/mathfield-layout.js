@@ -14,8 +14,12 @@ mathQuillConfig = {
 };
 
 class MathGroup {
-    constructor() {
-        this.fields = [];
+    constructor(board, x, y, data = null) {
+        super(board, x, y, data, 'math');
+
+        this.mathFields = [];
+        this.element = null;
+        
         
         //setup event listener
         document.addEventListener('mathFieldEvent', (event) => this.handleEvents(event));
@@ -26,46 +30,81 @@ class MathGroup {
     }
 
     insertField(position) {
-        const newField = new MathField();
-        this.fields.splice(position, 0, newField);
+        const newField = new MathField(this);
+
+		if (refIndex !== -1) {
+			this.mathFields.splice(position + 1, 0, newField);
+		} else {
+			this.mathFields.push(newField);
+		}
+
+		const mathField = newField.editor.mathField;
+		if (mathField && typeof mathField.focus === 'function') mathField.focus();
+
+		return newField;
     }
 
     deleteField(position) {
-        this.fields.splice(position, 1);
+        this.mathFields.splice(position, 1);
     }
 
     reorderField(oldPosition, newPosition) {
-        const field = this.fields[oldPosition];
-        this.fields.splice(oldPosition, 1);
-        this.fields.splice(newPosition, 0, field);
+        const field = this.mathFields[oldPosition];
+        this.mathFields.splice(oldPosition, 1);
+        this.mathFields.splice(newPosition, 0, field);
+    }
+
+    destroy() {
+        this.mathFields.forEach(field => field.destroy());
+        this.element.remove();
+        super.remove();
     }
 }
 
 class MathField {
-    constructor() {
+    constructor(board, x, y, data = null) {
         this.latex = '';
-        this.isFocused = true; // todo, account for isFocused = false on page load
+        // TODO: account for isFocused = false on page load
+        this.isFocused = true; 
         this.elementId = `mathfield-${Math.random().toString(36).substr(2, 9)}`;
-        this.element = document.getElementById(this.elementId);
+        this.element = null;
 
 
         this.mathQuillConfig = {
 			handlers: {
 				edit: () => {
 					this.latex = this.element.latex;
+
 				},
                 enter: () => {
                     this.latex = this.element.latex;
-
+                    
+                    // get item position number in stack
+                    const array = Array.from(this.element.parentElement.children);
+                    const position = array.indexOf(this.element);
+                    this.element.parentElement.insertField(position + 1);
                 },
                 upOutOf: function(dir) {
                     // handle moving out of the math field
+                    above = this.getAbove();
+                    if (above) above.focus();
+                    this.blur();
+
                 },
                 downOutOf: function(dir) {
                     // handle moving out of the math field
+                    below = this.getBelow();
+                    if (below) below.focus();
+                    this.blur();
                 },
                 deleteOutOf: function(dir, mathField) {
                     // handle deleting out of the math field
+                    if (dir === 'left') {
+                        const above = this.getAbove();
+                        if (above) above.focus();
+                        this.blur();
+                        this.destroy();
+                    }
                 },
                 edit: function() {
                     this.latex = this.element.latex;
@@ -79,7 +118,7 @@ class MathField {
     }
 
     getLatex() {
-        return this.latex;
+        return this.mqField ? this.mqField.latex() : this.latex;
     }
 
     setLatex(latex) {
@@ -87,11 +126,13 @@ class MathField {
     }
 
     focus() {
-        this.element.focus();
+        this.isFocused = true;
+        if (this.element) this.element.focus();
     }
 
     blur() {
-        this.element.blur();
+        this.isFocused = false;
+        if (this.element) this.element.blur();
     }
 
     getAbove() {
@@ -101,4 +142,17 @@ class MathField {
     getBelow() {
         return this.element.nextElementSibling;
     }
+
+    destroy() {
+        this.element.remove();
+    }
+}
+
+class MathGroupDragHandler {
+    constructor(mathGroup) {
+        this.mathGroup = mathGroup;
+        this.isDragging = false;
+        this.dragStartData = null;
+    }
+
 }

@@ -65,6 +65,7 @@ export class MathGroup extends ObjectGroup {
 			document.removeEventListener('mouseup', this.boundHandleFieldDragEnd);
 			this.boundHandleFieldDragEnd = null;
 		}
+		
 		super.remove();
 	}
 
