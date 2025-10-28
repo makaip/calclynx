@@ -26,7 +26,7 @@ class MathNodeView {
 			charsThatBreakOutOfSupSub: '=<>',
 			autoSubscriptNumerals: false,
 			autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
-			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup inf det gcd lcm min max',
+			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup det gcd lcm min max',
 			maxDepth: 10,
 			handlers: {
 				edit: () => {

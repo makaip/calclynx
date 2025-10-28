@@ -75,8 +75,8 @@ class MathFieldUtils {
 			supSubsRequireOperand: true,
 			charsThatBreakOutOfSupSub: '=<>',
 			autoSubscriptNumerals: false,
-			autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu xi rho sigma tau phi chi psi omega',
-			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup inf det gcd lcm min max',
+			autoCommands: 'pi theta sqrt sum prod alpha beta gamma delta epsilon zeta eta mu nu rho sigma tau phi chi psi omega vec binom int cup cap forall exists mathbf',
+			autoOperatorNames: 'sin cos tan sec csc cot sinh cosh tanh log ln exp lim sup det gcd lcm min max arcsin arccos arctan arcsec arccsc arccot',
 			maxDepth: 10,
 		};
 	}

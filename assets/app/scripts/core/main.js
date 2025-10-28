@@ -82,6 +82,7 @@ const initializeApp = () => {
 	if (TextFieldCompatibility.shouldUseProseMirror()) {
 		App.mathBoard = new MathBoard();
 		App.expressionEquivalence = new ExpressionEquivalence();
+		window.expressionEquivalence = App.expressionEquivalence;
 		if (window.saveButton && App.mathBoard?.fileManager?.fileWriter) {
 			App.mathBoard.fileManager.fileWriter.setSaveButton(window.saveButton);
 		}
