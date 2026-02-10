@@ -285,8 +285,10 @@ class MathBoard {
 				const screenDeltaX = event.clientX - this.dragStart.x;
 				const screenDeltaY = event.clientY - this.dragStart.y;
 
-				const canvasDeltaX = screenDeltaX / this.canvasState.scale;
-				const canvasDeltaY = screenDeltaY / this.canvasState.scale;
+				// I have no idea why, but you need to square this.canvasState.scale, otherwise the dragging is too
+				//  fast when zoomed in and too slow when zoomed out. But this fixes it.
+				const canvasDeltaX = screenDeltaX / (this.canvasState.scale * this.canvasState.scale);
+				const canvasDeltaY = screenDeltaY / (this.canvasState.scale * this.canvasState.scale);
 
 				const snapToGrid = event.ctrlKey || event.metaKey;
 
