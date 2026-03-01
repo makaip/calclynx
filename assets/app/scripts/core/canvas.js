@@ -6,6 +6,7 @@ import { Navigation } from './navigation.js';
 import { MathFieldEditor } from '../math/mathfield-editor.js';
 import { TextGroup } from '../text/textgroup.js';
 import { MathGroup } from '../math/mathgroup.js';
+import { UndoManager } from './undo-manager.js';
 
 const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
 
@@ -42,6 +43,7 @@ class MathBoard {
 		};
 
 		this.fileManager = new FileManager(this);
+		this.undoManager = new UndoManager();
 		this.clipboard = new Clipboard(this);
 		this.initEventListeners();
 
@@ -95,6 +97,19 @@ class MathBoard {
 		if (this.isUserCurrentlyEditing()) return;
 
 		switch (e.key) {
+			case 'z':
+			case 'Z':
+				e.preventDefault();
+				if (e.shiftKey) {
+					this.undoManager.redo(this);
+				} else {
+					this.undoManager.undo(this);
+				}
+				break;
+			case 'y':
+				e.preventDefault();
+				this.undoManager.redo(this);
+				break;
 			case 'c':
 				e.preventDefault();
 				this.clipboard.copySelectedGroups();

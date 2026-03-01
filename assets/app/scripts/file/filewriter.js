@@ -97,6 +97,11 @@ class FileWriter {
 
 		const stateString = JSON.stringify(saveData);
 
+		// Push snapshot into the undo manager before any cloud I/O.
+		if (this.board.undoManager) {
+			this.board.undoManager.pushSnapshot(stateString);
+		}
+
 		if (!this.fileManager.fileId && this.saveButton) this.saveButton.setSyncing(true);
 
 		if (!this.fileManager.fileId) {

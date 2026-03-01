@@ -22,6 +22,21 @@ class MathFieldEventHandler {
 
 	handleKeyDown(event) {
 		switch (event.key) {
+			case 'Z':
+			case 'z':
+				if (event.ctrlKey || event.metaKey) {
+					if (event.shiftKey) {
+						this.handleRedoInField(event);
+					} else {
+						this.handleUndoInField(event);
+					}
+				}
+				break;
+			case 'y':
+				if (event.ctrlKey || event.metaKey) {
+					this.handleRedoInField(event);
+				}
+				break;
 			case 'Backspace':
 				this.handleBackspace(event);
 				break;
@@ -29,6 +44,18 @@ class MathFieldEventHandler {
 				this.handleEnter(event);
 				break;
 		}
+	}
+
+	handleUndoInField(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		MathFieldEditor.triggerUndo(this.container);
+	}
+
+	handleRedoInField(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		MathFieldEditor.triggerRedo(this.container);
 	}
 
 	handleBackspace(event) {

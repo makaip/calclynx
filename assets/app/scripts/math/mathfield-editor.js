@@ -1,5 +1,5 @@
-import { MathFieldUtils } from './mathfield-utils.js';
-import { MathFieldUIManager } from './mathfield-ui-manager.js';
+import {MathFieldUtils} from './mathfield-utils.js';
+import {MathFieldUIManager} from './mathfield-ui-manager.js';
 
 const MQ = window.MathQuill ? window.MathQuill.getInterface(2) : null;
 
@@ -9,6 +9,7 @@ class MathFieldEditor {
 		this.mathGroup = mathGroup;
 		this.mathField = null;
 		this.mathFieldElement = null;
+		this._saveTimeout = null;
 	}
 
 	createMathField() {
@@ -35,6 +36,7 @@ class MathFieldEditor {
 			handlers: {
 				edit: () => {
 					this.container.dataset.latex = this.mathField.latex().trim();
+					MathFieldEditor.scheduleSave(this.container, this.mathGroup.board);
 				}
 			}
 		};
@@ -57,7 +59,7 @@ class MathFieldEditor {
 		return this.mathFieldElement;
 	}
 
-	// existicng math field editing methods
+	// existing math field editing methods
 	static edit(container) {
 		const existingLatex = container.dataset.latex || '';
 
@@ -123,6 +125,8 @@ class MathFieldEditor {
 			handlers: {
 				edit: () => {
 					container.dataset.latex = mathField.latex().trim();
+					const board = container.closest('.math-group')?.mathGroup?.board;
+					MathFieldEditor.scheduleSave(container, board);
 				}
 			}
 		});
@@ -139,8 +143,29 @@ class MathFieldEditor {
 	}
 
 	static attachEditKeydownListener(mathFieldElement, container) {
+		if (mathFieldElement.dataset.listenersAttached === 'true') return;
+		mathFieldElement.dataset.listenersAttached = 'true';
+
 		mathFieldElement.addEventListener('keydown', (event) => {
 			const mathField = MQ(mathFieldElement);
+
+			if ((event.ctrlKey || event.metaKey) && (event.key === 'z' || event.key === 'Z')) {
+				event.preventDefault();
+				event.stopPropagation();
+				if (event.shiftKey) {
+					MathFieldEditor.triggerRedo(container);
+				} else {
+					MathFieldEditor.triggerUndo(container);
+				}
+				return;
+			}
+
+			if ((event.ctrlKey || event.metaKey) && event.key === 'y') {
+				event.preventDefault();
+				event.stopPropagation();
+				MathFieldEditor.triggerRedo(container);
+				return;
+			}
 
 			if (event.key === 'Backspace') {
 				MathFieldEditor.handleStaticBackspace(event, mathField, container);
@@ -248,10 +273,69 @@ class MathFieldEditor {
 
 		const group = container.parentElement;
 		if (group && group.mathGroup) {
+			// Cancel any pending debounced save — blur does a final immediate save.
+			MathFieldEditor.cancelScheduledSave(container);
 			group.mathGroup.board.fileManager.saveState();
 			MathFieldUIManager.processEquivalenceColors(container, hasText);
 		}
 	}
+
+	// ── Debounced save while typing ──────────────────────────────────────────
+
+	/**
+	 * Schedule a canvas saveState() 600ms after the last keystroke.
+	 * This means every distinct pause in typing creates an undo checkpoint.
+	 */
+	static scheduleSave(container, board) {
+		if (!board) return;
+		if (container._saveTimeout) clearTimeout(container._saveTimeout);
+		container._saveTimeout = setTimeout(() => {
+			container._saveTimeout = null;
+			board.fileManager.saveState();
+		}, 600);
+	}
+
+	static cancelScheduledSave(container) {
+		if (container._saveTimeout) {
+			clearTimeout(container._saveTimeout);
+			container._saveTimeout = null;
+		}
+	}
+
+	// ── Unified undo ─────────────────────────────────────────────────────────
+
+	/**
+	 * Flush any pending debounced save first (so the very latest typed state
+	 * is committed to the snapshot stack), then delegate to the canvas
+	 * UndoManager — the same path used by Ctrl+Z outside a field.
+	 */
+	static triggerUndo(container) {
+		const board = container.closest('.math-group')?.mathGroup?.board;
+		if (!board) return;
+
+		if (container._saveTimeout) {
+			clearTimeout(container._saveTimeout);
+			container._saveTimeout = null;
+			board.fileManager.saveState();
+		}
+
+		board.undoManager.undo(board);
+	}
+
+	static triggerRedo(container) {
+		const board = container.closest('.math-group')?.mathGroup?.board;
+		if (!board) return;
+
+		// Cancel any pending debounced save — a redo should not be preceded by
+		// an accidental snapshot of the partially-typed current state.
+		MathFieldEditor.cancelScheduledSave(container);
+
+		board.undoManager.redo(board);
+	}
 }
 
 export { MathFieldEditor };
+
+
+
+

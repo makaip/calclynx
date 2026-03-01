@@ -97,6 +97,13 @@ class FileReader {
 			if (shouldSave) {
 				this.fileManager.fileWriter.saveState();
 			} else {
+				// When loading a file fresh (not an undo-restore), reset the undo
+				// history and seed it with this snapshot so the very first Ctrl+Z
+				// does nothing rather than restoring an empty board.
+				if (this.board.undoManager && !this.board.undoManager.isRestoring) {
+					this.board.undoManager.clear();
+					this.board.undoManager.pushSnapshot(jsonData);
+				}
 				EquivalenceUtils.updateEquivalenceState();
 			}
 		} catch (error) {
